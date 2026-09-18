@@ -11,12 +11,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-:root{--teal:#2DD4BF;--teal-d:#14B8A6;--plum:#818CF8;--plum-d:#6366F1;
-      --amber:#FBBF24;--rose:#F87171;--good:#34D399;--bad:#F87171;
-      --page:#0B1220;--card:#141B2E;--soft:#1E293B;--line:#2A3548;--ink:#E8EDF5;--mute:#93A1B8;--ink-faint:#B7C4D9}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
+:root{--teal:#2DD4BF;--teal-d:#14B8A6;--plum:#A78BFA;--plum-d:#8B5CF6;
+      --amber:#FBBF24;--rose:#FB7185;--good:#34D399;--bad:#FB7185;
+      --page:#100D26;--card:#1C1836;--soft:#272149;--line:#3A3164;--ink:#EDEBFA;--mute:#9C93C4;--ink-faint:#C3BBDF}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
   background:var(--page);
-  background-image:radial-gradient(900px 500px at 6% -6%,rgba(45,212,191,.14),transparent 62%),
-                   radial-gradient(700px 460px at 100% 4%,rgba(129,140,248,.10),transparent 58%);
+  background-image:radial-gradient(900px 500px at 6% -6%,rgba(45,212,191,.13),transparent 62%),
+                   radial-gradient(700px 460px at 100% 4%,rgba(167,139,250,.13),transparent 58%);
   background-attachment:fixed;
   font-family:'IBM Plex Sans Thai','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size:27.7px;line-height:1.6}#vKPI .wrap{max-width:none;margin:0 auto;padding:26px 6% 44px}#vKPI .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}#vKPI .btn{background:var(--teal);color:#fff;border:0;font-family:inherit;font-weight:bold;
   font-size:30.7px;padding:13px 24px;border-radius:7px;cursor:pointer}#vKPI .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:normal}#vKPI .btn:disabled{opacity:.5;cursor:default}#vKPI select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:7px;
@@ -24,7 +24,7 @@
   box-shadow:0 1px 3px rgba(20,24,40,.07),0 8px 24px rgba(20,24,40,.05)}#vKPI header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
   flex-wrap:wrap;border-bottom:2px solid var(--teal);padding-bottom:20px;margin-bottom:26px}#vKPI h1{margin:0;font-size:75.2px;letter-spacing:-.6px;line-height:1.2;font-weight:bold;
   border-left:8px solid var(--teal);padding-left:20px}#vKPI .sub{color:var(--mute);font-size:33.5px;margin:8px 0 0 21px}#vKPI .period{text-align:right;color:var(--mute);font-size:28.5px}#vKPI .period b{display:block;color:var(--ink);font-size:45.5px;font-weight:normal}
-#vKPI .toolbar{background:var(--card);border:1px solid var(--line);border-radius:18px;
+#vKPI .toolbar{background:var(--card);border:1px solid var(--line);border-radius:20px;
   padding:20px 24px;gap:16px;align-items:flex-end;
   box-shadow:0 1px 2px rgba(20,24,40,.05),0 10px 28px rgba(20,24,40,.07)}
 #vKPI .kf{display:flex;flex-direction:column;gap:7px}
@@ -101,7 +101,7 @@
 #vKPI .ring .cap b{color:var(--ink)}
 
 #vKPI .sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:16px}
-#vKPI .scard{background:var(--card);border:1px solid var(--line);border-radius:18px;
+#vKPI .scard{background:var(--card);border:1px solid var(--line);border-radius:22px;
   box-shadow:0 1px 2px rgba(20,24,40,.04),0 8px 20px rgba(20,24,40,.05);
   padding:28px 24px;text-align:center;display:flex;flex-direction:column;gap:4px}
 #vKPI .scard .sl{font-size:26.2px;color:var(--mute);letter-spacing:.04em}
@@ -110,7 +110,7 @@
 #vKPI .sv.amber{color:var(--amber)} #vKPI .sv.plum{color:var(--plum-d)}
 #vKPI .sv.mute{color:var(--mute)}
 
-#vKPI .cpanel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px;margin-bottom:18px;
+#vKPI .cpanel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px;margin-bottom:18px;
   box-shadow:0 1px 2px rgba(20,24,40,.04),0 8px 22px rgba(20,24,40,.05)}
 /* ปุ่มพรีเซนต์ลอยของหน้า SOP — โชว์เฉพาะหน้านี้ และซ่อนตอนพรีเซนต์อยู่แล้ว */
 #vKPI .sop-present{display:none}
@@ -170,7 +170,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .pkcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 @media(max-width:1500px){#vKPI .pkcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #vKPI .pkcard{background:var(--card);border:1px solid var(--line);border-top:6px solid var(--line);
-  border-radius:18px;padding:24px}
+  border-radius:22px;padding:24px}
 #vKPI .pkhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
 #vKPI .pkname{font-size:41px;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #vKPI .pkutil{font-size:27px;font-weight:700;padding:6px 16px;border-radius:12px;white-space:nowrap}
@@ -243,7 +243,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .hero .meta{font-size:22.8px;color:var(--mute);line-height:1.7}
 #vKPI .hero .meta b{color:var(--ink)}
 #vKPI table.dt{width:100%;border-collapse:collapse;font-size:28.5px;background:var(--card);
-  border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  border:1px solid var(--line);border-radius:20px;overflow:hidden;
   box-shadow:0 1px 2px rgba(20,24,40,.04),0 8px 22px rgba(20,24,40,.05)}
 #vKPI table.dt th{background:var(--soft);text-align:left;color:var(--mute);font-weight:normal;
   font-size:25.1px;padding:15px 18px}
@@ -265,7 +265,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
   box-shadow:0 2px 6px rgba(20,24,40,.10),0 16px 38px rgba(20,24,40,.12)}#vKPI .big.a{background:linear-gradient(140deg,#4AA3A0 0%,var(--teal-d) 100%)}#vKPI .big.b{background:linear-gradient(140deg,#7D6DB8 0%,var(--plum-d) 100%)}#vKPI .big .l{font-size:37.6px;opacity:.95}#vKPI .big .v{font-size:114px;font-weight:bold;line-height:1.05;letter-spacing:-1px;margin-top:4px}#vKPI .big .n{font-size:29.6px;opacity:.9;margin-top:4px}/* KPI เรียงบรรทัดละใบ · จัดเนื้อหาแนวนอนไม่ให้การ์ดสูงเกินไป */
 #vKPI .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
 #vKPI .kpis>.subsec{grid-column:1/-1}
-#vKPI .kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;
+#vKPI .kpi{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px 28px;
   box-shadow:0 1px 2px rgba(20,24,40,.04),0 8px 20px rgba(20,24,40,.05);
   transition:box-shadow .16s ease,transform .16s ease;
   display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
@@ -525,12 +525,12 @@ body.cap #vKPI .tscroll{max-height:none!important;overflow:visible}
 /* คอลัมน์สัปดาห์ต้องอยู่บรรทัดเดียว ไม่ตัดเป็น "Week" / "1" */
 #vKPI .c-week{white-space:nowrap}
 
-:root{--teal:#2DD4BF;--teal-d:#14B8A6;--plum:#818CF8;--plum-d:#6366F1;
-      --amber:#FBBF24;--rose:#F87171;--page:#0B1220;--card:#141B2E;--soft:#1E293B;
-      --line:#2A3548;--ink:#E8EDF5;--mute:#93A1B8}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
+:root{--teal:#2DD4BF;--teal-d:#14B8A6;--plum:#A78BFA;--plum-d:#8B5CF6;
+      --amber:#FBBF24;--rose:#FB7185;--page:#100D26;--card:#1C1836;--soft:#272149;
+      --line:#3A3164;--ink:#EDEBFA;--mute:#9C93C4}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
   background:var(--page);
-  background-image:radial-gradient(900px 500px at 6% -6%,rgba(45,212,191,.14),transparent 62%),
-                   radial-gradient(700px 460px at 100% 4%,rgba(129,140,248,.10),transparent 58%);
+  background-image:radial-gradient(900px 500px at 6% -6%,rgba(45,212,191,.13),transparent 62%),
+                   radial-gradient(700px 460px at 100% 4%,rgba(167,139,250,.13),transparent 58%);
   background-attachment:fixed;
   font-family:Tahoma,"Segoe UI",sans-serif;font-size:27.7px;line-height:1.6}#vRPT .wrap{max-width:none;margin:0 auto;padding:20px 5% 20px;
   height:100vh;display:flex;flex-direction:column;overflow:hidden}#vRPT .teams{display:flex;gap:6px;align-items:center;margin-bottom:14px;flex:none;
@@ -560,7 +560,7 @@ body.cap .wrap{height:auto;overflow:visible;padding:0}#vRPT #shot.cap-slide{widt
 /* ---------- แถบเมนูด้านข้าง ---------- */
 .shell{display:flex;min-height:100vh}
 .side{width:476px;flex:none;color:#EAF0F0;
-  background:linear-gradient(180deg,#141B2E 0%,#0B1220 100%);
+  background:linear-gradient(180deg,#1C1836 0%,#100D26 100%);
   display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto;
   box-shadow:3px 0 22px rgba(20,24,40,.16)}
 .side .brand{padding:36px 28px 26px;border-bottom:1px solid rgba(255,255,255,.10);line-height:1.25}
