@@ -1931,8 +1931,22 @@ let DOCK_CTX=null;
 function secDock(){
   if(!DOCK)return `<div class="empty2">${STATIC_ERR.dock?'อ่านชีตไม่ได้ — '+STATIC_ERR.dock:'กำลังโหลดข้อมูล…'}</div>`;
 
-  /* ตัวกรอง WEEK ใช้ร่วมกับหน้าอื่น · ชีตนี้ไม่มีวันที่รายแถวจึงกรองได้แค่ระดับสัปดาห์ */
-  const rows=(DOCK_ROWS||[]).filter(r=>weekOK(r.week));
+  /* ตัวกรอง WEEK ใช้ร่วมกับหน้าอื่น · v132: เดิมกรองแค่ระดับสัปดาห์ ไม่เช็ค Year/Month/Day เลย
+     ทำให้เลือกเดือน/วันแล้วข้อมูลไม่ขยับ — ใช้วันที่จริงจากคอลัมน์ "วันที่ของมาส่ง/รับเข้าระบบ/วันที่จัดเก็บ" มาช่วยกรองเพิ่ม */
+  const dockDateMs=r=>{const a=dparse(r.send||''),b=dparse(r.recv||''),c=dparse(r.store||'');
+    return !isNaN(a)?a:(!isNaN(b)?b:(!isNaN(c)?c:NaN));};
+  const dockOK=r=>{
+    if(!weekOK(r.week))return false;
+    const ms=dockDateMs(r);
+    if(isNaN(ms))return !DAYSEL; /* ไม่มีวันที่ให้เช็ค: ผ่านเว้นแต่เลือก Day เจาะจงมา ซึ่งยืนยันไม่ได้ */
+    const d=dkey(new Date(ms));
+    if(fYear()&&d.slice(0,4)!==fYear())return false;
+    if(DAYSEL)return d===DAYSEL;
+    const ym=fYear()&&fMonth()?fYear()+'-'+String(MONTH_ORDER.indexOf(fMonth())+1).padStart(2,'0'):'';
+    if(ym&&d.slice(0,7)!==ym)return false;
+    return true;
+  };
+  const rows=(DOCK_ROWS||[]).filter(dockOK);
   if(!rows.length)return '<div class="empty2">ไม่มีข้อมูล Dock to Stock ในสัปดาห์ที่เลือก</div>';
 
   const n=rows.length;
