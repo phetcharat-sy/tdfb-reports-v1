@@ -1491,11 +1491,12 @@ function chipMulti(key,label,items,sel){
    แต่แสดงเป็นปุ่มเดียวกดเปิด/ปิดรายการแทนการเรียงชื่อเป็นแถวยาว (เหมือนตัวเลือก WEEK ด้านบน)
    OPEN_DD เก็บว่าตอนนี้เปิดดรอปดาวน์ตัวไหนอยู่ — คงค่าไว้ข้าม renderKPI() แต่ละครั้ง */
 let OPEN_DD='';
-function chipDropdown(key,label,items,sel){
+function chipDropdown(key,label,items,sel,unit){
+  unit=unit||'คน';
   const on=new Set(sel||[]);
   const open=OPEN_DD===key;
   const box=c=>`<i class="ck${c?' on':''}">${c?'✓':''}</i>`;
-  const btnLabel=!on.size?'ทั้งหมด':on.size===1?[...on][0]:on.size+' คน';
+  const btnLabel=!on.size?'ทั้งหมด':on.size===1?[...on][0]:on.size+' '+unit;
   return `<div class="fbar"><span class="fl">${label}</span>
     <div class="wsel">
       <button type="button" class="btn ghost ddbtn" data-dd="${key}" data-on="${on.size?'1':'0'}"
@@ -1952,7 +1953,7 @@ function secDock(){
   const dkTypes=[...new Set(rowsByDate.map(r=>r.type).filter(Boolean))].sort();
   const dkTypeSel=String(sf('dk_type','')).split('|').filter(Boolean);
   const rows=dkTypeSel.length?rowsByDate.filter(r=>dkTypeSel.includes(r.type)):rowsByDate;
-  if(!rows.length)return chipDropdown('dk_type','ประเภท',dkTypes.map(t=>[t,t]),dkTypeSel)
+  if(!rows.length)return chipDropdown('dk_type','ประเภท',dkTypes.map(t=>[t,t]),dkTypeSel,'ประเภท')
     +'<div class="empty2">ไม่มีข้อมูลของประเภทที่เลือก</div>';
 
   const n=rows.length;
@@ -1986,7 +1987,7 @@ function secDock(){
 
   return chipBar('dk_v','มุมมอง',
       [['all','รวม (รับเข้า + จัดเก็บ)'],['in','เฉพาะรับเข้า'],['st','เฉพาะจัดเก็บ','amber']],fDk)
-   +(dkTypes.length>1?chipDropdown('dk_type','ประเภท',dkTypes.map(t=>[t,t]),dkTypeSel):'')
+   +(dkTypes.length>1?chipDropdown('dk_type','ประเภท',dkTypes.map(t=>[t,t]),dkTypeSel,'ประเภท'):'')
    +ringHTML(allP,90,
       `<span>ON-TIME ${esc(vName)}</span>`
      +`<span>เป้าหมาย ไม่ผ่านเกณฑ์ <b>&lt; 10%</b> · ตอนนี้ <b>${pct1(100-allP)}</b></span>`
