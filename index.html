@@ -1946,8 +1946,14 @@ function secDock(){
     if(ym&&d.slice(0,7)!==ym)return false;
     return true;
   };
-  const rows=(DOCK_ROWS||[]).filter(dockOK);
-  if(!rows.length)return '<div class="empty2">ไม่มีข้อมูล Dock to Stock ในสัปดาห์ที่เลือก</div>';
+  const rowsByDate=(DOCK_ROWS||[]).filter(dockOK);
+  if(!rowsByDate.length)return '<div class="empty2">ไม่มีข้อมูล Dock to Stock ในสัปดาห์ที่เลือก</div>';
+  /* ตัวกรองประเภท (Matcha / Accessories ฯลฯ) — แบบดรอปดาวน์กดเข้าไปติ๊ก ไม่ใช่แถวปุ่มเรียงยาว */
+  const dkTypes=[...new Set(rowsByDate.map(r=>r.type).filter(Boolean))].sort();
+  const dkTypeSel=String(sf('dk_type','')).split('|').filter(Boolean);
+  const rows=dkTypeSel.length?rowsByDate.filter(r=>dkTypeSel.includes(r.type)):rowsByDate;
+  if(!rows.length)return chipDropdown('dk_type','ประเภท',dkTypes.map(t=>[t,t]),dkTypeSel)
+    +'<div class="empty2">ไม่มีข้อมูลของประเภทที่เลือก</div>';
 
   const n=rows.length;
   const inOk=rows.filter(r=>r.inOk).length, stOk=rows.filter(r=>r.stOk).length;
@@ -1980,6 +1986,7 @@ function secDock(){
 
   return chipBar('dk_v','มุมมอง',
       [['all','รวม (รับเข้า + จัดเก็บ)'],['in','เฉพาะรับเข้า'],['st','เฉพาะจัดเก็บ','amber']],fDk)
+   +(dkTypes.length>1?chipDropdown('dk_type','ประเภท',dkTypes.map(t=>[t,t]),dkTypeSel):'')
    +ringHTML(allP,90,
       `<span>ON-TIME ${esc(vName)}</span>`
      +`<span>เป้าหมาย ไม่ผ่านเกณฑ์ <b>&lt; 10%</b> · ตอนนี้ <b>${pct1(100-allP)}</b></span>`
