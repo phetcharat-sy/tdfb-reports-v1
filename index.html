@@ -264,25 +264,24 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
   padding:3px 15px;border-radius:20px;font-size:21.7px;margin-top:8px}
 #vKPI h2.sec{font-size:39.4px;margin:30px 0 12px;display:flex;align-items:center;gap:12px;color:var(--page-ink)}#vKPI h2.sec span{flex:1;height:1px;background:var(--page-line)}#vKPI h2.sec em{font-style:normal;font-size:27.7px;color:var(--page-mute);font-weight:normal}#vKPI .top{display:grid;grid-template-columns:1fr 1fr;gap:16px}#vKPI .big{border-radius:20px;padding:36px 40px;color:#fff;
   box-shadow:0 2px 6px rgba(20,24,40,.10),0 16px 38px rgba(20,24,40,.12)}#vKPI .big.a{background:linear-gradient(140deg,#4AA3A0 0%,var(--teal-d) 100%)}#vKPI .big.b{background:linear-gradient(140deg,#7D6DB8 0%,var(--plum-d) 100%)}#vKPI .big .l{font-size:37.6px;opacity:.95}#vKPI .big .v{font-size:114px;font-weight:bold;line-height:1.05;letter-spacing:-1px;margin-top:4px}#vKPI .big .n{font-size:29.6px;opacity:.9;margin-top:4px}/* KPI เรียงบรรทัดละใบ · จัดเนื้อหาแนวนอนไม่ให้การ์ดสูงเกินไป */
-#vKPI .kpis{display:grid;grid-template-columns:1fr;gap:16px}
-#vKPI .kpis>.subsec{grid-column:1/-1}
-#vKPI .kpi{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:38px 40px;
+#vKPI .kpis{display:grid;grid-template-columns:1fr;gap:6px}
+#vKPI .kpis>.subsec{grid-column:1/-1;margin-top:26px}
+#vKPI .kpi-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  padding:0 6px;margin-top:4px}
+#vKPI .kpi-head b{font-size:26px;font-weight:bold;color:var(--page-ink)}
+#vKPI .kpi-head span{font-size:20px;color:var(--page-mute)}
+#vKPI .kpi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 30px;
+  margin-bottom:14px;
   box-shadow:0 1px 2px rgba(20,24,40,.04),0 8px 20px rgba(20,24,40,.05);
   transition:box-shadow .16s ease;
   display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;
   position:relative;overflow:hidden}
 #vKPI .kpi:hover{box-shadow:0 3px 8px rgba(20,24,40,.07),0 16px 34px rgba(20,24,40,.09)}
-#vKPI .kpi .l{font-size:32px;font-weight:bold;letter-spacing:.01em}
-#vKPI .kpi .t{font-size:23px;color:var(--mute)}
-#vKPI .kpi .row{display:flex;justify-content:center;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:6px}
-#vKPI .kpi .v{font-size:72px;font-weight:bold;letter-spacing:-1px;line-height:1.08;margin:8px 0}
+#vKPI .kpi .row{display:flex;justify-content:center;align-items:baseline;gap:12px;flex-wrap:wrap}
+#vKPI .kpi .v{font-size:72px;font-weight:bold;letter-spacing:-1px;line-height:1.08}
 #vKPI .kpi .waitstat{font-size:26px;color:var(--mute);font-weight:bold}
 #vKPI .badge{font-size:20px;font-weight:bold;padding:4px 13px;border-radius:20px;white-space:nowrap;letter-spacing:.01em}
 #vKPI .badge.pass{background:#E3F0EA;color:var(--good)}#vKPI .badge.fail{background:#F7E4DF;color:var(--bad)}#vKPI .badge.wait{background:var(--soft);color:var(--mute)}
-#vKPI .delta{font-size:21px;white-space:nowrap;display:inline-flex;flex-direction:column;
-  align-items:center;line-height:1.25;font-weight:bold}
-#vKPI .delta em{font-style:normal;font-size:16px;font-weight:normal;color:var(--mute);margin-top:3px}#vKPI .delta.up{color:var(--good)}#vKPI .delta.down{color:var(--bad)}#vKPI .delta.flat{color:var(--mute)}
-#vKPI .kpi .base{font-size:19px;color:var(--mute);max-width:720px}
 #vKPI .kpi .note-corner{position:absolute;right:24px;bottom:18px;font-size:17px;color:var(--mute);font-style:italic}
 #vKPI .foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--page-line);
   color:var(--page-mute);font-size:24.9px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}#vKPI @media(max-width:1000px){.wrap{padding-left:4%;padding-right:4%}#kShot{padding:22px 18px 28px}
@@ -313,9 +312,8 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI table.dt th{font-size:31px}
 #vKPI table.dt td{padding:17px 18px}
 #vKPI .foot{font-size:29px}
-#vKPI .kpi .l{font-size:29px}
-#vKPI .kpi .t{font-size:23px}
-#vKPI .kpi .base{font-size:21px}
+#vKPI .kpi-head b{font-size:29px}
+#vKPI .kpi-head span{font-size:23px}
 #vKPI .badge{font-size:21px}
 .sidenav button{font-size:33px}
 
@@ -661,11 +659,9 @@ body.present #vKPI .cbox.xl{height:min(700px,78vh)}
 body.present #vKPI .subsec{font-size:36.5px}
 body.present #vKPI .chname{font-size:35.3px}
 body.present #vKPI .chpct{font-size:52.4px}
-body.present #vKPI .kpi .l{font-size:43.3px}
-body.present #vKPI .kpi .t{font-size:30.8px}
-body.present #vKPI .kpi .base{font-size:29.6px}
+body.present #vKPI .kpi-head b{font-size:43.3px}
+body.present #vKPI .kpi-head span{font-size:30.8px}
 body.present #vKPI .badge{font-size:30.8px}
-body.present #vKPI .delta{font-size:34.2px}
 body.present #vKPI .big .l{font-size:45.6px}
 body.present #vKPI .big .n{font-size:33.1px}
 body.present #vKPI .tscroll{max-height:none}
@@ -1250,15 +1246,12 @@ function deltaHTML(cur,prev,goodUp=true,unit='%'){
 }
 
 function kpiCard(o){
-  if(o.wait)return `<div class="kpi wait">
-    <div class="l">${o.l}</div>
-    <div class="t">${o.t}</div>
+  const head=`<div class="kpi-head"><b>${o.l}</b><span>${o.t}</span></div>`;
+  if(o.wait)return head+`<div class="kpi wait">
     <div class="row"><span class="waitstat">รอข้อมูล</span><span class="badge wait">ยังไม่ได้เชื่อมชีต</span></div>
     ${o.note?`<div class="note-corner">${esc(o.note)}</div>`:''}</div>`;
   const ok=o.pass;
-  return `<div class="kpi ${ok?'pass':'fail'}">
-    <div class="l">${o.l}</div>
-    <div class="t">${o.t}</div>
+  return head+`<div class="kpi ${ok?'pass':'fail'}">
     <div class="row"><div class="v">${o.disp}</div></div>
     <span class="badge ${ok?'pass':'fail'}">${ok?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์'}</span></div>`;
 }
