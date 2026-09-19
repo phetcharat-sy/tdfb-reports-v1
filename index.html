@@ -257,7 +257,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .subsec:first-child{margin-top:4px}
 #vKPI .subsec em{font-style:normal;font-size:22.8px;color:var(--mute);font-weight:normal}
 #vKPI .subsec span.line{flex:1;height:1px;background:var(--line)}
-#vKPI .subsec .no{width:34px;height:34px;border-radius:11px;color:#fff;
+#vKPI .no{width:34px;height:34px;border-radius:11px;color:#fff;
   background:linear-gradient(140deg,#4AA3A0,var(--teal-d));
   box-shadow:0 3px 9px rgba(15,118,110,.35);font-size:21.7px;font-weight:bold;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 #vKPI .kchip{display:inline-block;background:#6B5CA5;color:#fff;
@@ -266,7 +266,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
   box-shadow:0 2px 6px rgba(20,24,40,.10),0 16px 38px rgba(20,24,40,.12)}#vKPI .big.a{background:linear-gradient(140deg,#4AA3A0 0%,var(--teal-d) 100%)}#vKPI .big.b{background:linear-gradient(140deg,#7D6DB8 0%,var(--plum-d) 100%)}#vKPI .big .l{font-size:37.6px;opacity:.95}#vKPI .big .v{font-size:114px;font-weight:bold;line-height:1.05;letter-spacing:-1px;margin-top:4px}#vKPI .big .n{font-size:29.6px;opacity:.9;margin-top:4px}/* KPI เรียงบรรทัดละใบ · จัดเนื้อหาแนวนอนไม่ให้การ์ดสูงเกินไป */
 #vKPI .kpis{display:grid;grid-template-columns:1fr;gap:6px}
 #vKPI .kpis>.subsec{grid-column:1/-1;margin-top:26px}
-#vKPI .kpi-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+#vKPI .kpi-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   padding:0 6px;margin-top:20px}
 #vKPI .kpi-head b{font-size:26px;font-weight:bold;color:var(--page-ink)}
 #vKPI .kpi-head span{font-size:20px;color:var(--page-mute)}
@@ -1246,7 +1246,8 @@ function deltaHTML(cur,prev,goodUp=true,unit='%'){
 }
 
 function kpiCard(o){
-  const head=`<div class="kpi-head"><b>${o.l}</b><span>${o.t}</span></div>`;
+  const num=o.n!=null?`<span class="no">${o.n}</span>`:'';
+  const head=`<div class="kpi-head">${num}<b>${o.l}</b><span>${o.t}</span></div>`;
   if(o.wait)return head+`<div class="kpi wait">
     <div class="row"><span class="waitstat">รอข้อมูล</span><span class="badge wait">ยังไม่ได้เชื่อมชีต</span></div>
     ${o.note?`<div class="note-corner">${esc(o.note)}</div>`:''}</div>`;
@@ -4551,20 +4552,18 @@ function renderKPI(){
     +(note?` <em>${note}</em>`:'')+`<span class="line"></span></div>`;
 
   el('wh').innerHTML=[
-    sub(1,'Packing &amp; Dispatch','ชีต KPI On-Time / Out of Stock · ตามตัวกรอง'),
-    cur?kpiCard({l:'On-Time Performance',t:'Target ≥ 98% · ระดับออเดอร์ · แย่สุดของ WH + Packing',
+    cur?kpiCard({n:1,l:'On-Time Performance',t:'Target ≥ 98% · ระดับออเดอร์ · แย่สุดของ WH + Packing',
       disp:pct(cur.otp),v:cur.otp,pass:cur.otp>=98,
       delta:deltaHTML(cur.otp,prev?prev.otp:null,true),
       base:`${fmt(cur.onTimeOrders)} จาก ${fmt(cur.denom)} ออเดอร์ที่ระบุสถานะได้ · ทั้งหมด ${fmt(cur.orders)}`}):
-      kpiCard({l:'On-Time Performance',t:'Target ≥ 98%',wait:true,note:'ไม่มีข้อมูลในช่วงที่เลือก'}),
-    cur?kpiCard({l:'Out of Stock',t:'Target ≥ 99% · ถ่วงน้ำหนักด้วยจำนวนชิ้น',
+      kpiCard({n:1,l:'On-Time Performance',t:'Target ≥ 98%',wait:true,note:'ไม่มีข้อมูลในช่วงที่เลือก'}),
+    cur?kpiCard({n:2,l:'Out of Stock',t:'Target ≥ 99% · ถ่วงน้ำหนักด้วยจำนวนชิ้น',
       disp:pct(cur.oos),v:cur.oos,pass:cur.oos>=99,
       delta:deltaHTML(cur.oos,prev?prev.oos:null,true),
       base:`${fmt(cur.okQty)} จาก ${fmt(cur.items)} ชิ้น`}):
-      kpiCard({l:'Out of Stock',t:'Target ≥ 99%',wait:true,note:'ไม่มีข้อมูลในช่วงที่เลือก'}),
+      kpiCard({n:2,l:'Out of Stock',t:'Target ≥ 99%',wait:true,note:'ไม่มีข้อมูลในช่วงที่เลือก'}),
 
-    sub(2,'Stock Accuracy','ชีตนับสต็อก · คอลัมน์ “เช็ค”'),
-    diffV!=null?kpiCard({l:'Stock Variance',t:'Target < 2% · สัดส่วนที่นับแล้ว “ไม่ตรง” กับระบบ',
+    diffV!=null?kpiCard({n:3,l:'Stock Variance',t:'Target < 2% · สัดส่วนที่นับแล้ว “ไม่ตรง” กับระบบ',
       disp:pct(diffV),v:diffV,bar:diffV*10,pass:diffV<2,
       delta:deltaHTML(diffV,diffP,false),
       base:(dNow.weighted
@@ -4572,29 +4571,27 @@ function renderKPI(){
             +` · ${fmt(dNow.badRows)} จาก ${fmt(dNow.rows)} แถว`
           : `ไม่ตรง ${fmt(dNow.bad)} จาก ${fmt(dNow.n)} รายการที่นับ`)
         +(lo?` · ช่วง ${showD(lo)} – ${showD(hi)}`:'')}):
-      kpiCard({l:'Stock Variance',t:'Target < 2%',wait:true,
+      kpiCard({n:3,l:'Stock Variance',t:'Target < 2%',wait:true,
         note:STATIC_ERR.diff?('อ่านชีตไม่ได้ — '+STATIC_ERR.diff):'ไม่มีรายการนับสต็อกในช่วงที่เลือก'}),
 
-    sub(3,'GR to Putaway',`ชีต Dock to Stock · รายสัปดาห์${wkSel?' (Week '+wkSel+')':''} · เป้า ไม่ผ่านเกณฑ์ < 10%`),
-    allV!=null?kpiCard({l:'ON-TIME รวม (รับเข้า+จัดเก็บ)',
+    allV!=null?kpiCard({n:4,l:'ON-TIME รวม (รับเข้า+จัดเก็บ)',
       t:`Target ไม่ผ่านเกณฑ์ < 10% · Dock to Stock · Week ${wkSel}`,
       disp:pct1(allV),v:allV,pass:(100-allV)<10,
       delta:deltaHTML(allV,allP,true),
       base:`ไม่ผ่านเกณฑ์ ${pct1(100-allV)} (เป้า < 10%)`
         +` · ค่าเฉลี่ยของ ${pct1(inV)} (รับเข้า) และ ${pct1(stV)} (จัดเก็บ) · ${fmt(kNow.n)} ใบรับเข้า`}):
-      kpiCard({l:'ON-TIME รวม (รับเข้า+จัดเก็บ)',t:'Dock to Stock · รายสัปดาห์',wait:true,
+      kpiCard({n:4,l:'ON-TIME รวม (รับเข้า+จัดเก็บ)',t:'Dock to Stock · รายสัปดาห์',wait:true,
         note:STATIC_ERR.dock?('อ่านชีตไม่ได้ — '+STATIC_ERR.dock):'ยังไม่มีข้อมูลของสัปดาห์นี้'}),
 
     /* v122: KPI ใหม่ — ยังไม่มีคอลัมน์ "หยิบผิด" ในชีต Picking จึงยังคำนวณไม่ได้
        เตรียมช่องไว้แบบเดียวกับการ์ด Human Error ของฝั่ง Delivery */
-    sub(4,'Picking Accuracy','ชีต Picking · จำนวนครั้งที่หยิบผิด ÷ จำนวนที่หยิบทั้งหมด'),
-    kpiCard({l:'Human Error On Picking',t:'Target < 0.05%',wait:true,
+    kpiCard({n:5,l:'Human Error On Picking',t:'Target < 0.05%',wait:true,
       note:'ยังไม่มีคอลัมน์บันทึกการหยิบผิดในชีต — เตรียมช่องไว้แล้ว'})
   ].join('');
 
-  el('dl').innerHTML=kpiCard({l:'Human Error',t:'Target 0 เคส/เดือน',wait:true,
+  el('dl').innerHTML=kpiCard({n:1,l:'Human Error',t:'Target 0 เคส/เดือน',wait:true,
     note:'ยังไม่ได้ระบุชีตต้นทาง — เตรียมช่องไว้แล้ว'});
-  el('ad').innerHTML=kpiCard({l:'Admin On-Time',t:'Target ≥ 85%',wait:true,
+  el('ad').innerHTML=kpiCard({n:1,l:'Admin On-Time',t:'Target ≥ 85%',wait:true,
     note:'ยังไม่ได้ระบุชีตต้นทาง — เตรียมช่องไว้แล้ว'});
 
   el('src').innerHTML='ชีต: On-Time/Out of Stock <b>'+SHEET_STATE.otp+'</b>'
