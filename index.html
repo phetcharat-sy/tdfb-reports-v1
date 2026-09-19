@@ -275,7 +275,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .kpi .l{font-size:32px;font-weight:bold;letter-spacing:.01em}
 #vKPI .kpi .t{font-size:23px;color:var(--mute)}
 #vKPI .kpi .row{display:flex;justify-content:center;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:6px}
-#vKPI .kpi .v{font-size:56px;font-weight:bold;letter-spacing:-1px;line-height:1.08}
+#vKPI .kpi .v{font-size:72px;font-weight:bold;letter-spacing:-1px;line-height:1.08;margin:8px 0}
 #vKPI .kpi .waitstat{font-size:26px;color:var(--mute);font-weight:bold}
 #vKPI .badge{font-size:20px;font-weight:bold;padding:4px 13px;border-radius:20px;white-space:nowrap;letter-spacing:.01em}
 #vKPI .badge.pass{background:#E3F0EA;color:var(--good)}#vKPI .badge.fail{background:#F7E4DF;color:var(--bad)}#vKPI .badge.wait{background:var(--soft);color:var(--mute)}
@@ -1260,9 +1260,7 @@ function kpiCard(o){
     <div class="l">${o.l}</div>
     <div class="t">${o.t}</div>
     <div class="row"><div class="v">${o.disp}</div></div>
-    <span class="badge ${ok?'pass':'fail'}">${ok?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์'}</span>
-    ${o.delta||''}
-    <div class="base">${o.base||''}</div></div>`;
+    <span class="badge ${ok?'pass':'fail'}">${ok?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์'}</span></div>`;
 }
 
 /* ---------- หน้าย่อยของ Warehouse ---------- */
