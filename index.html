@@ -282,6 +282,12 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .kpi .waitstat{font-size:26px;color:var(--mute);font-weight:bold}
 #vKPI .badge{font-size:20px;font-weight:bold;padding:4px 13px;border-radius:20px;white-space:nowrap;letter-spacing:.01em}
 #vKPI .badge.pass{background:#E3F0EA;color:var(--good)}#vKPI .badge.fail{background:#F7E4DF;color:var(--bad)}#vKPI .badge.wait{background:var(--soft);color:var(--mute)}
+#vKPI .delta{font-size:19px;color:var(--mute);display:flex;flex-direction:column;
+  align-items:center;line-height:1.4;margin-top:4px}
+#vKPI .delta em{font-style:normal;font-weight:normal;color:var(--mute)}
+#vKPI .delta.up{color:var(--good);font-weight:bold}
+#vKPI .delta.down{color:var(--bad);font-weight:bold}
+#vKPI .delta.flat{color:var(--mute)}
 #vKPI .kpi .note-corner{position:absolute;right:24px;bottom:18px;font-size:17px;color:var(--mute);font-style:italic}
 #vKPI .foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--page-line);
   color:var(--page-mute);font-size:24.9px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}#vKPI @media(max-width:1000px){.wrap{padding-left:4%;padding-right:4%}#kShot{padding:22px 18px 28px}
@@ -1254,7 +1260,8 @@ function kpiCard(o){
   const ok=o.pass;
   return head+`<div class="kpi ${ok?'pass':'fail'}">
     <div class="row"><div class="v">${o.disp}</div></div>
-    <span class="badge ${ok?'pass':'fail'}">${ok?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์'}</span></div>`;
+    <span class="badge ${ok?'pass':'fail'}">${ok?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์'}</span>
+    ${o.delta||''}</div>`;
 }
 
 /* ---------- หน้าย่อยของ Warehouse ---------- */
@@ -4552,18 +4559,18 @@ function renderKPI(){
     +(note?` <em>${note}</em>`:'')+`<span class="line"></span></div>`;
 
   el('wh').innerHTML=[
-    cur?kpiCard({n:1,l:'On-Time Performance',t:'Target ≥ 98% · ระดับออเดอร์ · แย่สุดของ WH + Packing',
+    cur?kpiCard({n:1,l:'On-Time Performance',t:'Target ≥ 98%',
       disp:pct(cur.otp),v:cur.otp,pass:cur.otp>=98,
       delta:deltaHTML(cur.otp,prev?prev.otp:null,true),
       base:`${fmt(cur.onTimeOrders)} จาก ${fmt(cur.denom)} ออเดอร์ที่ระบุสถานะได้ · ทั้งหมด ${fmt(cur.orders)}`}):
       kpiCard({n:1,l:'On-Time Performance',t:'Target ≥ 98%',wait:true,note:'ไม่มีข้อมูลในช่วงที่เลือก'}),
-    cur?kpiCard({n:2,l:'Out of Stock',t:'Target ≥ 99% · ถ่วงน้ำหนักด้วยจำนวนชิ้น',
+    cur?kpiCard({n:2,l:'Out of Stock',t:'Target ≥ 99%',
       disp:pct(cur.oos),v:cur.oos,pass:cur.oos>=99,
       delta:deltaHTML(cur.oos,prev?prev.oos:null,true),
       base:`${fmt(cur.okQty)} จาก ${fmt(cur.items)} ชิ้น`}):
       kpiCard({n:2,l:'Out of Stock',t:'Target ≥ 99%',wait:true,note:'ไม่มีข้อมูลในช่วงที่เลือก'}),
 
-    diffV!=null?kpiCard({n:3,l:'Stock Variance',t:'Target < 2% · สัดส่วนที่นับแล้ว “ไม่ตรง” กับระบบ',
+    diffV!=null?kpiCard({n:3,l:'Stock Variance',t:'Target < 2%',
       disp:pct(diffV),v:diffV,bar:diffV*10,pass:diffV<2,
       delta:deltaHTML(diffV,diffP,false),
       base:(dNow.weighted
@@ -4575,7 +4582,7 @@ function renderKPI(){
         note:STATIC_ERR.diff?('อ่านชีตไม่ได้ — '+STATIC_ERR.diff):'ไม่มีรายการนับสต็อกในช่วงที่เลือก'}),
 
     allV!=null?kpiCard({n:4,l:'ON-TIME รวม (รับเข้า+จัดเก็บ)',
-      t:`Target ไม่ผ่านเกณฑ์ < 10% · Dock to Stock · Week ${wkSel}`,
+      t:'Target ไม่ผ่านเกณฑ์ < 10%',
       disp:pct1(allV),v:allV,pass:(100-allV)<10,
       delta:deltaHTML(allV,allP,true),
       base:`ไม่ผ่านเกณฑ์ ${pct1(100-allV)} (เป้า < 10%)`
