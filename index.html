@@ -13,7 +13,7 @@
 <style>
 :root{--teal:#2DD4BF;--teal-d:#14B8A6;--plum:#A78BFA;--plum-d:#8B5CF6;
       --amber:#FBBF24;--rose:#FB7185;--good:#34D399;--bad:#FB7185;
-      --page:#100D26;--card:#1C1836;--soft:#272149;--line:#3A3164;--ink:#EDEBFA;--mute:#9C93C4;--ink-faint:#C3BBDF}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
+      --page:#100D26;--card:#1C1836;--soft:#272149;--line:#3A3164;--ink:#F7F5FF;--mute:#B7AEDE;--ink-faint:#D2CBEC}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
   background:var(--page);
   background-image:radial-gradient(900px 500px at 6% -6%,rgba(45,212,191,.13),transparent 62%),
                    radial-gradient(700px 460px at 100% 4%,rgba(167,139,250,.13),transparent 58%);
@@ -23,7 +23,7 @@
   padding:13px 16px;font-family:inherit;font-size:30.7px}#vKPI .btn:focus-visible, #vKPI select:focus-visible{outline:2px solid var(--plum);outline-offset:2px}#vKPI .stat{color:var(--mute);font-size:28.5px;margin-left:auto}#vKPI .stat b{color:var(--teal-d)}#vKPI .stat.err b{color:var(--rose)}#vKPI .tabs{display:flex;gap:6px;background:var(--soft);padding:5px;border-radius:11px;width:fit-content;margin-bottom:14px}#vKPI .tabs a{text-decoration:none;font-size:29.2px;padding:10px 26px;border-radius:8px;color:var(--mute)}#vKPI .tabs a.on{background:var(--teal);color:#fff;font-weight:bold}#vKPI #kShot{background:transparent;border:0;box-shadow:none;padding:8px 0 40px;
   box-shadow:0 1px 3px rgba(20,24,40,.07),0 8px 24px rgba(20,24,40,.05)}#vKPI header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
   flex-wrap:wrap;border-bottom:2px solid var(--teal);padding-bottom:20px;margin-bottom:26px}#vKPI h1{margin:0;font-size:75.2px;letter-spacing:-.6px;line-height:1.2;font-weight:bold;
-  border-left:8px solid var(--teal);padding-left:20px}#vKPI .sub{color:var(--mute);font-size:33.5px;margin:8px 0 0 21px}#vKPI .period{text-align:right;color:var(--mute);font-size:28.5px}#vKPI .period b{display:block;color:var(--ink);font-size:45.5px;font-weight:normal}
+  border-left:8px solid var(--teal);padding-left:20px}#vKPI .sub{color:var(--mute);font-size:33.5px;margin:10px 0 0 21px;line-height:1.4}#vKPI .period{text-align:right;color:var(--mute);font-size:28.5px}#vKPI .period b{display:block;color:var(--ink);font-size:45.5px;font-weight:normal}
 #vKPI .toolbar{background:var(--card);border:1px solid var(--line);border-radius:20px;
   padding:20px 24px;gap:16px;align-items:flex-end;
   box-shadow:0 1px 2px rgba(20,24,40,.05),0 10px 28px rgba(20,24,40,.07)}
@@ -41,6 +41,7 @@
 #vKPI #kDayBtn[data-on="1"]{background:linear-gradient(100deg,var(--teal-d),#14B8A6);
   color:#fff;border-color:var(--teal-d);box-shadow:0 4px 14px rgba(15,118,110,.35)}
 #vKPI #kClear,#vKPI #kReload,#vKPI #kPresent{border-radius:12px;padding:14px 20px;font-size:25.1px}
+#vKPI #kReload{display:none}
 #vKPI #kSave{border-radius:12px;padding:14px 24px;font-size:25.1px;
   background:linear-gradient(100deg,var(--teal-d),#14B8A6);
   box-shadow:0 4px 14px rgba(15,118,110,.35)}
@@ -263,7 +264,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
   padding:3px 15px;border-radius:20px;font-size:21.7px;margin-top:8px}
 #vKPI h2.sec{font-size:39.4px;margin:30px 0 12px;display:flex;align-items:center;gap:12px}#vKPI h2.sec span{flex:1;height:1px;background:var(--line)}#vKPI h2.sec em{font-style:normal;font-size:27.7px;color:var(--mute);font-weight:normal}#vKPI .top{display:grid;grid-template-columns:1fr 1fr;gap:16px}#vKPI .big{border-radius:20px;padding:36px 40px;color:#fff;
   box-shadow:0 2px 6px rgba(20,24,40,.10),0 16px 38px rgba(20,24,40,.12)}#vKPI .big.a{background:linear-gradient(140deg,#4AA3A0 0%,var(--teal-d) 100%)}#vKPI .big.b{background:linear-gradient(140deg,#7D6DB8 0%,var(--plum-d) 100%)}#vKPI .big .l{font-size:37.6px;opacity:.95}#vKPI .big .v{font-size:114px;font-weight:bold;line-height:1.05;letter-spacing:-1px;margin-top:4px}#vKPI .big .n{font-size:29.6px;opacity:.9;margin-top:4px}/* KPI เรียงบรรทัดละใบ · จัดเนื้อหาแนวนอนไม่ให้การ์ดสูงเกินไป */
-#vKPI .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+#vKPI .kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
 #vKPI .kpis>.subsec{grid-column:1/-1}
 #vKPI .kpi{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px 28px;
   box-shadow:0 1px 2px rgba(20,24,40,.04),0 8px 20px rgba(20,24,40,.05);
@@ -359,12 +360,49 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .fcs-i.dd b{color:#8a6a2f}
 #vKPI .fcs-u{font-size:24px;color:var(--mute)}
 #vKPI .fnote{background:var(--soft);border:1px solid var(--line);border-left:5px solid var(--plum);
-  border-radius:14px;padding:22px 26px;margin:0 0 18px;font-size:28px;line-height:1.65;color:var(--ink)}
+  border-radius:14px;padding:0 26px;margin:0 0 18px;font-size:28px;line-height:1.65;color:var(--ink)}
 #vKPI .fnote>div{margin-top:6px;color:var(--ink)}
+#vKPI .fnote summary{padding:22px 0;cursor:pointer;list-style:none;font-weight:bold;
+  display:flex;align-items:center;gap:10px;user-select:none}
+#vKPI .fnote summary::-webkit-details-marker{display:none}
+#vKPI .fnote summary::before{content:"▸";display:inline-block;color:var(--plum);
+  transition:transform .15s ease;font-size:.85em}
+#vKPI .fnote[open] summary::before{transform:rotate(90deg)}
+#vKPI .fnote .fbody{padding-bottom:22px}
 #vKPI .fnote code{display:block;margin-top:12px;background:var(--soft);border-radius:9px;
   padding:12px 16px;font-family:'JetBrains Mono',monospace,Tahoma;font-size:24px;
   color:var(--plum-d);line-height:1.6}
 #vKPI .fwarn{margin-top:12px;color:var(--bad);font-size:26px}
+/* ---------- Forecast Accuracy — การ์ดสไตล์สว่าง แยกจากธีมมืดหลักตามที่ขอ (อ่านง่าย สบายตา) ---------- */
+#vKPI .fcacc{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:20px;
+  padding:26px 28px 8px;margin-bottom:18px;
+  box-shadow:0 1px 2px rgba(15,23,42,.06),0 10px 26px rgba(15,23,42,.10)}
+#vKPI .fcacc-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;margin-bottom:22px}
+#vKPI .fcacc-card{background:#fff;border:1px solid #E2E8F0;border-radius:14px;
+  padding:20px 18px;text-align:center;display:flex;flex-direction:column;
+  align-items:center;gap:6px}
+#vKPI .fcacc-card i{font-style:normal;font-size:26px;color:#0D9488}
+#vKPI .fcacc-card b{font-size:20px;font-weight:600;color:#475569}
+#vKPI .fcacc-card span{font-size:38px;font-weight:800;color:#0F172A;letter-spacing:-.5px}
+#vKPI .fcacc-card span.up{color:#B45309}#vKPI .fcacc-card span.down{color:#0F766E}
+#vKPI .fcacc-card small{font-size:16px;color:#64748B}
+#vKPI .fcacc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:1300px){#vKPI .fcacc-grid{grid-template-columns:1fr}}
+#vKPI .fcacc-panel{background:#fff;border:1px solid #E2E8F0;border-radius:16px;
+  padding:20px 22px 4px;margin-bottom:22px}
+#vKPI .fcacc-h{font-size:24px;font-weight:700;color:#0F172A;margin-bottom:10px}
+#vKPI .fcacc-h em{display:block;font-style:normal;font-weight:normal;
+  font-size:18px;color:#64748B;margin-top:2px}
+#vKPI .fcacc-chartbox{position:relative;height:320px;margin-bottom:14px}
+#vKPI .fcacc-tblwrap{max-height:320px;overflow:auto;border-top:1px solid #E2E8F0}
+#vKPI .fcacc-tbl{width:100%;border-collapse:collapse;font-size:19px}
+#vKPI .fcacc-tbl th{position:sticky;top:0;background:#F1F5F9;text-align:left;
+  color:#64748B;font-weight:600;padding:9px 10px;font-size:17px}
+#vKPI .fcacc-tbl td{padding:8px 10px;border-top:1px solid #EEF1F5;color:#0F172A}
+#vKPI .fcacc-tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+#vKPI .fcacc-tbl .up{color:#B45309;font-weight:600}
+#vKPI .fcacc-tbl .down{color:#0F766E;font-weight:600}
 #vKPI tr.ddrow td{background:#FBF1E8!important}
 #vKPI .ddtag{display:inline-block;background:#F3E3CB;color:#8a6a2f;font-weight:bold;
   font-size:23px;padding:2px 12px;border-radius:20px;margin-left:8px;white-space:nowrap}
@@ -527,7 +565,7 @@ body.cap #vKPI .tscroll{max-height:none!important;overflow:visible}
 
 :root{--teal:#2DD4BF;--teal-d:#14B8A6;--plum:#A78BFA;--plum-d:#8B5CF6;
       --amber:#FBBF24;--rose:#FB7185;--page:#100D26;--card:#1C1836;--soft:#272149;
-      --line:#3A3164;--ink:#EDEBFA;--mute:#9C93C4}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
+      --line:#3A3164;--ink:#F7F5FF;--mute:#B7AEDE}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
   background:var(--page);
   background-image:radial-gradient(900px 500px at 6% -6%,rgba(45,212,191,.13),transparent 62%),
                    radial-gradient(700px 460px at 100% 4%,rgba(167,139,250,.13),transparent 58%);
@@ -2290,6 +2328,32 @@ function fcDaily(byDate){
           level,trend,boost,ddSamples:dd.samples,days:total};
 }
 
+/* ---------- ย้อนหลังดูว่าพยากรณ์แม่นแค่ไหน (backtest) ----------
+   ไล่ทีละวันจากวันล่าสุดถอยหลังไป `days` วัน · แต่ละวันใช้ fcDaily()
+   คำนวณจากข้อมูล "ก่อนวันนั้น" เท่านั้น (เหมือนไม่รู้อนาคต) แล้วเทียบพยากรณ์ 1 วันข้างหน้ากับของจริง */
+function backtestDaily(byDate,days){
+  days=days||30;
+  const keys=Object.keys(byDate).sort();
+  const minHist=14;
+  const out=[];
+  for(let i=keys.length-1;i>=minHist&&out.length<days;i--){
+    const k=keys[i];
+    const priorMap={}; keys.slice(0,i).forEach(pk=>priorMap[pk]=byDate[pk]);
+    const fc=fcDaily(priorMap);
+    if(!fc)continue;
+    const pred=fc.fc[0], actual=byDate[k]||0, diff=pred-actual;
+    out.push({date:k,pred,actual,diff,pct:actual!==0?(diff/actual*100):null});
+  }
+  out.reverse();
+  if(!out.length)return null;
+  const wp=out.filter(r=>r.pct!=null);
+  const mape=wp.length?wp.reduce((s,r)=>s+Math.abs(r.pct),0)/wp.length:null;
+  const bias=wp.length?wp.reduce((s,r)=>s+r.pct,0)/wp.length:null;
+  const within10=wp.filter(r=>Math.abs(r.pct)<=10).length;
+  return {rows:out,mape,bias,within10,total:wp.length,
+          accuracy:mape!=null?Math.max(0,100-mape):null};
+}
+
 /* เกณฑ์กำลังคน — ยกมาจาก dashboard v2 ตรงๆ */
 const STAFF={ordPerPerson:200,packHours:6,endOfLine:1,
              whPerHour:88,whHours:6,whHandhelds:3,
@@ -2437,7 +2501,8 @@ function secForecast(){
   }
 
   const items1=depItems(dep,1), items4=depItems(dep,4);
-  FC_CTX={wOrd,wQty,dOrd,dQty,items1,items4};
+  const btOrd=backtestDaily(ordCntDate,30), btQty=backtestDaily(qtyByDate,30);
+  FC_CTX={wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty};
   STAFF_ROWS=staff;
   if(Number(STAFF_IN.pIdx)>=staff.length)STAFF_IN.pIdx=0;
   if(Number(STAFF_IN.wIdx)>=staff.length)STAFF_IN.wIdx=0;
@@ -2453,13 +2518,15 @@ function secForecast(){
       ${card('สินค้าที่วิเคราะห์ได้',dep.length)}</div>
 
     <h2 class="sec">พยากรณ์รายสัปดาห์ <em>ยอดจริง + ประมาณการ 4 สัปดาห์ข้างหน้า</em><span></span></h2>
-    <div class="fnote">
-      <b>วิธีคิด</b> — บวกกัน 3 อย่าง
+    <details class="fnote">
+      <summary>วิธีคิด — บวกกัน 3 อย่าง</summary>
+      <div class="fbody">
       <div>1. <b>ยอดปกติ</b> เฉลี่ยจาก 4 สัปดาห์ล่าสุด = <b>${fmt(Math.round(wOrd.avg4))}</b> ออเดอร์ / <b>${fmt(Math.round(wQty.avg4))}</b> ชิ้น</div>
       <div>2. <b>แนวโน้ม</b> จากข้อมูล ${wOrd.weeksUsed} สัปดาห์ = <b>${wOrd.slope>=0?'+':''}${wOrd.slope.toFixed(1)}</b> ออเดอร์/สัปดาห์ · <b>${wQty.slope>=0?'+':''}${wQty.slope.toFixed(1)}</b> ชิ้น/สัปดาห์</div>
       <div>3. <b>Double Day</b> (1.1, 2.2, … 12.12) — ${esc(ddNote)}</div>
       <code>พยากรณ์ (h สัปดาห์ข้างหน้า) = avg4 + slope × h + Double Day boost</code>
-    </div>
+      </div>
+    </details>
     <div class="cgrid2">
       <div class="cpanel"><div class="chname2">จำนวนออเดอร์ / สัปดาห์</div>
         <div class="cbox" style="height:520px"><canvas id="c_fcwo"></canvas></div>
@@ -2470,8 +2537,9 @@ function secForecast(){
     </div>
 
     <h2 class="sec">พยากรณ์รายวัน <em>ยอดจริง + ประมาณการ 7 วันข้างหน้า</em><span></span></h2>
-    ${dOrd?`<div class="fnote">
-      <b>วิธีคิด</b> — Holt's Exponential Smoothing ให้น้ำหนักวันใกล้มากกว่าวันไกล
+    ${dOrd?`<details class="fnote">
+      <summary>วิธีคิด — Holt's Exponential Smoothing ให้น้ำหนักวันใกล้มากกว่าวันไกล</summary>
+      <div class="fbody">
       <div>1. <b>ยอดฐาน</b> วันใหม่ 30% + ยอดฐานเดิม 70% · ตอนนี้ Level = <b>${fmt(Math.round(dOrd.level))}</b> ออเดอร์/วัน</div>
       <div>2. <b>แนวโน้ม</b> Trend = <b>${dOrd.trend>=0?'+':''}${dOrd.trend.toFixed(2)}</b> ออเดอร์/วัน</div>
       <div>3. <b>Double Day</b> คูณเพิ่มตามที่เคยเกิด (สูงสุด 3 เท่า ต้องเคยเกิด ≥ 2 ครั้ง)</div>
@@ -2479,7 +2547,8 @@ function secForecast(){
             Trend(t) = 0.15 × (Level(t) − Level(t-1)) + 0.85 × Trend(t-1)<br>
             พยากรณ์ (h วันข้างหน้า) = Level + Trend × h</code>
       <div class="fwarn">กราฟโชว์จุดทุก 5 วันเพื่อไม่ให้รก แต่คำนวณจากข้อมูลทุกวันจริง (${fmt(dOrd.days)} วัน)</div>
-    </div>
+      </div>
+    </details>
     <div class="cgrid2">
       <div class="cpanel"><div class="chname2">จำนวนออเดอร์ / วัน</div>
         <div class="cbox" style="height:520px"><canvas id="c_fcdo"></canvas></div>
@@ -2489,14 +2558,36 @@ function secForecast(){
         ${fcStrip(dQty,'ชิ้น')}</div>
     </div>`:'<div class="empty2">ข้อมูลรายวันไม่พอสำหรับพยากรณ์ (ต้องมีอย่างน้อย 7 วัน)</div>'}
 
+    <h2 class="sec">ความแม่นยำของพยากรณ์ย้อนหลัง <em>Forecast Accuracy · เทียบพยากรณ์ล่วงหน้า 1 วัน กับยอดจริง · 30 วันล่าสุด</em><span></span></h2>
+    <details class="fnote">
+      <summary>วิธีคิด — ทำไมไม่ต้องเก็บไฟล์พยากรณ์เก่าไว้</summary>
+      <div class="fbody">ย้อนเวลากลับไปพยากรณ์ทีละวันด้วยข้อมูลเท่าที่ "มีอยู่จริงในวันนั้น" เท่านั้น (ตัดข้อมูลหลังจากนั้นทิ้งชั่วคราว แล้วรันสูตร Holt's Exponential Smoothing เดียวกับด้านบน) ได้พยากรณ์ล่วงหน้า 1 วัน แล้วเทียบกับยอดจริงที่เกิดขึ้นจริงในวันนั้น ทำแบบนี้ย้อนหลังไป 30 วัน เพื่อดูว่าที่ผ่านมาพยากรณ์แม่นแค่ไหน</div>
+    </details>
+    <div class="fcacc">
+      ${fcAccCards(btOrd)}
+      <div class="fcacc-grid">
+        <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / วัน
+            <em>${btOrd?`MAPE ${btOrd.mape.toFixed(1)}% · ความแม่น ${btOrd.accuracy.toFixed(1)}% (${btOrd.total} วัน)`:''}</em></div>
+          <div class="fcacc-chartbox"><canvas id="c_btord"></canvas></div>
+          ${fcAccTable(btOrd,'ออเดอร์')}</div>
+        <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / วัน
+            <em>${btQty?`MAPE ${btQty.mape.toFixed(1)}% · ความแม่น ${btQty.accuracy.toFixed(1)}% (${btQty.total} วัน)`:''}</em></div>
+          <div class="fcacc-chartbox"><canvas id="c_btqty"></canvas></div>
+          ${fcAccTable(btQty,'ชิ้น')}</div>
+      </div>
+    </div>
+
     ${staff.length?`<h2 class="sec">พยากรณ์อัตรากำลังคน <em>7 วันข้างหน้า · แถวไฮไลท์ = Double Day</em><span></span></h2>
-    <div class="fnote">
+    <details class="fnote">
+      <summary>วิธีคิด — เกณฑ์กำลังคน Packing / WH</summary>
+      <div class="fbody">
       <div><b>ทีม Packing</b> — 1 คนแพ็คได้ ${STAFF.ordPerPerson} ออเดอร์/วัน (${STAFF.packHours} ชม. = ${(STAFF.ordPerPerson/STAFF.packHours).toFixed(0)} ออเดอร์/ชม.) + คนท้ายไลน์แยกพัสดุอีก 1 คนเสมอ ไม่ว่ายอดจะน้อยแค่ไหน</div>
       <div><b>ทีม WH หยิบของ</b> — 1 คนหยิบได้ ${STAFF.whPerHour} ชิ้น/ชม. (${STAFF.whHours} ชม. = ${fmt(STAFF.whPerHour*STAFF.whHours)} ชิ้น/วัน) · มี handheld ${STAFF.whHandhelds} เครื่อง เกินกว่านั้นต้องหมุนเวียน</div>
       <code>ตาราง (ควรมีกี่คน): Packing = ceil(ออเดอร์ ÷ ${STAFF.ordPerPerson}) + 1 ท้ายไลน์ · WH = ceil(ชิ้น ÷ ${STAFF.whPerHour*STAFF.whHours})<br>
         ช่องกรอก (เสร็จกี่โมง): คนแพ็ค = คนที่ใส่ − 1 · เวลาสุทธิ = ออเดอร์ ÷ (คนแพ็ค × ${(STAFF.ordPerPerson/STAFF.packHours).toFixed(0)}) · WH = ชิ้น ÷ (คน × ${STAFF.whPerHour})<br>
         เวลาเลิก = ${STAFF.shiftStart} + เวลาสุทธิ + พักเที่ยง ${STAFF.lunchHours} ชม. · OT = ส่วนที่เลย ${STAFF.otAfter}</code>
-    </div>
+      </div>
+    </details>
     <div class="cgrid2">
       <div class="cpanel">
         <div class="chname2">Packing / Delivery <span class="dim">(เริ่มกะ ${STAFF.shiftStart} น.)</span></div>
@@ -2589,6 +2680,37 @@ function depItems(dep,weeks){
   }).sort((a,b)=>b.need-a.need||b.deficit-a.deficit).slice(0,14);
 }
 
+/* ---------- การ์ดสรุป + ตารางของ Forecast Accuracy — สไตล์การ์ดสว่าง อ่านง่าย ----------*/
+function fcAccCards(bt){
+  if(!bt)return '<div class="empty2">ข้อมูลไม่พอสำหรับย้อนหลังดูความแม่นยำ (ต้องมีอย่างน้อย ~44 วัน)</div>';
+  const biasTxt=bt.bias==null?'—':(bt.bias>=0?'+':'')+bt.bias.toFixed(1)+'%';
+  const biasNote=bt.bias==null?'':(bt.bias>0?'พยากรณ์สูงกว่าจริงโดยเฉลี่ย':bt.bias<0?'พยากรณ์ต่ำกว่าจริงโดยเฉลี่ย':'พอดีเป๊ะ');
+  return `<div class="fcacc-cards">
+    <div class="fcacc-card"><i>◎</i><b>ความแม่น (ออเดอร์)</b>
+      <span>${bt.accuracy==null?'—':bt.accuracy.toFixed(1)+'%'}</span></div>
+    <div class="fcacc-card"><i>∿</i><b>MAPE คลาดเฉลี่ย</b>
+      <span>${bt.mape==null?'—':bt.mape.toFixed(1)+'%'}</span></div>
+    <div class="fcacc-card"><i>${bt.bias>=0?'▲':'▼'}</i><b>BIAS สูง/ต่ำกว่าจริง</b>
+      <span class="${bt.bias>0?'up':bt.bias<0?'down':''}">${biasTxt}</span>
+      <small>${esc(biasNote)}</small></div>
+    <div class="fcacc-card"><i>✓</i><b>วันที่คลาดไม่เกิน ±10%</b>
+      <span>${bt.within10} / ${bt.total}</span></div>
+  </div>`;
+}
+function fcAccTable(bt,unit){
+  if(!bt)return '';
+  const rows=[...bt.rows].reverse().slice(0,14);
+  return `<div class="fcacc-tblwrap"><table class="fcacc-tbl"><thead><tr>
+    <th>วันที่</th><th class="num">พยากรณ์</th><th class="num">จริง</th>
+    <th class="num">ต่าง</th><th class="num">%คลาด</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td>${showD(r.date)}</td>
+      <td class="num">${fmt(r.pred)}</td><td class="num">${fmt(r.actual)}</td>
+      <td class="num ${r.diff>0?'up':r.diff<0?'down':''}">${r.diff>0?'+':''}${fmt(r.diff)}</td>
+      <td class="num ${r.pct==null?'':(r.pct>0?'up':r.pct<0?'down':'')}">${r.pct==null?'—':(r.pct>0?'+':'')+r.pct.toFixed(1)+'%'}</td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
 /* เส้นทึบ = ยอดจริง · เส้นประ = พยากรณ์ · จุดสีเหลือง = Double Day */
 function fcLineChart(id,key,s,unit){
   const el2=document.getElementById(id); if(!el2||!s)return;
@@ -2620,7 +2742,31 @@ function fcLineChart(id,key,s,unit){
     options:o});
 }
 
-/* แท่งนอนซ้อน: เขียว = ครอบคลุมด้วย stock · แดง = ขาด */
+/* กราฟย้อนหลัง Forecast Accuracy — สไตล์สว่างแยกจากธีมมืดหลัก (อ่านง่ายตามที่ขอ) */
+function fcAccChart(id,key,bt,unit){
+  const el2=document.getElementById(id); if(!el2||!bt)return;
+  destroy(key);
+  const rows=bt.rows;
+  const o={responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(20)},usePointStyle:true}},
+      tooltip:{backgroundColor:'#1E293B',padding:10,cornerRadius:6,
+        titleFont:{size:cf(20)},bodyFont:{size:cf(19)}}},
+    scales:{x:{ticks:{color:'#64748B',font:{size:cf(18)},maxRotation:0,autoSkip:true},
+                grid:{display:false}},
+      y:{ticks:{color:'#64748B',font:{size:cf(18)},callback:v=>fmt(v)},
+          grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
+  CH[key]=new Chart(el2,{type:'line',
+    data:{labels:rows.map(r=>showD(r.date)),
+      datasets:[
+        {label:'ยอดจริง',data:rows.map(r=>r.actual),borderColor:'#0D9488',
+         backgroundColor:'rgba(13,148,136,.14)',borderWidth:3,tension:.3,fill:true,pointRadius:2},
+        {label:'พยากรณ์ (ล่วงหน้า 1 วัน)',data:rows.map(r=>r.pred),borderColor:'#B45309',
+         borderDash:[7,4],borderWidth:2.5,tension:.3,fill:false,pointRadius:2,pointBackgroundColor:'#B45309'}
+      ]},
+    options:o});
+}
+
 function fcStackChart(id,key,items,weeks){
   const el2=document.getElementById(id); if(!el2||!items.length)return;
   destroy(key);
@@ -2648,11 +2794,13 @@ function fcStackChart(id,key,items,weeks){
 
 function drawForecast(){
   if(!FC_CTX)return;
-  const {wOrd,wQty,dOrd,dQty,items1,items4}=FC_CTX;
+  const {wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty}=FC_CTX;
   fcLineChart('c_fcwo','fcwo',wOrd,'ออเดอร์');
   fcLineChart('c_fcwq','fcwq',wQty,'ชิ้น');
   fcLineChart('c_fcdo','fcdo',dOrd,'ออเดอร์');
   fcLineChart('c_fcdq','fcdq',dQty,'ชิ้น');
+  fcAccChart('c_btord','btord',btOrd,'ออเดอร์');
+  fcAccChart('c_btqty','btqty',btQty,'ชิ้น');
   fcStackChart('c_fc1w','fc1w',items1,1);
   fcStackChart('c_fc4w','fc4w',items4,4);
   recalcStaff();
@@ -4677,10 +4825,8 @@ async function boot(){
     el('kStat').innerHTML=`อ่านวันที่ได้ ${DATES.length} วัน `
       +`(${showD(DATES[0])} – ${showD(DATES[DATES.length-1])}) · ${fmt(n)} บรรทัด · กำลังคำนวณ…`;
     fillFiltersKPI();renderKPI();
-    const s=LAST_STATS;
-    el('kStat').innerHTML='เชื่อมกับ Google Sheet แล้ว · <b>ข้อมูลสด</b>'
-      +(NO_DATE?` · <span style="color:var(--rose)">${fmt(NO_DATE)} แถววันที่อ่านไม่ออก</span>`:'')
-      +(s?` · แถวของวันนี้ ${fmt(s.lines)} บรรทัด → ${fmt(s.orders)} ออเดอร์ · ${fmt(s.items)} ชิ้น`:'');
+    el('kStat').innerHTML=`<b>ข้อมูลอัปเดตล่าสุด</b> ${showD(DATES[DATES.length-1])}`
+      +(NO_DATE?` · <span style="color:var(--rose)">${fmt(NO_DATE)} แถววันที่อ่านไม่ออก</span>`:'');
   }catch(e){
     el('kStat').className='stat err';
     el('kStat').innerHTML='<b>ดึงข้อมูลไม่ได้</b> — '+e.message;
