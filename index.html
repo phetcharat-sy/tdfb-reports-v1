@@ -2711,6 +2711,28 @@ function fcAccTable(bt,unit){
 /* เส้นทึบ = ยอดจริง · เส้นประ = พยากรณ์ · จุดสีเหลือง = Double Day
    ธีมสว่างเหมือนกราฟ Forecast Accuracy — เอาป้ายตัวเลขที่เคยวาดทับกันบนกราฟออก
    (ตัวเลขจริงดูได้จากแถบ "พยากรณ์" ใต้กราฟอยู่แล้ว ไม่ต้องซ้อนบนเส้น) */
+/* ตัวเลขกำกับเฉพาะจุดพยากรณ์ (มีแค่ 4-7 จุด ไม่ชนกันเหมือนเส้นยอดจริงที่มีเป็นสิบๆจุด)
+   กันเส้น/ตัวเลขโดนตัดขอบบนกราฟตอนพยากรณ์พุ่งสูง ด้วยการเผื่อ padding ด้านบนไว้ */
+const fcPtLbl={id:'fcPtLbl',
+  beforeLayout(ch,a,op){ if(!op||!op.display)return;
+    const need=Math.round(50*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
+    if(typeof p==='object'&&p){ if((p.top||0)<need)p.top=need; }
+    else ch.options.layout={padding:{top:need}}; },
+  afterDatasetsDraw(ch,a,op){
+    if(!op||!op.display)return;
+    const x=ch.ctx, m=ch.getDatasetMeta(1); if(!m||m.hidden)return;
+    const ds=ch.data.datasets[1];
+    x.save(); x.font='bold '+cf(19)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
+    m.data.forEach((pt,i)=>{
+      if(i<op.nH)return;
+      const v=ds.data[i]; if(v==null)return;
+      x.fillStyle='#B45309';
+      x.fillText(fmt(v),pt.x,pt.y-10);
+    });
+    x.restore();
+  }};
+if(window.Chart&&!Chart.registry.plugins.get('fcPtLbl'))Chart.register(fcPtLbl);
+
 function fcLineChart(id,key,s,unit){
   const el2=document.getElementById(id); if(!el2||!s)return;
   destroy(key);
@@ -2726,7 +2748,8 @@ function fcLineChart(id,key,s,unit){
         callbacks:{
           title:c=>{const i=c[0].dataIndex;
             return s.labels[i]+(s.ranges&&s.ranges[i]?'  ·  '+s.ranges[i]:'');},
-          label:c=>c.raw==null?null:`${c.dataset.label}: ${fmt(c.raw)} ${unit}`}}},
+          label:c=>c.raw==null?null:`${c.dataset.label}: ${fmt(c.raw)} ${unit}`}},
+      fcPtLbl:{display:true,nH}},
     scales:{x:{ticks:{color:'#64748B',font:{size:cf(18)},maxRotation:0,autoSkip:true},
                 grid:{display:false}},
       y:{ticks:{color:'#64748B',font:{size:cf(18)},callback:v=>fmt(v)},
@@ -2991,7 +3014,12 @@ function secRetEmbed(){
 function drawRetEmbed(){
   const f=document.getElementById('retFrame'), t=document.getElementById('retDoc');
   if(!f||!t||f.dataset.ready)return;
-  f.srcdoc=t.content.textContent;   /* <template> ถอด entity ให้แล้ว ได้ HTML ต้นฉบับกลับมา */
+  /* ไฟล์ต้นฉบับล็อกความกว้างเนื้อหาไว้แค่ 1000px (.wrap{max-width:1000px})
+     ให้กินพื้นที่เต็มกรอบขาวแทน โดยยัด override เข้าไปก่อน </head> */
+  let doc=t.content.textContent;
+  doc=doc.replace('</head>',
+    '<style>.wrap{max-width:none!important;padding-left:5%!important;padding-right:5%!important}</style></head>');
+  f.srcdoc=doc;
   f.dataset.ready='1';
 }
 
