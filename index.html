@@ -268,8 +268,8 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .kpis>.subsec{grid-column:1/-1;margin-top:26px}
 #vKPI .kpi-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   padding:0 6px;margin-top:20px}
-#vKPI .kpi-head b{font-size:26px;font-weight:bold;color:var(--page-ink)}
-#vKPI .kpi-head span{font-size:20px;color:var(--page-mute)}
+#vKPI .kpi-head b{font-size:38px;font-weight:bold;color:var(--page-ink)}
+#vKPI .kpi-head span{font-size:28px;color:var(--page-mute)}
 #vKPI .kpi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:44px 30px;
   margin-bottom:14px;
   box-shadow:0 1px 2px rgba(20,24,40,.04),0 8px 20px rgba(20,24,40,.05);
@@ -282,8 +282,8 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .kpi .waitstat{font-size:26px;color:var(--mute);font-weight:bold}
 #vKPI .badge{font-size:20px;font-weight:bold;padding:4px 13px;border-radius:20px;white-space:nowrap;letter-spacing:.01em}
 #vKPI .badge.pass{background:#E3F0EA;color:var(--good)}#vKPI .badge.fail{background:#F7E4DF;color:var(--bad)}#vKPI .badge.wait{background:var(--soft);color:var(--mute)}
-#vKPI .delta{font-size:19px;color:var(--mute);display:flex;flex-direction:column;
-  align-items:center;line-height:1.4;margin-top:4px}
+#vKPI .delta{font-size:26px;color:var(--mute);display:flex;flex-direction:column;
+  align-items:center;line-height:1.4;margin-top:6px}
 #vKPI .delta em{font-style:normal;font-weight:normal;color:var(--mute)}
 #vKPI .delta.up{color:var(--good);font-weight:bold}
 #vKPI .delta.down{color:var(--bad);font-weight:bold}
@@ -318,8 +318,8 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI table.dt th{font-size:31px}
 #vKPI table.dt td{padding:17px 18px}
 #vKPI .foot{font-size:29px}
-#vKPI .kpi-head b{font-size:29px}
-#vKPI .kpi-head span{font-size:23px}
+#vKPI .kpi-head b{font-size:38px}
+#vKPI .kpi-head span{font-size:28px}
 #vKPI .badge{font-size:21px}
 .sidenav button{font-size:33px}
 
@@ -702,6 +702,7 @@ body.present #vKPI .tscroll{max-height:none}
 
       <div class="grp">Delivery</div>
       <button data-view="kpi" data-sec="pack">Packing</button>
+      <button data-view="kpi" data-sec="ret">Return</button>
 
       <div class="grp">Admin</div>
       <button data-view="kpi" data-sec="ship">การจัดส่ง (Shipping)</button>
@@ -2980,6 +2981,20 @@ function drawSOP(){
   f.dataset.ready='1';
 }
 
+/* ================= Delivery · Return (ฝังหน้า Return Dashboard แยกต่างหาก) =================
+   หน้านี้เป็นเอกสารสมบูรณ์ในตัว (ดึง CSV เอง ไม่พึ่งชีตของแดชบอร์ดหลัก) ฝังผ่าน iframe
+   แบบเดียวกับหน้า SOP กันสไตล์/สคริปต์ชนกัน แต่ไม่ต้องยัด CSS scale เพิ่มเพราะขนาดตัวอักษร
+   ในไฟล์นั้นอ่านง่ายอยู่แล้ว */
+function secRetEmbed(){
+  return '<div class="sopwrap"><iframe id="retFrame" class="sopframe" title="Return Dashboard"></iframe></div>';
+}
+function drawRetEmbed(){
+  const f=document.getElementById('retFrame'), t=document.getElementById('retDoc');
+  if(!f||!t||f.dataset.ready)return;
+  f.srcdoc=t.content.textContent;   /* <template> ถอด entity ให้แล้ว ได้ HTML ต้นฉบับกลับมา */
+  f.dataset.ready='1';
+}
+
 /* ================= Admin · การจัดส่ง (Shipping) =================
    ต้นทาง: ชีต Packing 2026 หน้า Data
    คอลัมน์ (0-based) ตรงกับที่หน้า Logistics Central ใช้:
@@ -4446,7 +4461,7 @@ function renderKPI(){
                pack:['Packing','Delivery · ผลงานพนักงานแพ็ค สถานี และเวลาหนาแน่น'],
                sop:['เงื่อนไขการส่งสินค้าแต่ละ Platform','วิธีการปฏิบัติงาน · รอบตัดคำสั่งซื้อ Shopee · Lazada · TikTok'],
                ship:['การจัดส่ง (Shipping)','Admin · ปริมาณจัดส่ง ค้างส่ง ช่องทาง และขนส่ง'],
-               ret:['Return','Admin · งานตีคืน ยกเลิก และเคสค้าง']};
+               ret:['Return','Delivery · งานตีคืน ยกเลิก และเคสค้าง']};
   const tt=TITLE[SEC]||TITLE.overview;
   el('kTitle').textContent=tt[0];
   el('kSub').textContent=tt[1];
@@ -4460,7 +4475,7 @@ function renderKPI(){
                            : SEC==='pack'?secPack()
                            : SEC==='ship'?secShip()
                            : SEC==='sop'?secSOP()
-                           : SEC==='ret'?secReturn() : secRepl();
+                           : SEC==='ret'?secRetEmbed() : secRepl();
     fitScrolls();
     /* กราฟต้องวาดหลัง canvas เข้า DOM แล้ว */
     requestAnimationFrame(()=>{
@@ -4471,7 +4486,7 @@ function renderKPI(){
            else if(SEC==='pack')drawPack();
            else if(SEC==='ship')drawShip();
            else if(SEC==='sop')drawSOP();
-           else if(SEC==='ret')drawReturn(); else drawRepl(); }
+           else if(SEC==='ret')drawRetEmbed(); else drawRepl(); }
       catch(e){ console.warn('chart',e); }
     });
   }
@@ -4533,9 +4548,12 @@ function renderKPI(){
   const lo=days[0]||'', hi=days[days.length-1]||'';
   const inRange=r=>!lo||!hi||(r.date>=lo&&r.date<=hi);
   const diffNow = DIFF?diffStat(DIFF.filter(r=>diffMatch(r)&&inRange(r))):null;
-  /* ช่วงเทียบ = วันเดียวกันเดือนก่อน (ใช้ชุดวันที่เดียวกับ KPI ด้านบน) */
-  const prevDaySet=new Set([...new Set(rows.map(r=>r.date).filter(Boolean))].map(prevMonth));
-  const diffPrev = DIFF?diffStat(DIFF.filter(r=>r.date&&prevDaySet.has(r.date))):null;
+  /* ช่วงเทียบ = วันเดียวกันเดือนก่อน (ใช้ชุดวันที่เดียวกับ KPI ด้านบน)
+     มีความหมายเฉพาะตอนเลือกช่วงแคบ (วัน/สัปดาห์/เดือน) — ถ้าดูทั้งปีแบบไม่กรอง
+     การเลื่อนแต่ละวันถอยไป 1 เดือนจะทับซ้อนกับช่วงเดิมเกือบหมด ทำให้ตัวเลขดูเหมือนกันโดยบังเอิญ */
+  const hasNarrowFilter=!!(fMonth()||DAYSEL||WKSEL.length);
+  const prevDaySet=hasNarrowFilter?new Set([...new Set(rows.map(r=>r.date).filter(Boolean))].map(prevMonth)):new Set();
+  const diffPrev = (DIFF&&hasNarrowFilter)?diffStat(DIFF.filter(r=>r.date&&prevDaySet.has(r.date))):null;
   const diffV=diffNow?diffNow.pct:null, diffP=diffPrev?diffPrev.pct:null;
   const dNow=diffNow;
 
@@ -4653,6 +4671,11 @@ const filteredRows=()=>RAW.filter(matchRow);
    เลื่อนทุกวันที่ในช่วงที่เลือกถอยหลัง 1 เดือน แล้วเอาข้อมูลของวันเหล่านั้นมาเทียบ
    เลือกวันเดียว → วันเดียวกันเดือนก่อน · เลือกสัปดาห์/เดือน → ช่วงเดียวกันเดือนก่อน */
 function comparisonRows(){
+  /* เปรียบเทียบแบบมีความหมายเฉพาะตอนเลือกช่วงแคบ (วัน/สัปดาห์/เดือน) เท่านั้น
+     ถ้าดูทั้งปีแบบไม่กรองอะไรเลย การเลื่อนแต่ละวันถอยไป 1 เดือนจะทับซ้อนกับช่วงเดิมเกือบหมด
+     (เช่น ม.ค.–ก.ย. เลื่อนกลับกลายเป็น ธ.ค.–ส.ค. ทับกัน 8 ใน 9 เดือน) ทำให้ตัวเลขดูเหมือนกันโดยบังเอิญ
+     ไม่ใช่การเทียบที่มีความหมายจริง จึงไม่โชว์ช่วงเทียบเลยในกรณีนี้ */
+  if(!fMonth()&&!DAYSEL&&!WKSEL.length)return {label:'',rows:[]};
   const days=[...new Set(filteredRows().map(r=>r.date).filter(Boolean))].sort();
   if(!days.length)return {label:'',rows:[]};
   const prevDays=new Set(days.map(prevMonth));
@@ -4870,13 +4893,10 @@ window.KPI_SEC=async(sec)=>{
   if(SEC==='pick'&&!PICK){ await loadPick(); renderKPI(); }
   if(SEC==='pack'&&!PACK){ await loadPack(); renderKPI(); }
   if(SEC==='ship'&&!SHIP){ await loadShip(); renderKPI(); }
-  if(SEC==='ret'){ const g=(RET_TABS.find(t=>t.k===sf('ret_t','cancel'))||RET_TABS[0]).gid;
-    if(!RET[g]){ await loadRet(g); renderKPI(); } }
 };
 
 /* ให้หน้า Replenishment เริ่มโหลดชีตของตัวเองทันที ไม่ต้องรอชีต On-Time ที่ใหญ่กว่ามาก */
 if(/^#kpi-(repl|fc)/.test(location.hash||'')) loadRepl().then(()=>{ if(SEC==='repl'||SEC==='fc')renderKPI(); });
-if(/^#kpi-ret/.test(location.hash||'')) loadRet(RET_TABS[0].gid).then(()=>{ if(SEC==='ret')renderKPI(); });
 if(/^#kpi-pick/.test(location.hash||'')) loadPick().then(()=>{ if(SEC==='pick')renderKPI(); });
 if(/^#kpi-pack/.test(location.hash||'')) loadPack().then(()=>{ if(SEC==='pack')renderKPI(); });
 if(/^#kpi-ship/.test(location.hash||'')) loadShip().then(()=>{ if(SEC==='ship')renderKPI(); });
@@ -5906,5 +5926,374 @@ window.RPT_INIT=(t)=>{ if(started){ if(t&&t!==TEAM) team(t); return; } started=t
     &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</template>
+<template id="retDoc">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;th&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;Return Dashboard — TDFB&lt;/title&gt;
+&lt;style&gt;
+:root{--paper:#F7F6F1;--ink:#1C2119;--matcha:#4F7A3F;--matcha-d:#3A5C2E;--clay:#B5603A;
+ --tint:#E7EDE0;--line:#D9D8CF;--muted:#6B7266;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+ font-family:&quot;Segoe UI&quot;,&quot;Noto Sans Thai&quot;,system-ui,sans-serif;font-size:15px;line-height:1.55}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 70px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+h1{font-size:21px;font-weight:650;margin:0 0 2px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+.btn{font:inherit;font-size:13.5px;font-weight:550;border:1px solid var(--line);background:#fff;
+ color:var(--matcha-d);border-radius:9px;padding:9px 16px;cursor:pointer}
+.btn:hover{background:var(--tint);border-color:var(--matcha)}
+.btn:disabled{opacity:.55;cursor:default}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:16px}
+h2{font-size:15px;font-weight:600;margin:0 0 3px}
+h3{font-size:13.5px;font-weight:600;margin:0 0 8px;text-align:center}
+.note{color:var(--muted);font-size:12.5px;line-height:1.6;margin:3px 0 0}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.f label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+.f input,.f select{font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);
+ border-radius:8px;background:var(--paper);color:var(--ink)}
+.f input:focus,.f select:focus{outline:2px solid var(--matcha);outline-offset:-1px;border-color:transparent}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.chip{font:inherit;font-size:12.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);
+ background:var(--paper);color:var(--muted);cursor:pointer}
+.chip:hover{border-color:var(--matcha)}
+.chip.on{background:var(--matcha);border-color:var(--matcha);color:#fff;font-weight:550}
+.hint{font-size:12.5px;color:var(--muted);margin-top:9px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.kpi b{display:block;font-size:26px;font-weight:660;letter-spacing:-.02em;line-height:1.1}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+.legend{display:flex;flex-wrap:wrap;gap:13px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.bar{display:flex;height:26px;border-radius:7px;overflow:hidden;margin:10px 0 8px}
+.bar div{display:flex;align-items:center;justify-content:center;font-size:11.5px;color:#fff;font-weight:550}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:550;font-size:12.5px}
+td.hi{font-weight:650}
+.pbar{height:7px;border-radius:4px;background:var(--tint);position:relative;min-width:60px}
+.pbar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--matcha)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.donuts{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.donuts svg{width:100%;height:auto;display:block;overflow:visible}
+@media(max-width:760px){.grid2,.donuts{grid-template-columns:1fr}}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:5px;background:var(--tint);color:var(--matcha-d);margin-left:6px}
+.tag.warn{background:#F6E3DA;color:var(--clay)}
+.empty{text-align:center;color:var(--muted);font-size:13.5px;padding:26px 0}
+.scroll{overflow-x:auto}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;div class=&quot;wrap&quot;&gt;
+&lt;div class=&quot;head&quot;&gt;
+  &lt;div&gt;&lt;h1&gt;งาน Return&lt;/h1&gt;&lt;p class=&quot;sub&quot;&gt;&lt;span id=&quot;meta&quot;&gt;กำลังโหลด…&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+  &lt;button id=&quot;save&quot; class=&quot;btn&quot;&gt;บันทึกภาพ&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;panel&quot;&gt;
+  &lt;div class=&quot;filters&quot;&gt;
+    &lt;div class=&quot;f&quot;&gt;&lt;label for=&quot;from&quot;&gt;ตั้งแต่วันที่&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;from&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;f&quot;&gt;&lt;label for=&quot;to&quot;&gt;ถึงวันที่&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;to&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;f&quot;&gt;&lt;label for=&quot;plat&quot;&gt;Platform&lt;/label&gt;&lt;select id=&quot;plat&quot;&gt;&lt;/select&gt;&lt;/div&gt;
+    &lt;div class=&quot;f&quot;&gt;&lt;label for=&quot;cause&quot;&gt;สาเหตุ&lt;/label&gt;&lt;select id=&quot;cause&quot;&gt;&lt;/select&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;chips&quot; id=&quot;chips&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;hint&quot; id=&quot;hint&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;kpis&quot; id=&quot;kpis&quot;&gt;&lt;/div&gt;
+
+&lt;div class=&quot;panel&quot;&gt;
+  &lt;div class=&quot;donuts&quot;&gt;
+    &lt;div&gt;&lt;h3&gt;ของออกจากคลังไปแล้วหรือยัง&lt;/h3&gt;&lt;svg id=&quot;d1&quot;&gt;&lt;/svg&gt;&lt;/div&gt;
+    &lt;div&gt;&lt;h3&gt;แยกตามสาเหตุ&lt;/h3&gt;&lt;svg id=&quot;d2&quot;&gt;&lt;/svg&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;scroll&quot;&gt;
+  &lt;table id=&quot;causetbl&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สาเหตุ&lt;/th&gt;&lt;th&gt;ใบ&lt;/th&gt;&lt;th&gt;สัดส่วน&lt;/th&gt;&lt;th&gt;ห่าง (กลาง)&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;panel&quot;&gt;
+  &lt;h2&gt;สาเหตุมาจาก Platform ไหน&lt;/h2&gt;
+  &lt;p class=&quot;note&quot;&gt;อ่านตามแนวนอน — แต่ละสาเหตุกระจายไปแต่ละช่องทางกี่เปอร์เซ็นต์ · ช่องที่มากสุดของแต่ละแถวเป็นตัวหนา&lt;/p&gt;
+  &lt;div class=&quot;scroll&quot;&gt;&lt;table id=&quot;matrix&quot;&gt;&lt;/table&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;panel&quot;&gt;
+  &lt;h2&gt;แยกตาม Platform&lt;/h2&gt;
+  &lt;p class=&quot;note&quot;&gt;อ่านตามช่องทาง — แต่ละช่องทางมีสาเหตุอะไรบ้าง&lt;/p&gt;
+  &lt;div class=&quot;legend&quot; id=&quot;platleg&quot; style=&quot;margin:10px 0 14px&quot;&gt;&lt;/div&gt;
+  &lt;div id=&quot;platwrap&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;grid2&quot;&gt;
+  &lt;div class=&quot;panel&quot;&gt;
+    &lt;h2&gt;สินค้าที่ตีกลับบ่อย&lt;/h2&gt;
+    &lt;p class=&quot;note&quot;&gt;ของออกจากคลังไปแล้ว เสียค่าส่งสองเที่ยว&lt;/p&gt;
+    &lt;table id=&quot;prodret&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สินค้า&lt;/th&gt;&lt;th&gt;ใบ&lt;/th&gt;&lt;th&gt;ชิ้น&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;panel&quot;&gt;
+    &lt;h2&gt;สินค้าที่ยกเลิกในวันบ่อย&lt;/h2&gt;
+    &lt;p class=&quot;note&quot;&gt;จับได้ก่อนของออก ไม่เสียค่าส่ง&lt;/p&gt;
+    &lt;table id=&quot;prodcan&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สินค้า&lt;/th&gt;&lt;th&gt;ใบ&lt;/th&gt;&lt;th&gt;ชิ้น&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;panel&quot;&gt;
+  &lt;h2&gt;แนวโน้มรายสัปดาห์&lt;/h2&gt;
+  &lt;p class=&quot;note&quot; id=&quot;trendnote&quot;&gt;&lt;/p&gt;
+  &lt;svg id=&quot;trend&quot; viewBox=&quot;0 0 900 220&quot; style=&quot;width:100%;height:220px&quot;&gt;&lt;/svg&gt;
+  &lt;div class=&quot;legend&quot; style=&quot;margin-top:8px&quot;&gt;
+    &lt;span&gt;&lt;i style=&quot;background:#C2603C&quot;&gt;&lt;/i&gt;ตีกลับ (ของออกไปแล้ว)&lt;/span&gt;
+    &lt;span&gt;&lt;i style=&quot;background:#3F8E6E&quot;&gt;&lt;/i&gt;ยกเลิกในวัน&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+/* ============================================================
+   ใส่ลิงก์ CSV ของชีตที่เผยแพร่ตรงนี้ (ดูวิธีทำในคู่มือที่แนบมา)
+   ถ้าเว้นว่างไว้ หน้าจะใช้ข้อมูลสำรองที่ฝังในไฟล์แทน
+   ============================================================ */
+const CSV_URL=&#x27;&#x27;;
+
+const SNAPSHOT=[{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-01&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-02&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-02&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:8,&quot;d&quot;:&quot;2026-09-02&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:4,&quot;d&quot;:&quot;2026-09-02&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Excellent Rich 95% 3.1g x 2 sachets&quot;,5]],&quot;q&quot;:5},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-02&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 1 Kg&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-03&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 1 Kg&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-03&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Red Bean 250 g&quot;,1],[&quot;Matcha M6 100 g&quot;,1]],&quot;q&quot;:2},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:4,&quot;d&quot;:&quot;2026-09-03&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Houjicha H1 95% 1 Kg&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-04&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Classic Rich 95% 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-04&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-05&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Sweetened Condensed Milk 200g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:30,&quot;d&quot;:&quot;2026-09-06&quot;,&quot;w&quot;:&quot;36&quot;,&quot;it&quot;:[[&quot;Ready set 10 sc Classic Rich 95%&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-07&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:3,&quot;d&quot;:&quot;2026-09-07&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:5,&quot;d&quot;:&quot;2026-09-07&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-07&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-07&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Sweetened Condensed Milk 200g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-07&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Sweetened Condensed Milk 200g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-08&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-08&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:10,&quot;d&quot;:&quot;2026-09-08&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matcha Grand Reserve 30 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Line OA&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ขาย&quot;,&quot;g&quot;:4,&quot;d&quot;:&quot;2026-09-08&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[],&quot;q&quot;:0},{&quot;p&quot;:&quot;Line OA&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ขาย&quot;,&quot;g&quot;:null,&quot;d&quot;:&quot;2026-09-08&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[],&quot;q&quot;:0},{&quot;p&quot;:&quot;Line OA&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ขาย&quot;,&quot;g&quot;:4,&quot;d&quot;:&quot;2026-09-08&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Excellent Rich 95% 1 Kg&quot;,3]],&quot;q&quot;:3},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-08&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:3,&quot;d&quot;:&quot;2026-09-08&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Imperial 30 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Lazada&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:11,&quot;d&quot;:&quot;2026-09-08&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-09&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Ceremonial 30 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-09&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Red Bean 250 g&quot;,3]],&quot;q&quot;:3},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-09&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matcha M6 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-09&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-09&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:4,&quot;d&quot;:&quot;2026-09-09&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:9,&quot;d&quot;:&quot;2026-09-09&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Sweetened Condensed Milk 200g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-09&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:2,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 100 g&quot;,1],[&quot;Matchazuki M3 100 g&quot;,2]],&quot;q&quot;:3},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:3,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Excellent 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Classic Rich 95% 100 g&quot;,3],[&quot;Stainless Canister (S)&quot;,1]],&quot;q&quot;:4},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Excellent 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-10&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-11&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:7,&quot;d&quot;:&quot;2026-09-11&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:8,&quot;d&quot;:&quot;2026-09-11&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-11&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Sweetened Condensed Milk 200g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-11&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Coconut Matcha Box Set&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Lazada&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:10,&quot;d&quot;:&quot;2026-09-12&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Chasen&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:8,&quot;d&quot;:&quot;2026-09-13&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 1 Kg&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:4,&quot;d&quot;:&quot;2026-09-13&quot;,&quot;w&quot;:&quot;37&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:2,&quot;d&quot;:&quot;2026-09-14&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-14&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 1 Kg&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:5,&quot;d&quot;:&quot;2026-09-14&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 40 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:2,&quot;d&quot;:&quot;2026-09-15&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Sweetened Condensed Milk 200g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:8,&quot;d&quot;:&quot;2026-09-15&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Sweetened Condensed Milk 200g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:8,&quot;d&quot;:&quot;2026-09-15&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-15&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Imperial 30 g&quot;,1],[&quot;Ceremonial 30 g&quot;,1],[&quot;Matchazuki M3 3.1g (1 sachet)&quot;,1],[&quot;Matchazuki M4 3.1g (1 sachet)&quot;,1]],&quot;q&quot;:4},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-15&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-15&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Sifter (New)&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-15&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 3.1g (1 sachet)&quot;,7]],&quot;q&quot;:7},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-15&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-15&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:7,&quot;d&quot;:&quot;2026-09-16&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Line OA&quot;,&quot;c&quot;:&quot;ไม่ระบุ&quot;,&quot;g&quot;:null,&quot;d&quot;:&quot;2026-09-16&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[],&quot;q&quot;:0},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:6,&quot;d&quot;:&quot;2026-09-16&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-16&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Ready set 10 sc Classic Rich 95%&quot;,1],[&quot;Matchazuki M3 3.1g (1 sachet)&quot;,2]],&quot;q&quot;:3},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-16&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Ceremonial 30 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:8,&quot;d&quot;:&quot;2026-09-17&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:3,&quot;d&quot;:&quot;2026-09-17&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;B-Chasen&quot;,3],[&quot;B-Chasen Holder (Black) Ver.01&quot;,1]],&quot;q&quot;:4},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-17&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Excellent 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Lazada&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:7,&quot;d&quot;:&quot;2026-09-17&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[],&quot;q&quot;:0},{&quot;p&quot;:&quot;Lazada&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:7,&quot;d&quot;:&quot;2026-09-17&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;TikTok Shop&quot;,&quot;c&quot;:&quot;สินค้าสูญหาย&quot;,&quot;g&quot;:33,&quot;d&quot;:&quot;2026-09-18&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matcha Grand Reserve 30 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกในวัน&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-18&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 3.1g (1 sachet)&quot;,5]],&quot;q&quot;:5},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;ยกเลิกจากผู้ซื้อ&quot;,&quot;g&quot;:0,&quot;d&quot;:&quot;2026-09-18&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1]],&quot;q&quot;:1},{&quot;p&quot;:&quot;Shopee&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:1,&quot;d&quot;:&quot;2026-09-18&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M3 100 g&quot;,1],[&quot;Matchazuki M4 3.1g (1 sachet)&quot;,1]],&quot;q&quot;:2},{&quot;p&quot;:&quot;Lazada&quot;,&quot;c&quot;:&quot;จัดส่งไม่สำเร็จ&quot;,&quot;g&quot;:12,&quot;d&quot;:&quot;2026-09-18&quot;,&quot;w&quot;:&quot;38&quot;,&quot;it&quot;:[[&quot;Matchazuki M4 40 g&quot;,1]],&quot;q&quot;:1}];
+const CANCEL=&#x27;ยกเลิกในวัน&#x27;;
+const COLORS={&#x27;ยกเลิกในวัน&#x27;:&#x27;#3F8E6E&#x27;,&#x27;ยกเลิกจากผู้ซื้อ&#x27;:&#x27;#C2603C&#x27;,&#x27;จัดส่งไม่สำเร็จ&#x27;:&#x27;#D4A32C&#x27;,
+ &#x27;ยกเลิกจากผู้ขาย&#x27;:&#x27;#5B6BA8&#x27;,&#x27;สินค้าสูญหาย&#x27;:&#x27;#8E4B8B&#x27;};
+const shipped=r=&gt;r.c!==CANCEL;
+const med=a=&gt;{if(!a.length)return null;const b=[...a].sort((x,y)=&gt;x-y),i=(b.length-1)/2;
+ return b.length%2?b[i]:Math.round((b[i-.5]+b[i+.5])/2);};
+const pct=(n,t)=&gt;t?(n/t*100):0;
+const el=id=&gt;document.getElementById(id);
+
+let RAW=SNAPSHOT, ALL=[], MIN=&#x27;&#x27;, MAX=&#x27;&#x27;, LIVE=false;
+
+/* ---------- อ่าน CSV (รองรับช่องที่มีจุลภาคอยู่ข้างใน) ---------- */
+function parseCSV(text){
+  const rows=[]; let row=[],f=&#x27;&#x27;,q=false;
+  for(let i=0;i&lt;text.length;i++){
+    const ch=text[i];
+    if(q){ if(ch===&#x27;&quot;&#x27;){ if(text[i+1]===&#x27;&quot;&#x27;){f+=&#x27;&quot;&#x27;;i++;} else q=false; } else f+=ch; }
+    else if(ch===&#x27;&quot;&#x27;) q=true;
+    else if(ch===&#x27;,&#x27;){ row.push(f); f=&#x27;&#x27;; }
+    else if(ch===&#x27;\n&#x27;){ row.push(f); rows.push(row); row=[]; f=&#x27;&#x27;; }
+    else if(ch!==&#x27;\r&#x27;) f+=ch;
+  }
+  if(f.length||row.length){ row.push(f); rows.push(row); }
+  return rows.filter(r=&gt;r.some(c=&gt;c.trim()));
+}
+function fromSheet(text){
+  const rows=parseCSV(text);
+  if(!rows.length) throw new Error(&#x27;ไฟล์ว่าง&#x27;);
+  const h=rows[0].map(x=&gt;x.trim());
+  const col=n=&gt;h.indexOf(n);
+  const iP=col(&#x27;Platform&#x27;), iC=col(&#x27;สาเหตุ&#x27;), iG=col(&#x27;ห่างกี่วัน&#x27;),
+        iD=col(&#x27;วันที่ได้รับสินค้า&#x27;), iW=col(&#x27;Week&#x27;), iPr=col(&#x27;Product&#x27;), iQ=col(&#x27;QTY&#x27;);
+  if(iC&lt;0||iD&lt;0) throw new Error(&#x27;ไม่พบคอลัมน์ที่ต้องใช้&#x27;);
+  return rows.slice(1).map(r=&gt;{
+    const g=(r[iG]||&#x27;&#x27;).trim();
+    const items=[];
+    (r[iPr]||&#x27;&#x27;).split(&#x27;,&#x27;).forEach(p=&gt;{
+      p=p.trim(); if(!p) return;
+      const m=p.match(/^(.*?)\s+(\d+)\s*ชิ้น$/);
+      items.push(m?[m[1].trim(),+m[2]]:[p,0]);
+    });
+    return {p:(r[iP]||&#x27;&#x27;).trim(), c:(r[iC]||&#x27;&#x27;).trim(), d:(r[iD]||&#x27;&#x27;).trim(),
+            w:(r[iW]||&#x27;&#x27;).trim(), it:items,
+            g:/^-?\d+$/.test(g)?+g:null, q:+(r[iQ]||0)||0};
+  }).filter(r=&gt;r.d);
+}
+
+/* ---------- โดนัทหนึ่งวง ---------- */
+function donut(svgId,parts,total){
+  const show=parts.filter(p=&gt;p[1]&gt;0);
+  const W=300, cx=150, cy=108, R=88, IN=56;
+  const legendTop=cy+R+30;                       // เริ่มใต้ขอบวงเสมอ
+  const H=legendTop+show.length*19;
+  const svg=el(svgId);
+  svg.setAttribute(&#x27;viewBox&#x27;,&#x27;0 0 &#x27;+W+&#x27; &#x27;+H);
+  if(!total){ svg.innerHTML=&#x27;&lt;text x=&quot;150&quot; y=&quot;110&quot; text-anchor=&quot;middle&quot; font-size=&quot;13&quot; fill=&quot;#6B7266&quot;&gt;ไม่มีข้อมูล&lt;/text&gt;&#x27;; return; }
+  const P=(r,a)=&gt;[cx+r*Math.sin(a),cy-r*Math.cos(a)];
+  const arc=(r0,r1,a0,a1,fill)=&gt;{
+    if(a1-a0&lt;=0.0001) return &#x27;&#x27;;
+    const big=(a1-a0)&gt;Math.PI?1:0;
+    const [x1,y1]=P(r1,a0),[x2,y2]=P(r1,a1),[x3,y3]=P(r0,a1),[x4,y4]=P(r0,a0);
+    return &#x27;&lt;path d=&quot;M&#x27;+x1+&#x27; &#x27;+y1+&#x27;A&#x27;+r1+&#x27; &#x27;+r1+&#x27; 0 &#x27;+big+&#x27; 1 &#x27;+x2+&#x27; &#x27;+y2+&#x27;L&#x27;+x3+&#x27; &#x27;+y3
+      +&#x27;A&#x27;+r0+&#x27; &#x27;+r0+&#x27; 0 &#x27;+big+&#x27; 0 &#x27;+x4+&#x27; &#x27;+y4+&#x27;Z&quot; fill=&quot;&#x27;+fill+&#x27;&quot; stroke=&quot;#fff&quot; stroke-width=&quot;1.5&quot;/&gt;&#x27;;};
+  let out=&#x27;&#x27;,ang=0;
+  show.forEach(([,n,col])=&gt;{
+    const a2=ang+n/total*2*Math.PI;
+    out+=arc(IN,R,ang,a2,col);
+    const share=n/total*100;
+    if(share&gt;=11){
+      const mid=(ang+a2)/2,[tx,ty]=P((IN+R)/2,mid);
+      out+=&#x27;&lt;text x=&quot;&#x27;+tx+&#x27;&quot; y=&quot;&#x27;+(ty+4)+&#x27;&quot; text-anchor=&quot;middle&quot; font-size=&quot;12.5&quot; font-weight=&quot;650&quot; fill=&quot;#fff&quot;&gt;&#x27;
+        +share.toFixed(0)+&#x27;%&lt;/text&gt;&#x27;;}
+    ang=a2;});
+  out+=&#x27;&lt;text x=&quot;&#x27;+cx+&#x27;&quot; y=&quot;&#x27;+(cy+2)+&#x27;&quot; text-anchor=&quot;middle&quot; font-size=&quot;26&quot; font-weight=&quot;660&quot;&gt;&#x27;+total+&#x27;&lt;/text&gt;&#x27;;
+  out+=&#x27;&lt;text x=&quot;&#x27;+cx+&#x27;&quot; y=&quot;&#x27;+(cy+19)+&#x27;&quot; text-anchor=&quot;middle&quot; font-size=&quot;10.5&quot; fill=&quot;#6B7266&quot;&gt;ใบ&lt;/text&gt;&#x27;;
+  let y=legendTop;
+  show.forEach(([nm,n,col])=&gt;{
+    out+=&#x27;&lt;rect x=&quot;10&quot; y=&quot;&#x27;+(y-9)+&#x27;&quot; width=&quot;11&quot; height=&quot;11&quot; rx=&quot;3&quot; fill=&quot;&#x27;+col+&#x27;&quot;/&gt;&#x27;
+       +&#x27;&lt;text x=&quot;28&quot; y=&quot;&#x27;+y+&#x27;&quot; font-size=&quot;12&quot;&gt;&#x27;+nm+&#x27;&lt;/text&gt;&#x27;
+       +&#x27;&lt;text x=&quot;&#x27;+(W-10)+&#x27;&quot; y=&quot;&#x27;+y+&#x27;&quot; font-size=&quot;12&quot; text-anchor=&quot;end&quot; fill=&quot;#6B7266&quot;&gt;&#x27;+n+&#x27; · &#x27;+pct(n,total).toFixed(0)+&#x27;%&lt;/text&gt;&#x27;;
+    y+=19;});
+  svg.innerHTML=out;
+}
+
+function prodTable(D,filter,sel){
+  const m={};
+  D.filter(filter).forEach(r=&gt;r.it.forEach(([n,q])=&gt;{(m[n]??={d:0,q:0});m[n].d++;m[n].q+=q;}));
+  const arr=Object.entries(m).sort((a,b)=&gt;b[1].d-a[1].d).slice(0,8);
+  const max=arr.length?arr[0][1].d:1;
+  document.querySelector(sel+&#x27; tbody&#x27;).innerHTML=arr.map(([n,v])=&gt;
+   &#x27;&lt;tr&gt;&lt;td&gt;&#x27;+n+&#x27;&lt;div class=&quot;pbar&quot; style=&quot;margin-top:4px&quot;&gt;&lt;i style=&quot;width:&#x27;+(v.d/max*100)+&#x27;%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;/td&gt;&#x27;
+   +&#x27;&lt;td&gt;&#x27;+v.d+&#x27;&lt;/td&gt;&lt;td&gt;&#x27;+v.q+&#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;).join(&#x27;&#x27;)||&#x27;&lt;tr&gt;&lt;td colspan=&quot;3&quot; class=&quot;note&quot;&gt;ไม่มีข้อมูลในช่วงนี้&lt;/td&gt;&lt;/tr&gt;&#x27;;
+}
+
+function trend(D){
+  const wk={}; D.forEach(r=&gt;{const k=r.w||&#x27;?&#x27;;(wk[k]??={s:0,c:0});shipped(r)?wk[k].s++:wk[k].c++;});
+  const ks=Object.keys(wk).sort((a,b)=&gt;a-b);
+  if(!ks.length){el(&#x27;trend&#x27;).innerHTML=&#x27;&lt;text x=&quot;450&quot; y=&quot;110&quot; text-anchor=&quot;middle&quot; font-size=&quot;14&quot; fill=&quot;#6B7266&quot;&gt;ไม่มีข้อมูลในช่วงนี้&lt;/text&gt;&#x27;;el(&#x27;trendnote&#x27;).textContent=&#x27;&#x27;;return;}
+  const max=Math.max(...ks.map(k=&gt;wk[k].s+wk[k].c))*1.15||1;
+  const W=900,H=220,P=34,bw=Math.min(90,(W-P*2)/ks.length*0.6);
+  const x=i=&gt;P+(W-P*2)*(i+0.5)/ks.length, y=v=&gt;H-30-(H-56)*v/max;
+  let s=&#x27;&#x27;;
+  [0,Math.round(max/2),Math.round(max)].forEach(v=&gt;{
+    s+=&#x27;&lt;line x1=&quot;&#x27;+P+&#x27;&quot; y1=&quot;&#x27;+y(v)+&#x27;&quot; x2=&quot;&#x27;+(W-P)+&#x27;&quot; y2=&quot;&#x27;+y(v)+&#x27;&quot; stroke=&quot;#D9D8CF&quot;/&gt;&#x27;
+      +&#x27;&lt;text x=&quot;4&quot; y=&quot;&#x27;+(y(v)+4)+&#x27;&quot; font-size=&quot;11&quot; fill=&quot;#6B7266&quot;&gt;&#x27;+v+&#x27;&lt;/text&gt;&#x27;;});
+  ks.forEach((k,i)=&gt;{const o=wk[k],t=o.s+o.c;
+    s+=&#x27;&lt;rect x=&quot;&#x27;+(x(i)-bw/2)+&#x27;&quot; y=&quot;&#x27;+y(o.c)+&#x27;&quot; width=&quot;&#x27;+bw+&#x27;&quot; height=&quot;&#x27;+Math.max(0,y(0)-y(o.c))+&#x27;&quot; fill=&quot;#3F8E6E&quot; rx=&quot;3&quot;/&gt;&#x27;;
+    s+=&#x27;&lt;rect x=&quot;&#x27;+(x(i)-bw/2)+&#x27;&quot; y=&quot;&#x27;+y(t)+&#x27;&quot; width=&quot;&#x27;+bw+&#x27;&quot; height=&quot;&#x27;+Math.max(0,y(o.c)-y(t))+&#x27;&quot; fill=&quot;#C2603C&quot; rx=&quot;3&quot;/&gt;&#x27;;
+    s+=&#x27;&lt;text x=&quot;&#x27;+x(i)+&#x27;&quot; y=&quot;&#x27;+(y(t)-7)+&#x27;&quot; font-size=&quot;12&quot; font-weight=&quot;600&quot; text-anchor=&quot;middle&quot;&gt;&#x27;+t+&#x27;&lt;/text&gt;&#x27;;
+    s+=&#x27;&lt;text x=&quot;&#x27;+x(i)+&#x27;&quot; y=&quot;&#x27;+(H-10)+&#x27;&quot; font-size=&quot;11.5&quot; text-anchor=&quot;middle&quot; fill=&quot;#6B7266&quot;&gt;สัปดาห์ &#x27;+k+&#x27;&lt;/text&gt;&#x27;;});
+  el(&#x27;trend&#x27;).innerHTML=s;
+  el(&#x27;trendnote&#x27;).textContent=ks.length&lt;6?&#x27;ข้อมูลยังมี &#x27;+ks.length+&#x27; สัปดาห์ ต้องสะสมอีกสักระยะถึงจะอ่านแนวโน้มได้จริง&#x27;:&#x27;&#x27;;
+}
+
+const current=()=&gt;{const f=el(&#x27;from&#x27;).value,t=el(&#x27;to&#x27;).value,p=el(&#x27;plat&#x27;).value,c=el(&#x27;cause&#x27;).value;
+  return ALL.filter(r=&gt;(!f||r.d&gt;=f)&amp;&amp;(!t||r.d&lt;=t)&amp;&amp;(!p||r.p===p)&amp;&amp;(!c||r.c===c));};
+
+function render(){
+  const D=current();
+  const skipped=RAW.length-ALL.length;
+  el(&#x27;meta&#x27;).textContent=(LIVE?&#x27;ข้อมูลสดจากชีต&#x27;:&#x27;ข้อมูลสำรองในไฟล์&#x27;)+&#x27; · &#x27;+ALL.length+&#x27; ใบ · &#x27;+MIN+&#x27; ถึง &#x27;+MAX
+    +(skipped?&#x27; · ไม่นับอีก &#x27;+skipped+&#x27; ใบที่ยังไม่ได้ระบุสาเหตุใน Odoo&#x27;:&#x27;&#x27;);
+  el(&#x27;hint&#x27;).textContent=&#x27;กำลังแสดง &#x27;+D.length+&#x27; ใบ จาก &#x27;+ALL.length+&#x27; ใบ&#x27;;
+
+  const nShip=D.filter(shipped).length, nCan=D.length-nShip;
+  el(&#x27;kpis&#x27;).innerHTML=[
+   &#x27;&lt;b&gt;&#x27;+D.length+&#x27;&lt;/b&gt;&lt;span&gt;ใบในช่วงที่เลือก&lt;/span&gt;&#x27;,
+   &#x27;&lt;b&gt;&#x27;+nShip+&#x27;&lt;/b&gt;&lt;span&gt;ตีกลับ (ของออกไปแล้ว)&lt;/span&gt;&lt;small&gt;&#x27;+pct(nShip,D.length).toFixed(0)+&#x27;% ของที่แสดง&lt;/small&gt;&#x27;,
+   &#x27;&lt;b&gt;&#x27;+nCan+&#x27;&lt;/b&gt;&lt;span&gt;ยกเลิกก่อนของออก&lt;/span&gt;&lt;small&gt;&#x27;+pct(nCan,D.length).toFixed(0)+&#x27;% ไม่เสียค่าส่ง&lt;/small&gt;&#x27;,
+  ].map(x=&gt;&#x27;&lt;div class=&quot;kpi&quot;&gt;&#x27;+x+&#x27;&lt;/div&gt;&#x27;).join(&#x27;&#x27;);
+
+  donut(&#x27;d1&#x27;,[[&#x27;ของออกไปแล้ว&#x27;,nShip,&#x27;#C2603C&#x27;],[&#x27;ยกเลิกก่อนของออก&#x27;,nCan,&#x27;#3F8E6E&#x27;]],D.length);
+  const cs={}; D.forEach(r=&gt;(cs[r.c]??=[]).push(r));
+  const causes=Object.entries(cs).sort((a,b)=&gt;b[1].length-a[1].length);
+  donut(&#x27;d2&#x27;,causes.map(([c,rs])=&gt;[c,rs.length,COLORS[c]||&#x27;#A8A79E&#x27;]),D.length);
+
+  document.querySelector(&#x27;#causetbl tbody&#x27;).innerHTML=causes.map(([c,rs])=&gt;{
+    const m=med(rs.filter(r=&gt;r.g!=null).map(r=&gt;r.g));
+    return &#x27;&lt;tr&gt;&lt;td&gt;&lt;i style=&quot;display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;background:&#x27;
+     +(COLORS[c]||&#x27;#A8A79E&#x27;)+&#x27;&quot;&gt;&lt;/i&gt;&#x27;+c+&#x27;&lt;/td&gt;&lt;td&gt;&#x27;+rs.length+&#x27;&lt;/td&gt;&lt;td&gt;&#x27;+pct(rs.length,D.length).toFixed(1)
+     +&#x27;%&lt;/td&gt;&lt;td&gt;&#x27;+(m==null?&#x27;—&#x27;:m)+&#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;;}).join(&#x27;&#x27;)
+   ||&#x27;&lt;tr&gt;&lt;td colspan=&quot;4&quot; class=&quot;note&quot;&gt;ไม่มีข้อมูลในช่วงนี้&lt;/td&gt;&lt;/tr&gt;&#x27;;
+
+  const plats=[...new Set(D.map(r=&gt;r.p||&#x27;ไม่ระบุ&#x27;))]
+    .sort((a,b)=&gt;D.filter(r=&gt;(r.p||&#x27;ไม่ระบุ&#x27;)===b).length-D.filter(r=&gt;(r.p||&#x27;ไม่ระบุ&#x27;)===a).length);
+  const th=&#x27;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สาเหตุ&lt;/th&gt;&#x27;+plats.map(p=&gt;&#x27;&lt;th&gt;&#x27;+p+&#x27;&lt;/th&gt;&#x27;).join(&#x27;&#x27;)+&#x27;&lt;th&gt;รวม&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&#x27;;
+  const tb=causes.map(([c,rs])=&gt;{
+    const pc={}; rs.forEach(r=&gt;pc[r.p||&#x27;ไม่ระบุ&#x27;]=(pc[r.p||&#x27;ไม่ระบุ&#x27;]||0)+1);
+    const top=Math.max(...plats.map(p=&gt;pc[p]||0));
+    return &#x27;&lt;tr&gt;&lt;td&gt;&lt;i style=&quot;display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;background:&#x27;
+      +(COLORS[c]||&#x27;#A8A79E&#x27;)+&#x27;&quot;&gt;&lt;/i&gt;&#x27;+c+&#x27;&lt;/td&gt;&#x27;
+      +plats.map(p=&gt;{const n=pc[p]||0;
+        return &#x27;&lt;td class=&quot;&#x27;+(n&amp;&amp;n===top?&#x27;hi&#x27;:&#x27;&#x27;)+&#x27;&quot;&gt;&#x27;+(n?pct(n,rs.length).toFixed(0)+&#x27;%&lt;span style=&quot;color:var(--muted);font-weight:400&quot;&gt; (&#x27;+n+&#x27;)&lt;/span&gt;&#x27;:&#x27;—&#x27;)+&#x27;&lt;/td&gt;&#x27;;}).join(&#x27;&#x27;)
+      +&#x27;&lt;td&gt;&#x27;+rs.length+&#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;;}).join(&#x27;&#x27;);
+  el(&#x27;matrix&#x27;).innerHTML=causes.length?th+&#x27;&lt;tbody&gt;&#x27;+tb+&#x27;&lt;/tbody&gt;&#x27;:&#x27;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;note&quot;&gt;ไม่มีข้อมูลในช่วงนี้&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&#x27;;
+
+  el(&#x27;platleg&#x27;).innerHTML=[...new Set(D.map(r=&gt;r.c))].map(c=&gt;
+    &#x27;&lt;span&gt;&lt;i style=&quot;background:&#x27;+(COLORS[c]||&#x27;#A8A79E&#x27;)+&#x27;&quot;&gt;&lt;/i&gt;&#x27;+c+&#x27;&lt;/span&gt;&#x27;).join(&#x27;&#x27;);
+  const bp={}; D.forEach(r=&gt;(bp[r.p||&#x27;ไม่ระบุ&#x27;]??=[]).push(r));
+  el(&#x27;platwrap&#x27;).innerHTML=Object.entries(bp).sort((a,b)=&gt;b[1].length-a[1].length).map(([p,rs])=&gt;{
+    const c={}; rs.forEach(r=&gt;c[r.c]=(c[r.c]||0)+1);
+    const ord=Object.entries(c).sort((a,b)=&gt;b[1]-a[1]);
+    const sh=rs.filter(shipped).length;
+    return &#x27;&lt;div style=&quot;margin-bottom:14px&quot;&gt;&#x27;
+     +&#x27;&lt;div style=&quot;display:flex;justify-content:space-between;font-size:13.5px;font-weight:550&quot;&gt;&#x27;
+     +&#x27;&lt;span&gt;&#x27;+p+&#x27;&lt;/span&gt;&lt;span style=&quot;color:var(--muted);font-weight:400&quot;&gt;&#x27;+rs.length+&#x27; ใบ · ของออกไปแล้ว &#x27;
+     +pct(sh,rs.length).toFixed(0)+&#x27;%&#x27;+(pct(sh,rs.length)&gt;55?&#x27;&lt;span class=&quot;tag warn&quot;&gt;สูง&lt;/span&gt;&#x27;:&#x27;&#x27;)+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;
+     +&#x27;&lt;div class=&quot;bar&quot; style=&quot;height:22px;margin:6px 0 4px&quot;&gt;&#x27;
+     +ord.map(([cc,n])=&gt;{const w=pct(n,rs.length);
+       return &#x27;&lt;div style=&quot;width:&#x27;+w+&#x27;%;background:&#x27;+(COLORS[cc]||&#x27;#A8A79E&#x27;)+&#x27;&quot; title=&quot;&#x27;+cc+&#x27; &#x27;+n+&#x27; ใบ&quot;&gt;&#x27;+(w&gt;14?n:&#x27;&#x27;)+&#x27;&lt;/div&gt;&#x27;;}).join(&#x27;&#x27;)
+     +&#x27;&lt;/div&gt;&lt;div class=&quot;note&quot;&gt;&#x27;+ord.map(([cc,n])=&gt;cc+&#x27; &#x27;+pct(n,rs.length).toFixed(0)+&#x27;%&#x27;).join(&#x27; · &#x27;)+&#x27;&lt;/div&gt;&lt;/div&gt;&#x27;;
+  }).join(&#x27;&#x27;)||&#x27;&lt;div class=&quot;empty&quot;&gt;ไม่มีข้อมูลในช่วงนี้&lt;/div&gt;&#x27;;
+
+  prodTable(D,shipped,&#x27;#prodret&#x27;);
+  prodTable(D,r=&gt;!shipped(r),&#x27;#prodcan&#x27;);
+  trend(D);
+}
+
+function setup(){
+  ALL=RAW.filter(r=&gt;r.c&amp;&amp;r.c!==&#x27;ไม่ระบุ&#x27;);
+  const ds=ALL.map(r=&gt;r.d).filter(Boolean).sort();
+  MIN=ds[0]||&#x27;&#x27;; MAX=ds[ds.length-1]||&#x27;&#x27;;
+  el(&#x27;from&#x27;).value=MIN; el(&#x27;to&#x27;).value=MAX;
+  el(&#x27;from&#x27;).min=MIN; el(&#x27;from&#x27;).max=MAX; el(&#x27;to&#x27;).min=MIN; el(&#x27;to&#x27;).max=MAX;
+  const uniq=k=&gt;[...new Set(ALL.map(r=&gt;r[k]).filter(Boolean))].sort();
+  el(&#x27;plat&#x27;).innerHTML=&#x27;&lt;option value=&quot;&quot;&gt;ทุก Platform&lt;/option&gt;&#x27;+uniq(&#x27;p&#x27;).map(v=&gt;&#x27;&lt;option&gt;&#x27;+v+&#x27;&lt;/option&gt;&#x27;).join(&#x27;&#x27;);
+  el(&#x27;cause&#x27;).innerHTML=&#x27;&lt;option value=&quot;&quot;&gt;ทุกสาเหตุ&lt;/option&gt;&#x27;+uniq(&#x27;c&#x27;).map(v=&gt;&#x27;&lt;option&gt;&#x27;+v+&#x27;&lt;/option&gt;&#x27;).join(&#x27;&#x27;);
+  render();
+}
+
+const PRESETS=[[&#x27;ทั้งหมด&#x27;,null],[&#x27;7 วันล่าสุด&#x27;,7],[&#x27;30 วันล่าสุด&#x27;,30],[&#x27;เดือนนี้&#x27;,&#x27;m&#x27;]];
+el(&#x27;chips&#x27;).innerHTML=PRESETS.map((p,i)=&gt;&#x27;&lt;button class=&quot;chip&#x27;+(i===0?&#x27; on&#x27;:&#x27;&#x27;)+&#x27;&quot; data-i=&quot;&#x27;+i+&#x27;&quot;&gt;&#x27;+p[0]+&#x27;&lt;/button&gt;&#x27;).join(&#x27;&#x27;);
+document.querySelectorAll(&#x27;.chip&#x27;).forEach(b=&gt;b.onclick=()=&gt;{
+  document.querySelectorAll(&#x27;.chip&#x27;).forEach(x=&gt;x.classList.remove(&#x27;on&#x27;)); b.classList.add(&#x27;on&#x27;);
+  const v=PRESETS[+b.dataset.i][1], end=new Date(MAX+&#x27;T00:00:00Z&#x27;);
+  if(v===null) el(&#x27;from&#x27;).value=MIN;
+  else if(v===&#x27;m&#x27;) el(&#x27;from&#x27;).value=MAX.slice(0,8)+&#x27;01&#x27;;
+  else el(&#x27;from&#x27;).value=new Date(end.getTime()-(v-1)*864e5).toISOString().slice(0,10);
+  el(&#x27;to&#x27;).value=MAX; render();});
+[&#x27;from&#x27;,&#x27;to&#x27;,&#x27;plat&#x27;,&#x27;cause&#x27;].forEach(id=&gt;el(id).addEventListener(&#x27;input&#x27;,()=&gt;{
+  document.querySelectorAll(&#x27;.chip&#x27;).forEach(x=&gt;x.classList.remove(&#x27;on&#x27;)); render();}));
+
+(async function boot(){
+  setup();                                   // วาดด้วยข้อมูลสำรองก่อน หน้าจะได้ไม่ว่าง
+  if(!CSV_URL) return;
+  try{
+    const ctl=new AbortController(); const to=setTimeout(()=&gt;ctl.abort(),10000);
+    const res=await fetch(CSV_URL,{cache:&#x27;no-store&#x27;,signal:ctl.signal});
+    clearTimeout(to);
+    if(!res.ok) throw new Error(&#x27;HTTP &#x27;+res.status);
+    const rows=fromSheet(await res.text());
+    if(rows.length&lt;3) throw new Error(&#x27;ข้อมูลน้อยผิดปกติ&#x27;);
+    RAW=rows; LIVE=true; setup();
+  }catch(e){ console.warn(&#x27;ดึงข้อมูลสดไม่ได้ ใช้ข้อมูลสำรองในไฟล์:&#x27;,e.message); }
+})();
+
+el(&#x27;save&#x27;).onclick=async function(){
+  const b=this, old=b.textContent;
+  b.disabled=true; b.textContent=&#x27;กำลังสร้างภาพ...&#x27;;
+  try{
+    if(!window.html2canvas){
+      await new Promise((ok,err)=&gt;{const sc=document.createElement(&#x27;script&#x27;);
+        sc.src=&#x27;https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js&#x27;;
+        sc.onload=ok; sc.onerror=()=&gt;err(new Error(&#x27;โหลดไม่ได้&#x27;)); document.head.appendChild(sc);});
+    }
+    b.style.visibility=&#x27;hidden&#x27;;
+    const cv=await html2canvas(document.querySelector(&#x27;.wrap&#x27;),{backgroundColor:&#x27;#F7F6F1&#x27;,scale:2});
+    b.style.visibility=&#x27;visible&#x27;;
+    const a=document.createElement(&#x27;a&#x27;);
+    a.download=&#x27;return-dashboard-&#x27;+el(&#x27;from&#x27;).value+&#x27;_&#x27;+el(&#x27;to&#x27;).value+&#x27;.png&#x27;;
+    a.href=cv.toDataURL(&#x27;image/png&#x27;); a.click();
+  }catch(e){
+    b.style.visibility=&#x27;visible&#x27;;
+    alert(&#x27;บันทึกภาพไม่ได้ (&#x27;+e.message+&#x27;)\nถ้าไม่ได้ต่ออินเทอร์เน็ต ให้ใช้การจับภาพหน้าจอแทน&#x27;);
+  }
+  b.disabled=false; b.textContent=old;
+};
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;</template>
 </body>
 </html>
