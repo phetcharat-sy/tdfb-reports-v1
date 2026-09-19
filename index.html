@@ -1872,9 +1872,8 @@ function secDiff(){
   return bars
    +(dfSel.length?`<div class="chint">กำลังกรอง — แสดง ${fmt(rows.length)} รายการ จากทั้งหมด ${fmt(all0.length)} รายการที่นับในช่วงนี้</div>`:'')
    +ringHTML(100-p,98,
-      `<span>ความแม่นยำสต็อก (นับแล้วตรงกับระบบ)</span>`
-     +`<span>เป้าหมาย Stock Variance <b>&lt; 2%</b> · ตอนนี้ <b>${pct(p)}</b></span>`
-     +`<span style="opacity:.8">นับจากรายการวันที่ ${span}</span>`)
+      `<span>ความแม่นยำสต็อก</span>`
+     +`<span>เป้าหมาย <b>&lt; 2%</b> · ปัจจุบัน <b>${pct(p)}</b></span>`)
    +`<div class="sgrid">${card('รายการที่นับ',rows.length)}
       ${card('ไม่ตรง',bad.length,'rose')}${card('ตรง',rows.length-bad.length,'teal')}
       ${card('ผลต่างรวม (ชิ้น)',gapSum,'amber')}</div>
