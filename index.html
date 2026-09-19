@@ -11,12 +11,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-:root{--teal:#2DD4BF;--teal-d:#14B8A6;--plum:#A78BFA;--plum-d:#8B5CF6;
-      --amber:#FBBF24;--rose:#FB7185;--good:#34D399;--bad:#FB7185;
-      --page:#100D26;--card:#1C1836;--soft:#272149;--line:#3A3164;--ink:#F7F5FF;--mute:#B7AEDE;--ink-faint:#D2CBEC}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
+:root{--teal:#0D9488;--teal-d:#0F766E;--plum:#7C3AED;--plum-d:#6D28D9;
+      --amber:#D97706;--rose:#DC2626;--good:#059669;--bad:#DC2626;
+      --page:#F3F1FA;--card:#FFFFFF;--soft:#EEEAF9;--line:#E1DBF0;--ink:#1E1B33;--mute:#6B6485;--ink-faint:#48415F}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
   background:var(--page);
-  background-image:radial-gradient(900px 500px at 6% -6%,rgba(45,212,191,.13),transparent 62%),
-                   radial-gradient(700px 460px at 100% 4%,rgba(167,139,250,.13),transparent 58%);
+  background-image:radial-gradient(900px 500px at 6% -6%,rgba(13,148,136,.05),transparent 62%),
+                   radial-gradient(700px 460px at 100% 4%,rgba(124,58,237,.05),transparent 58%);
   background-attachment:fixed;
   font-family:'IBM Plex Sans Thai','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size:27.7px;line-height:1.6}#vKPI .wrap{max-width:none;margin:0 auto;padding:26px 6% 44px}#vKPI .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}#vKPI .btn{background:var(--teal);color:#fff;border:0;font-family:inherit;font-weight:bold;
   font-size:30.7px;padding:13px 24px;border-radius:7px;cursor:pointer}#vKPI .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:normal}#vKPI .btn:disabled{opacity:.5;cursor:default}#vKPI select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:7px;
@@ -99,7 +99,6 @@
 #vKPI .ring .cap .tag{display:inline-block;margin-bottom:6px;padding:7px 22px;border-radius:30px;
   font-size:25px;font-weight:bold;background:rgba(255,255,255,.20);color:#fff;
   border:1px solid rgba(255,255,255,.32)}
-#vKPI .ring .cap b{color:var(--ink)}
 
 #vKPI .sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:16px}
 #vKPI .scard{background:var(--card);border:1px solid var(--line);border-radius:22px;
@@ -264,26 +263,27 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
   padding:3px 15px;border-radius:20px;font-size:21.7px;margin-top:8px}
 #vKPI h2.sec{font-size:39.4px;margin:30px 0 12px;display:flex;align-items:center;gap:12px}#vKPI h2.sec span{flex:1;height:1px;background:var(--line)}#vKPI h2.sec em{font-style:normal;font-size:27.7px;color:var(--mute);font-weight:normal}#vKPI .top{display:grid;grid-template-columns:1fr 1fr;gap:16px}#vKPI .big{border-radius:20px;padding:36px 40px;color:#fff;
   box-shadow:0 2px 6px rgba(20,24,40,.10),0 16px 38px rgba(20,24,40,.12)}#vKPI .big.a{background:linear-gradient(140deg,#4AA3A0 0%,var(--teal-d) 100%)}#vKPI .big.b{background:linear-gradient(140deg,#7D6DB8 0%,var(--plum-d) 100%)}#vKPI .big .l{font-size:37.6px;opacity:.95}#vKPI .big .v{font-size:114px;font-weight:bold;line-height:1.05;letter-spacing:-1px;margin-top:4px}#vKPI .big .n{font-size:29.6px;opacity:.9;margin-top:4px}/* KPI เรียงบรรทัดละใบ · จัดเนื้อหาแนวนอนไม่ให้การ์ดสูงเกินไป */
-#vKPI .kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+#vKPI .kpis{display:grid;grid-template-columns:1fr;gap:16px}
 #vKPI .kpis>.subsec{grid-column:1/-1}
-#vKPI .kpi{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px 28px;
+#vKPI .kpi{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:38px 40px;
   box-shadow:0 1px 2px rgba(20,24,40,.04),0 8px 20px rgba(20,24,40,.05);
-  transition:box-shadow .16s ease,transform .16s ease;
-  display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
-#vKPI .kpi:hover{transform:translateY(-2px);box-shadow:0 3px 8px rgba(20,24,40,.07),0 16px 34px rgba(20,24,40,.09)}
-#vKPI .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--mute)}
-#vKPI .kpi.pass::before{background:var(--good)}#vKPI .kpi.fail::before{background:var(--bad)}#vKPI .kpi.wait::before{background:#C9CDD6}
-#vKPI .kpi .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-#vKPI .kpi .l{font-size:27px;font-weight:bold;letter-spacing:.01em}
-#vKPI .kpi .t{font-size:22px;color:var(--mute)}
-#vKPI .kpi .row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:2px}
-#vKPI .kpi .v{font-size:58px;font-weight:bold;letter-spacing:-1px;line-height:1.08}
-#vKPI .kpi.wait .v{font-size:32px;color:var(--mute)}
+  transition:box-shadow .16s ease;
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;
+  position:relative;overflow:hidden}
+#vKPI .kpi:hover{box-shadow:0 3px 8px rgba(20,24,40,.07),0 16px 34px rgba(20,24,40,.09)}
+#vKPI .kpi .l{font-size:32px;font-weight:bold;letter-spacing:.01em}
+#vKPI .kpi .t{font-size:23px;color:var(--mute)}
+#vKPI .kpi .row{display:flex;justify-content:center;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:6px}
+#vKPI .kpi .v{font-size:56px;font-weight:bold;letter-spacing:-1px;line-height:1.08}
+#vKPI .kpi .waitstat{font-size:26px;color:var(--mute);font-weight:bold}
 #vKPI .badge{font-size:20px;font-weight:bold;padding:4px 13px;border-radius:20px;white-space:nowrap;letter-spacing:.01em}
 #vKPI .badge.pass{background:#E3F0EA;color:var(--good)}#vKPI .badge.fail{background:#F7E4DF;color:var(--bad)}#vKPI .badge.wait{background:var(--soft);color:var(--mute)}
-#vKPI .delta{font-size:22px;white-space:nowrap;display:inline-flex;flex-direction:column;
-  line-height:1.25;font-weight:bold}
-#vKPI .delta em{font-style:normal;font-size:16px;font-weight:normal;color:var(--mute);margin-top:3px}#vKPI .delta.up{color:var(--good)}#vKPI .delta.down{color:var(--bad)}#vKPI .delta.flat{color:var(--mute)}#vKPI .kpi .base{font-size:20px;color:var(--mute)}#vKPI .bar{height:6px;background:var(--soft);border-radius:4px;overflow:hidden;margin-top:2px}#vKPI .bar i{display:block;height:100%;border-radius:4px;background:var(--good)}#vKPI .kpi.fail .bar i{background:var(--bad)}#vKPI .foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
+#vKPI .delta{font-size:21px;white-space:nowrap;display:inline-flex;flex-direction:column;
+  align-items:center;line-height:1.25;font-weight:bold}
+#vKPI .delta em{font-style:normal;font-size:16px;font-weight:normal;color:var(--mute);margin-top:3px}#vKPI .delta.up{color:var(--good)}#vKPI .delta.down{color:var(--bad)}#vKPI .delta.flat{color:var(--mute)}
+#vKPI .kpi .base{font-size:19px;color:var(--mute);max-width:720px}
+#vKPI .kpi .note-corner{position:absolute;right:24px;bottom:18px;font-size:17px;color:var(--mute);font-style:italic}
+#vKPI .foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
   color:var(--mute);font-size:24.9px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}#vKPI @media(max-width:1000px){.wrap{padding-left:4%;padding-right:4%}#kShot{padding:22px 18px 28px}
   .top{grid-template-columns:1fr}h1{font-size:49.6px}}
 
@@ -354,7 +354,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
   background:#F3EFFA;border:1px solid #DDD5EE;border-radius:10px;padding:7px 15px;
   font-style:normal;white-space:nowrap}
 #vKPI .fcs-i b{font-size:23px;color:var(--plum-d);font-weight:bold}
-#vKPI .fcs-i i{font-size:30px;color:var(--ink);font-weight:bold;font-style:normal;
+#vKPI .fcs-i i{font-size:30px;color:#1E1B33;font-weight:bold;font-style:normal;
   font-variant-numeric:tabular-nums}
 #vKPI .fcs-i.dd{background:#FBF1E8;border-color:#EBD9BF}
 #vKPI .fcs-i.dd b{color:#8a6a2f}
@@ -563,12 +563,12 @@ body.cap #vKPI .tscroll{max-height:none!important;overflow:visible}
 /* คอลัมน์สัปดาห์ต้องอยู่บรรทัดเดียว ไม่ตัดเป็น "Week" / "1" */
 #vKPI .c-week{white-space:nowrap}
 
-:root{--teal:#2DD4BF;--teal-d:#14B8A6;--plum:#A78BFA;--plum-d:#8B5CF6;
-      --amber:#FBBF24;--rose:#FB7185;--page:#100D26;--card:#1C1836;--soft:#272149;
-      --line:#3A3164;--ink:#F7F5FF;--mute:#B7AEDE}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
+:root{--teal:#0D9488;--teal-d:#0F766E;--plum:#7C3AED;--plum-d:#6D28D9;
+      --amber:#D97706;--rose:#DC2626;--page:#F3F1FA;--card:#FFFFFF;--soft:#EEEAF9;
+      --line:#E1DBF0;--ink:#1E1B33;--mute:#6B6485}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
   background:var(--page);
-  background-image:radial-gradient(900px 500px at 6% -6%,rgba(45,212,191,.13),transparent 62%),
-                   radial-gradient(700px 460px at 100% 4%,rgba(167,139,250,.13),transparent 58%);
+  background-image:radial-gradient(900px 500px at 6% -6%,rgba(13,148,136,.05),transparent 62%),
+                   radial-gradient(700px 460px at 100% 4%,rgba(124,58,237,.05),transparent 58%);
   background-attachment:fixed;
   font-family:Tahoma,"Segoe UI",sans-serif;font-size:27.7px;line-height:1.6}#vRPT .wrap{max-width:none;margin:0 auto;padding:20px 5% 20px;
   height:100vh;display:flex;flex-direction:column;overflow:hidden}#vRPT .teams{display:flex;gap:6px;align-items:center;margin-bottom:14px;flex:none;
@@ -1249,20 +1249,19 @@ function deltaHTML(cur,prev,goodUp=true,unit='%'){
 }
 
 function kpiCard(o){
-  if(o.wait)return `<div class="kpi wait"><div class="hd"><div class="l">${o.l}</div>
-    <span class="badge wait">ยังไม่ได้เชื่อมชีต</span></div>
+  if(o.wait)return `<div class="kpi wait">
+    <div class="l">${o.l}</div>
     <div class="t">${o.t}</div>
-    <div class="v">รอข้อมูล</div>
-    <div class="base">${o.note||''}</div></div>`;
+    <div class="row"><span class="waitstat">รอข้อมูล</span><span class="badge wait">ยังไม่ได้เชื่อมชีต</span></div>
+    ${o.note?`<div class="note-corner">${esc(o.note)}</div>`:''}</div>`;
   const ok=o.pass;
-  const w=Math.max(0,Math.min(100,o.bar!=null?o.bar:o.v));
   return `<div class="kpi ${ok?'pass':'fail'}">
-    <div class="hd"><div class="l">${o.l}</div>
-      <span class="badge ${ok?'pass':'fail'}">${ok?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์'}</span></div>
+    <div class="l">${o.l}</div>
     <div class="t">${o.t}</div>
-    <div class="row"><div class="v">${o.disp}</div>${o.delta||''}</div>
-    <div class="base">${o.base||''}</div>
-    <div class="bar"><i style="width:${w}%"></i></div></div>`;
+    <div class="row"><div class="v">${o.disp}</div></div>
+    <span class="badge ${ok?'pass':'fail'}">${ok?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์'}</span>
+    ${o.delta||''}
+    <div class="base">${o.base||''}</div></div>`;
 }
 
 /* ---------- หน้าย่อยของ Warehouse ---------- */
@@ -1300,7 +1299,7 @@ function baseOpts(legend){
       tooltip:{backgroundColor:'#22252C',padding:10,cornerRadius:6,
         titleFont:{size:cf(22)},bodyFont:{size:cf(21)}}},
     scales:{x:{ticks:{color:C.mute,font:{size:cf(24)}},grid:{display:false}},
-      y:{ticks:{color:C.mute,font:{size:cf(24)}},grid:{color:'rgba(255,255,255,.06)'},beginAtZero:true}}};
+      y:{ticks:{color:C.mute,font:{size:cf(24)}},grid:{color:'rgba(30,27,51,.06)'},beginAtZero:true}}};
 }
 /* ---------- % สำหรับกราฟแท่งที่ต้องตรงกับวงแหวน ----------
    ของเดิมใช้ Math.round(v/t*1000)/10 = ทศนิยม 1 ตำแหน่ง
@@ -1345,7 +1344,7 @@ const barPct={id:'barPct',
       x.beginPath();x.moveTo(ch.chartArea.left,y);x.lineTo(ch.chartArea.right,y);x.stroke();
       x.setLineDash([]);
     }
-    x.font="bold "+cf(op.size||29)+"px Tahoma";x.fillStyle='#E8EDF5';x.textAlign='center';x.textBaseline='bottom';
+    x.font="bold "+cf(op.size||29)+"px Tahoma";x.fillStyle='#1E1B33';x.textAlign='center';x.textBaseline='bottom';
     ch.data.datasets.forEach((ds,di)=>{
       const m=ch.getDatasetMeta(di); if(m.hidden)return;
       let lastR=-1e9;                       /* ขอบขวาของป้ายก่อนหน้า — กันตัวเลขทับกัน */
@@ -1387,7 +1386,7 @@ const linePt={id:'linePt',
         placed.push({x:pt.x,y,w});
         x.lineJoin='round'; x.lineWidth=5; x.strokeStyle='rgba(255,255,255,.95)';
         x.strokeText(t,pt.x,y);
-        x.fillStyle='#E8EDF5'; x.fillText(t,pt.x,y);
+        x.fillStyle='#1E1B33'; x.fillText(t,pt.x,y);
       });
     });
     x.restore();
@@ -1402,7 +1401,7 @@ const stackTot={id:'stackTot',
   afterDatasetsDraw(ch,a,op){
     if(!op||!op.display)return;
     const x=ch.ctx; x.save();
-    x.font='bold '+cf(op.size||26)+'px Tahoma'; x.fillStyle='#E8EDF5';
+    x.font='bold '+cf(op.size||26)+'px Tahoma'; x.fillStyle='#1E1B33';
     x.textAlign='center'; x.textBaseline='bottom';
     let lastR=-1e9;
     (ch.data.labels||[]).forEach((_,i)=>{
@@ -1436,7 +1435,7 @@ const grpLbl={id:'grpLbl',
       const p1=sx.getPixelForValue(g.from), p2=sx.getPixelForValue(g.to);
       if(gi){                                   /* เส้นคั่นบาง ๆ ระหว่างกลุ่ม */
         const d=(sx.getPixelForValue(g.from)+sx.getPixelForValue(g.from-1))/2;
-        x.strokeStyle='rgba(255,255,255,.10)'; x.lineWidth=1;
+        x.strokeStyle='rgba(30,27,51,.10)'; x.lineWidth=1;
         x.beginPath(); x.moveTo(d,ar.top); x.lineTo(d,ar.bottom); x.stroke();
       }
       x.font='bold '+cf(op.size||26)+'px Tahoma'; x.fillStyle=C.mute;
@@ -1471,7 +1470,7 @@ const pieLbl={id:'pieLbl',
         const avail=Math.abs(Math.sin(ang))*arcW+Math.abs(Math.cos(ang))*ringW;
         if(x.measureText(t).width>avail-8)return;
       }
-      x.lineJoin='round'; x.lineWidth=6; x.strokeStyle='rgba(255,255,255,.35)';
+      x.lineJoin='round'; x.lineWidth=6; x.strokeStyle='rgba(30,27,51,.35)';
       x.strokeText(t,px,py);
       x.fillStyle='#fff'; x.fillText(t,px,py);
     });
@@ -1706,7 +1705,7 @@ function drawOnTime(){
   const sc={}; ord.forEach(r=>{const s=r.sender||'ไม่ระบุ';sc[s]=(sc[s]||0)+1;});
   const ce=Object.entries(sc).sort((a,b)=>b[1]-a[1]);
   const t4=ord.length||1;
-  const pal=[C.amber,'#C08A46',C.teal,C.rose,C.plum,C.tealD,C.mute];
+  const pal=[C.amber,'#A9752F',C.teal,C.rose,C.plum,C.tealD,C.mute];
   const cols=ce.map((e,i)=>pal[i%pal.length]);
   const pcts=ce.map(e=>Math.round(e[1]/t4*1000)/10);
   const leg=document.getElementById('chanLeg');
@@ -2153,7 +2152,7 @@ const lineLbl={id:'lineLbl',
       boxes.push(r.b);
       x.lineJoin='round'; x.lineWidth=4; x.strokeStyle='rgba(255,255,255,.95)';
       x.strokeText(txt,px,y);
-      x.fillStyle=fc?C.plumD:'#93A1B8';
+      x.fillStyle=fc?C.plumD:'#6B6485';
       x.fillText(txt,px,y);
     };
     ch.data.datasets.forEach((ds,di)=>{
@@ -2527,12 +2526,12 @@ function secForecast(){
       <code>พยากรณ์ (h สัปดาห์ข้างหน้า) = avg4 + slope × h + Double Day boost</code>
       </div>
     </details>
-    <div class="cgrid2">
-      <div class="cpanel"><div class="chname2">จำนวนออเดอร์ / สัปดาห์</div>
-        <div class="cbox" style="height:520px"><canvas id="c_fcwo"></canvas></div>
+    <div class="fcacc-grid">
+      <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / สัปดาห์</div>
+        <div class="fcacc-chartbox" style="height:420px"><canvas id="c_fcwo"></canvas></div>
         ${fcStrip(wOrd,'ออเดอร์')}</div>
-      <div class="cpanel"><div class="chname2">จำนวนสินค้า (ชิ้น) / สัปดาห์</div>
-        <div class="cbox" style="height:520px"><canvas id="c_fcwq"></canvas></div>
+      <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / สัปดาห์</div>
+        <div class="fcacc-chartbox" style="height:420px"><canvas id="c_fcwq"></canvas></div>
         ${fcStrip(wQty,'ชิ้น')}</div>
     </div>
 
@@ -2549,12 +2548,12 @@ function secForecast(){
       <div class="fwarn">กราฟโชว์จุดทุก 5 วันเพื่อไม่ให้รก แต่คำนวณจากข้อมูลทุกวันจริง (${fmt(dOrd.days)} วัน)</div>
       </div>
     </details>
-    <div class="cgrid2">
-      <div class="cpanel"><div class="chname2">จำนวนออเดอร์ / วัน</div>
-        <div class="cbox" style="height:520px"><canvas id="c_fcdo"></canvas></div>
+    <div class="fcacc-grid">
+      <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / วัน</div>
+        <div class="fcacc-chartbox" style="height:420px"><canvas id="c_fcdo"></canvas></div>
         ${fcStrip(dOrd,'ออเดอร์')}</div>
-      <div class="cpanel"><div class="chname2">จำนวนสินค้า (ชิ้น) / วัน</div>
-        <div class="cbox" style="height:520px"><canvas id="c_fcdq"></canvas></div>
+      <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / วัน</div>
+        <div class="fcacc-chartbox" style="height:420px"><canvas id="c_fcdq"></canvas></div>
         ${fcStrip(dQty,'ชิ้น')}</div>
     </div>`:'<div class="empty2">ข้อมูลรายวันไม่พอสำหรับพยากรณ์ (ต้องมีอย่างน้อย 7 วัน)</div>'}
 
@@ -2711,7 +2710,9 @@ function fcAccTable(bt,unit){
     </tbody></table></div>`;
 }
 
-/* เส้นทึบ = ยอดจริง · เส้นประ = พยากรณ์ · จุดสีเหลือง = Double Day */
+/* เส้นทึบ = ยอดจริง · เส้นประ = พยากรณ์ · จุดสีเหลือง = Double Day
+   ธีมสว่างเหมือนกราฟ Forecast Accuracy — เอาป้ายตัวเลขที่เคยวาดทับกันบนกราฟออก
+   (ตัวเลขจริงดูได้จากแถบ "พยากรณ์" ใต้กราฟอยู่แล้ว ไม่ต้องซ้อนบนเส้น) */
 function fcLineChart(id,key,s,unit){
   const el2=document.getElementById(id); if(!el2||!s)return;
   destroy(key);
@@ -2719,25 +2720,29 @@ function fcLineChart(id,key,s,unit){
   const histData=[...s.hist,...s.fc.map(()=>null)];
   /* ต่อเส้นให้เนียน — จุดสุดท้ายของเส้นจริงเป็นจุดเริ่มของเส้นพยากรณ์ */
   const fcData=[...s.hist.map((v,i)=>i===nH-1?v:null),...s.fc];
-  const o=baseOpts(true);
-  o.interaction={mode:'index',intersect:false};
-  o.plugins.tooltip.callbacks={
-    title:c=>{const i=c[0].dataIndex;
-      return s.labels[i]+(s.ranges&&s.ranges[i]?'  ·  '+s.ranges[i]:'');},
-    label:c=>c.raw==null?null:`${c.dataset.label}: ${fmt(c.raw)} ${unit}`};
-  o.scales.y.ticks.callback=v=>fmt(v);
-  o.plugins.lineLbl={display:true,histLen:nH};
-  o.layout={padding:{top:Math.round(190*CFZ),right:26,left:6}};
+  const o={responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(20)},usePointStyle:true}},
+      tooltip:{backgroundColor:'#1E293B',padding:10,cornerRadius:6,
+        titleFont:{size:cf(20)},bodyFont:{size:cf(19)},
+        callbacks:{
+          title:c=>{const i=c[0].dataIndex;
+            return s.labels[i]+(s.ranges&&s.ranges[i]?'  ·  '+s.ranges[i]:'');},
+          label:c=>c.raw==null?null:`${c.dataset.label}: ${fmt(c.raw)} ${unit}`}}},
+    scales:{x:{ticks:{color:'#64748B',font:{size:cf(18)},maxRotation:0,autoSkip:true},
+                grid:{display:false}},
+      y:{ticks:{color:'#64748B',font:{size:cf(18)},callback:v=>fmt(v)},
+          grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
   CH[key]=new Chart(el2,{type:'line',
     data:{labels:s.labels,datasets:[
-      {label:'ยอดจริง',data:histData,borderColor:C.teal,backgroundColor:'rgba(13,148,136,.12)',
-       borderWidth:3,tension:.32,fill:true,pointRadius:3,pointBackgroundColor:C.teal,spanGaps:false},
-      {label:'พยากรณ์',data:fcData,borderColor:C.plum,borderDash:[8,5],
-       borderWidth:3,tension:.32,fill:false,pointRadius:s.labels.map((_,i)=>i<nH-1?0:7),
-       pointHoverRadius:9,pointBorderColor:'#fff',pointBorderWidth:2.5,
+      {label:'ยอดจริง',data:histData,borderColor:'#0D9488',backgroundColor:'rgba(13,148,136,.12)',
+       borderWidth:3,tension:.32,fill:true,pointRadius:3,pointBackgroundColor:'#0D9488',spanGaps:false},
+      {label:'พยากรณ์',data:fcData,borderColor:'#B45309',borderDash:[8,5],
+       borderWidth:3,tension:.32,fill:false,pointRadius:s.labels.map((_,i)=>i<nH-1?0:6),
+       pointHoverRadius:8,pointBorderColor:'#fff',pointBorderWidth:2.5,
        pointBackgroundColor:s.labels.map((_,i)=>{
          const j=i-nH;
-         return (j>=0&&s.fcDD&&s.fcDD[j])||(j>=0&&s.ddCount&&s.ddCount[j]>0)?C.amber:C.plum;}),
+         return (j>=0&&s.fcDD&&s.fcDD[j])||(j>=0&&s.ddCount&&s.ddCount[j]>0)?'#D97706':'#B45309';}),
        spanGaps:false}]},
     options:o});
 }
@@ -2773,7 +2778,7 @@ function fcStackChart(id,key,items,weeks){
   const o=baseOpts(true);
   o.indexAxis='y';
   o.scales.x={stacked:true,ticks:{color:C.mute,font:{size:cf(22)},callback:v=>fmt(v)},
-              grid:{color:'rgba(255,255,255,.06)'},beginAtZero:true};
+              grid:{color:'rgba(30,27,51,.06)'},beginAtZero:true};
   o.scales.y={stacked:true,ticks:{color:C.mute,font:{size:cf(22)}},grid:{display:false}};
   o.plugins.tooltip.callbacks={
     title:c=>items[c[0].dataIndex].product,
@@ -2875,7 +2880,7 @@ async function loadPick(force){
 }
 
 let PICK_CTX=null;
-const PICK_PAL=[ '#60A5FA','#4ADE80','#FBBF24','#F87171','#A78BFA','#2DD4BF','#D4A56A','#93A1B8'];
+const PICK_PAL=[ '#2563EB','#16A34A','#D97706','#DC2626','#7C3AED','#0D9488','#A9752F','#475569'];
 
 /* ================= วิธีการปฏิบัติงาน · เงื่อนไขการส่งสินค้าแต่ละ Platform =================
    ฝังเอกสาร 3PL Operation Dashboard ไว้ใน iframe เพื่อกันไม่ให้ Tailwind/Font Awesome
@@ -2912,7 +2917,7 @@ function sopCSS(){
     /* v128: เอาชื่อเอกสารกลับมาไว้ซ้ายสุดของแถบ แล้วคั่นด้วยเส้นตั้ง
        ตามแบบที่ส่งมา (ชื่อซ้าย · แท็บเรียงต่อไปทางขวา บนแถบเดียวกัน) */
     +'aside>div:first-child{display:flex!important;align-items:center!important;'
-      +'border-bottom:0!important;border-right:1px solid rgba(255,255,255,.16)!important;'
+      +'border-bottom:0!important;border-right:1px solid rgba(30,27,51,.16)!important;'
       +'padding:0 '+Math.round(F*0.55)+'px!important;margin-right:'+Math.round(F*0.35)+'px!important;'
       +'align-self:stretch!important;flex:0 0 auto!important;'
       +'gap:'+Math.round(F*0.3)+'px!important}'
@@ -3170,7 +3175,7 @@ function drawShip(){
 
   /* โดนัทช่องทางขาย Top 5 — plot เป็น % ให้ pieLbl เขียนตัวเลขบนวงได้
      ที่เหลือรวมเป็น "อื่นๆ" กันชิ้นบางเรียงกันเป็นเสี้ยนรอบวง */
-  const PAL=[C.amber,'#E2E8F0',C.plumD,C.rose,C.plum,C.mute];
+  const PAL=[C.amber,'#334155',C.plumD,C.rose,C.plum,C.mute];
   const top5=S.chE.slice(0,5);
   const restSum=S.chE.slice(5).reduce((a,b)=>a+b[1],0);
   const chLab=top5.map(x=>x[0]).concat(restSum?['อื่นๆ']:[]);
@@ -3743,9 +3748,9 @@ function drawPick(){
     const o=baseOpts(false);
     o.indexAxis='y';
     o.layout={padding:{right:150}};
-    o.scales.x={beginAtZero:true,grid:{color:'rgba(255,255,255,.06)'},
+    o.scales.x={beginAtZero:true,grid:{color:'rgba(30,27,51,.06)'},
       ticks:{color:C.mute,font:{size:cf(22)},precision:0}};
-    o.scales.y={grid:{display:false},ticks:{color:'#93A1B8',font:{size:cf(24)}}};
+    o.scales.y={grid:{display:false},ticks:{color:'#6B6485',font:{size:cf(24)}}};
     o.plugins.tooltip.callbacks={
       label:c=>`${fmt(c.raw)} batch · ${(c.raw/tb*100).toFixed(1)}%`};
     o.plugins.barEnd={display:true,vals:bk.map(p=>p.batches),
@@ -3958,7 +3963,7 @@ const donutMid={id:'donutMid',
     const m=ch.getDatasetMeta(0); if(!m||!m.data||!m.data.length)return;
     const el0=m.data[0], cx=el0.x, cy=el0.y;
     const x=ch.ctx; x.save(); x.textAlign='center';
-    x.fillStyle='#E8EDF5'; x.textBaseline='alphabetic';
+    x.fillStyle='#1E1B33'; x.textBaseline='alphabetic';
     x.font='bold '+cf(52)+'px Tahoma';
     x.fillText(op.top,cx,cy+cf(8));
     x.fillStyle=C.mute; x.font=cf(24)+'px Tahoma';
@@ -3976,7 +3981,7 @@ const barEnd={id:'barEnd',
     x.font='bold '+cf(24)+'px Tahoma';
     m.data.forEach((bar,i)=>{
       const t=fmt(op.vals[i])+'  ·  '+op.pcts[i]+'%';
-      x.fillStyle='#E8EDF5';
+      x.fillStyle='#1E1B33';
       x.fillText(t,bar.x+12,bar.y);
     });
     x.restore();
@@ -3984,7 +3989,7 @@ const barEnd={id:'barEnd',
 if(window.Chart&&!Chart.registry.plugins.get('barEnd'))Chart.register(barEnd);
 
 /* สัดส่วนต่อหมวด: กราฟวงกลม + ตารางตัวเลขข้างใต้ */
-const RET_PAL=[C.teal,C.amber,C.plum,C.rose,C.tealD,'#C08A46',C.plumD,C.mute,
+const RET_PAL=[C.teal,C.amber,C.plum,C.rose,C.tealD,'#A9752F',C.plumD,C.mute,
                '#7FA8A6','#C9A063','#9A8BC4','#C9765F'];
 let RET_CTX=[];
 let RET_WK=null;
@@ -4042,10 +4047,10 @@ function drawReturn(){
       const o=baseOpts(false);
       o.indexAxis='y';
       o.layout={padding:{right:120}};
-      o.scales.x={beginAtZero:true,grid:{color:'rgba(255,255,255,.06)'},
+      o.scales.x={beginAtZero:true,grid:{color:'rgba(30,27,51,.06)'},
         ticks:{color:C.mute,font:{size:cf(22)},precision:0}};
       o.scales.y={grid:{display:false},
-        ticks:{color:'#93A1B8',font:{size:cf(24)},
+        ticks:{color:'#6B6485',font:{size:cf(24)},
           callback(v){const s=String(this.getLabelForValue(v));
             return s.length>34?s.slice(0,32)+'…':s;}}};
       o.plugins.tooltip.callbacks={
@@ -4842,7 +4847,7 @@ el('kReload').addEventListener('click',boot);
 el('kSave').addEventListener('click',async()=>{
   const b=el('kSave');b.disabled=true;b.textContent='กำลังบันทึก…';
   try{
-    const c=await html2canvas(el('kShot'),{scale:2,backgroundColor:'#0B1220',useCORS:true});
+    const c=await html2canvas(el('kShot'),{scale:2,backgroundColor:'#F3F1FA',useCORS:true});
     const a=document.createElement('a');
     const tag=[fYear(), fMonth()&&MONTH_EN[MONTH_ORDER.indexOf(fMonth())],
                WKSEL.length&&('W'+WKSEL.join('_')), DAYSEL].filter(Boolean).join('-')||'all';
@@ -5169,7 +5174,7 @@ el('save').addEventListener('click',async()=>{
   sh.classList.add(mode==='slide'?'cap-slide':'cap-full');
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
   try{
-    const opt={backgroundColor:'#0B1220',useCORS:true};
+    const opt={backgroundColor:'#F3F1FA',useCORS:true};
     if(mode==='slide')Object.assign(opt,{scale:2.4,width:1600,height:900,windowWidth:1640,windowHeight:940});
     else opt.scale=2;
     const c=await html2canvas(sh,opt);
