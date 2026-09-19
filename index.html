@@ -3013,12 +3013,25 @@ function secRetEmbed(){
 }
 function drawRetEmbed(){
   const f=document.getElementById('retFrame'), t=document.getElementById('retDoc');
-  if(!f||!t||f.dataset.ready)return;
-  /* ไฟล์ต้นฉบับล็อกความกว้างเนื้อหาไว้แค่ 1000px (.wrap{max-width:1000px})
-     ให้กินพื้นที่เต็มกรอบขาวแทน โดยยัด override เข้าไปก่อน </head> */
+  if(!f||!t)return;
+  /* ปรับความสูง iframe ให้พอดีกับเนื้อหาจริงเสมอ (ไม่ตัดครึ่งตอนกดโหมดพรีเซนต์
+     ที่ CSS บังคับ .sopframe เป็น 100vh ไว้) — วัดใหม่ทุกครั้งที่เนื้อหาข้างในเปลี่ยน (เช่น
+     พิมพ์กรองวันที่ในหน้า Return เอง) ด้วย ResizeObserver แทนที่จะวัดครั้งเดียวตอนโหลด */
+  const fit=()=>{ try{
+    const d=f.contentDocument; if(!d||!d.body)return;
+    f.style.height=Math.ceil(d.documentElement.scrollHeight)+'px';
+  }catch(e){} };
+  if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
   doc=doc.replace('</head>',
     '<style>.wrap{max-width:none!important;padding-left:5%!important;padding-right:5%!important}</style></head>');
+  f.addEventListener('load',()=>{
+    fit(); setTimeout(fit,200); setTimeout(fit,800);
+    try{
+      const d=f.contentDocument;
+      if(d&&window.ResizeObserver) new ResizeObserver(fit).observe(d.body);
+    }catch(e){}
+  });
   f.srcdoc=doc;
   f.dataset.ready='1';
 }
@@ -4493,7 +4506,7 @@ function renderKPI(){
   const tt=TITLE[SEC]||TITLE.overview;
   el('kTitle').textContent=tt[0];
   el('kSub').textContent=tt[1];
-  document.body.classList.toggle('sopmode', SEC==='sop');
+  document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='ret');
   if(!isOv){
     el('detail').innerHTML = SEC==='ontime'?secOnTime() : SEC==='oos'?secOOS()
                            : SEC==='diff'?secDiff() : SEC==='dock'?secDock()
