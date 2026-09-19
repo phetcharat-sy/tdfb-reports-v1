@@ -267,7 +267,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .kpis{display:grid;grid-template-columns:1fr;gap:6px}
 #vKPI .kpis>.subsec{grid-column:1/-1;margin-top:26px}
 #vKPI .kpi-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
-  padding:0 6px;margin-top:4px}
+  padding:0 6px;margin-top:20px}
 #vKPI .kpi-head b{font-size:26px;font-weight:bold;color:var(--page-ink)}
 #vKPI .kpi-head span{font-size:20px;color:var(--page-mute)}
 #vKPI .kpi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:44px 30px;
@@ -1871,14 +1871,13 @@ function secDiff(){
 
      <h2 class="sec">ความแม่นยำรายเดือน <em>% ที่นับตรงกับระบบ</em><span></span></h2>
      <div class="cpanel">
-       <div class="chint">เป้าหมาย ≥ 98% (Stock Variance &lt; 2%) · แท่งเขียว = ผ่าน · แท่งแดง = ต่ำกว่าเป้า</div>
        <div class="cscroll"><div class="cbox" style="height:520px;min-width:${Math.max(900,mk.length*140)}px">
          <canvas id="c_diffmo"></canvas></div></div>
      </div>
 
      <h2 class="sec">ความแม่นยำรายสัปดาห์ <em>% ที่นับตรงกับระบบ</em><span></span></h2>
      <div class="cpanel">
-       <div class="chint">เป้าหมาย ≥ 98%${DIFF_HAS_CRIT?' · คิด % แบบถ่วงน้ำหนักด้วยเกณฑ์ เหมือนหน้า KPI ทุกแผนก':''}${wk.length>14?' · เลื่อนซ้าย-ขวาเพื่อดูทุกสัปดาห์':''}${multiYear?'<br><b style="color:var(--bad)">กำลังรวมข้อมูลมากกว่า 1 ปี</b> — เลือกตัวกรอง YEAR เพื่อให้ตัวเลขตรงกับ Pivot ในชีต':''}</div>
+       ${multiYear?`<div class="chint"><b style="color:var(--bad)">กำลังรวมข้อมูลมากกว่า 1 ปี</b> — เลือกตัวกรอง YEAR เพื่อให้ตัวเลขตรงกับ Pivot ในชีต</div>`:''}
        <div class="cscroll"><div class="cbox" style="height:600px;min-width:${Math.max(900,wk.length*122)}px">
          <canvas id="c_diffwk"></canvas></div></div>
      </div>
@@ -2032,7 +2031,6 @@ function secDock(){
 
      <h2 class="sec">ON-TIME รายสัปดาห์ <em>${esc(vName)}</em><span></span></h2>
      <div class="cpanel">
-       <div class="chint">เป้าหมาย ON-TIME ≥ 90% (ไม่ผ่านเกณฑ์ &lt; 10%) · แท่งเขียว = ผ่าน · แท่งแดง = ต่ำกว่าเป้า${wk.length>14?' · เลื่อนซ้าย-ขวาเพื่อดูทุกสัปดาห์':''}</div>
        <div class="cscroll"><div class="cbox" style="height:560px;min-width:${Math.max(900,wk.length*122)}px">
          <canvas id="c_dockwk"></canvas></div></div>
      </div>
@@ -4171,16 +4169,8 @@ function secReturn(){
              wkKeys.length,'teal')}
       ${timeCards}
       ${card('มีระบุสาเหตุ',fmt(list.filter(r=>r.r).length),'rose')}</div>`
-   +(hasTime
-     ?`<div class="chint">ตัวเลขคือ<b>ชั่วโมงที่มีเคสมากสุด</b> ไม่ใช่ค่าเฉลี่ย
-        (ค่าเฉลี่ยจะตกไปอยู่ช่วงที่ไม่มีเคสเกิดจริง ถ้างานกระจุกหลายช่วง) ·
-        ค่ากลาง: ${[pkL.length?esc(d.hPk)+' '+minToClock(median(pkL)):'',
-                    cxL.length?esc(d.hCx)+' '+minToClock(median(cxL)):''].filter(Boolean).join(' · ')} ·
-        <span style="color:var(--mute)">คิดจากเคสที่มีเวลาจริง ${fmt(Math.max(pkL.length,cxL.length))} จาก ${fmt(tot)} เคส</span></div>`
-     :avgD==null?`<div class="chint">หาคอลัมน์ "วันที่สิ้นสุด" ในชีตไม่เจอ จึงยังคำนวณระยะเวลาปิดเคสไม่ได้<br>
-      <span style="color:var(--mute)">หัวคอลัมน์ในชีต: ${esc(d.H.filter(Boolean).join(' | '))}</span></div>`
-     :`<div class="chint">ระยะเวลาปิดเคสคิดจาก <b>วันที่สิ้นสุด − วันที่ได้รับ</b> ·
-        คำนวณได้ ${fmt(dl2.length)} จาก ${fmt(tot)} เคส</div>`)
+   +(!hasTime&&avgD==null?`<div class="chint">หาคอลัมน์ "วันที่สิ้นสุด" ในชีตไม่เจอ จึงยังคำนวณระยะเวลาปิดเคสไม่ได้<br>
+      <span style="color:var(--mute)">หัวคอลัมน์ในชีต: ${esc(d.H.filter(Boolean).join(' | '))}</span></div>`:'')
    +(wkKeys.length>1?`
      <h2 class="sec">รายสัปดาห์ <em>${esc(tab.t)} · จำนวนออเดอร์ต่อสัปดาห์</em><span></span></h2>
      <div class="cpanel">
