@@ -1878,8 +1878,6 @@ function secDiff(){
       ${card('ไม่ตรง',bad.length,'rose')}${card('ตรง',rows.length-bad.length,'teal')}
       ${card('ผลต่างรวม (ชิ้น)',gapSum,'amber')}</div>
 
-     ${chipOne('diff_ch','รูปแบบกราฟ',[['line','เส้น (จุดแดง = ไม่ผ่านเกณฑ์)'],['bar','แท่ง']],sf('diff_ch','line'))}
-
      <h2 class="sec">ความแม่นยำรายเดือน <em>% ที่นับตรงกับระบบ</em><span></span></h2>
      <div class="cpanel">
        <div class="cscroll"><div class="cbox" style="height:520px;min-width:${Math.max(900,mk.length*140)}px">
@@ -1887,6 +1885,7 @@ function secDiff(){
      </div>
 
      <h2 class="sec">ความแม่นยำรายสัปดาห์ <em>% ที่นับตรงกับระบบ</em><span></span></h2>
+     ${chipOne('diff_ch','รูปแบบกราฟ',[['line','เส้น (จุดแดง = ไม่ผ่านเกณฑ์)'],['bar','แท่ง']],sf('diff_ch','line'))}
      <div class="cpanel">
        ${multiYear?`<div class="chint"><b style="color:var(--bad)">กำลังรวมข้อมูลมากกว่า 1 ปี</b> — เลือกตัวกรอง YEAR เพื่อให้ตัวเลขตรงกับ Pivot ในชีต</div>`:''}
        <div class="cscroll"><div class="cbox" style="height:600px;min-width:${Math.max(900,wk.length*122)}px">
@@ -1935,9 +1934,10 @@ function drawDiff(){
 
   /* กราฟทั้งสองแสดง "% ที่นับตรง" = 100 − Stock Diff · เป้าหมาย ≥ 98%
      เลือกได้ 2 แบบ (chipOne "diff_ch") — เส้น (default) จุดไหนต่ำกว่าเกณฑ์ขึ้นจุดแดง / แท่งสีเดียวกับก่อนหน้า */
-  const mkChart=(id,key,labels,vals,meta)=>{
+  const mkChart=(id,key,labels,vals,meta,forceType)=>{
     const el2=document.getElementById(id); if(!el2||!labels.length)return;
     destroy(key);
+    const t=forceType||chType;
     const o=baseOpts(false); o.layout={padding:{top:34}};
     o.scales.y.ticks.callback=v=>v+'%';
     o.scales.y.max=100;
@@ -1948,7 +1948,7 @@ function drawDiff(){
       title:c=>meta[c[0].dataIndex].title,
       label:c=>[`นับตรง ${(+c.raw).toFixed(2)}%  (Stock Variance ${(100-c.raw).toFixed(2)}%)`,
                 `นับทั้งหมด ${fmt(meta[c.dataIndex].n)} · ไม่ตรง ${fmt(meta[c.dataIndex].bad)} รายการ`]};
-    if(chType==='line'){
+    if(t==='line'){
       CH[key]=new Chart(el2,{type:'line',
         data:{labels,datasets:[{data:vals,
           borderColor:C.teal,backgroundColor:'rgba(13,148,136,.12)',
@@ -1964,12 +1964,12 @@ function drawDiff(){
     }
   };
 
-  /* รายเดือน */
+  /* รายเดือน — ยึดเป็นแท่งเสมอ ไม่มีตัวเลือกเปลี่ยนรูปแบบ (ตัวเลือกอยู่เฉพาะกราฟรายสัปดาห์ด้านล่าง) */
   if(mk&&mk.length){
     const vals=mk.map(k=>100-wpct(byM[k]));
     const meta=mk.map(k=>{const o=byM[k];
       return {title:monLbl(k)+'  ·  '+weekRange(o.d0,o.d1),n:o.n,bad:o.bad};});
-    mkChart('c_diffmo','diffmo',mk.map(monLbl),vals,meta);
+    mkChart('c_diffmo','diffmo',mk.map(monLbl),vals,meta,'bar');
   }
 
   /* รายสัปดาห์ */
