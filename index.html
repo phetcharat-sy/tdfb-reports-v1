@@ -3556,10 +3556,7 @@ function secPack(){
       </div>
       <div class="pkrow"><span>ชม. ยืนแพ็ค : เวลาสแกนจริง</span>
         <b>${c.workHrs} ชม. : ${c.time}</b></div>
-      <div class="pkgrid">
-        <div class="pkcell"><div class="pklbl">CHANNEL</div>
-          <div class="pkv amber">${esc(c.ch[0])}</div>
-          <div class="pksub">${fmt(c.ch[1])} กล่อง</div></div>
+      <div class="pkgrid" style="grid-template-columns:1fr">
         <div class="pkcell"><div class="pklbl">STATION</div>
           <div class="pkv plum">${esc(c.st[0])}</div>
           <div class="pksub">${fmt(c.st[1])} กล่อง</div></div>
@@ -3597,12 +3594,8 @@ function secPack(){
      ${chipOne('pk2_stack','รูปแบบ',[['0','แยกแท่ง (เทียบรายคน)'],['1','ซ้อนแท่ง (ดูยอดรวม)']],tStack?'1':'0')}
      <div class="cpanel"><div class="cbox xl"><canvas id="c_pkWk"></canvas></div></div>
 
-     <div class="g2">
-       <div><h2 class="sec">สัดส่วนการแพ็ค (เทียบรายบุคคล)<span></span></h2>
-         <div class="cpanel"><div class="cbox"><canvas id="c_pkShare"></canvas></div></div></div>
-       <div><h2 class="sec">ช่องทางการขาย (เปรียบเทียบ)<span></span></h2>
-         <div class="cpanel"><div class="cbox"><canvas id="c_pkChan"></canvas></div></div></div>
-     </div>
+     <h2 class="sec">สัดส่วนการแพ็ค (เทียบรายบุคคล)<span></span></h2>
+     <div class="cpanel" style="max-width:820px"><div class="cbox"><canvas id="c_pkShare"></canvas></div></div>
 
      <h2 class="sec">เวลาที่ใช้งานหนาแน่น (Peak Hours - เปรียบเทียบ)<span></span></h2>
      <div class="cpanel"><div class="cbox"><canvas id="c_pkHour"></canvas></div></div>
@@ -3727,12 +3720,7 @@ function drawPack(){
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('
             +fmt(shareVal[c.dataIndex])+' กล่อง)'}}}}});
 
-  /* ช่องทางขาย แยกคน */
-  destroy('pkChan');
-  CH.pkChan=new Chart(document.getElementById('c_pkChan'),{type:'bar',
-    data:{labels:S.pArr,datasets:S.chArr.map((c2,i)=>({label:c2,
-      data:S.pArr.map(n=>S.per[n].ch[c2]||0),backgroundColor:col(i+3),borderRadius:3}))},
-    options:Object.assign(baseOpts(true),{indexAxis:'y'})});
+  /* ช่องทางขาย แยกคน — เอาออกแล้ว เพราะคอลัมน์ต้นทางไม่ตรง หาคอลัมน์จริงในชีตไม่เจอ */
 
   /* Peak hours */
   const hArr=[...new Set(PACK.list.map(x=>x.hr))].filter(h=>h!=='ไม่ระบุ').sort();
