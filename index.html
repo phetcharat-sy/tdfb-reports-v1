@@ -4449,7 +4449,12 @@ function secRepl(){
   REPL_CTX={need};
 
   const bySale=[...act].sort((a,b)=>b.score-a.score);
-  const byQty=[...need].sort((a,b)=>b.qty-a.qty);
+  /* เรียงตัวที่มีสาเหตุ (Remark) ก่อน ตัวที่ไม่มี ("—") ไปอยู่ท้ายตาราง แล้วค่อยเรียงตามจำนวนที่ต้องเติมมาก→น้อย */
+  const byQty=[...need].sort((a,b)=>{
+    const ar=a.remark?1:0, br=b.remark?1:0;
+    if(ar!==br)return br-ar;
+    return b.qty-a.qty;
+  });
   const all=[...REPL].sort((a,b)=>{
     const an=isNeed(a)?1:0,bn=isNeed(b)?1:0;
     if(an!==bn)return bn-an;
