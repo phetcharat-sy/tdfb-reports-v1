@@ -1634,7 +1634,7 @@ function secOnTime(){
   ONTIME_CTX={ord,lines,onT,late,plat,walk};
 
   return ringHTML(p,98,`<span>แพ็คเสร็จตามวันที่ต้องการ</span><span>เป้าหมาย <b>≥ 98%</b></span>`)
-   +`<div class="sgrid">${card('Orders',total)}${card('Packed On Time',onT,'teal')}
+   +`<div class="sgrid">${card('Orders',total)}${card('Packed On Time',onT+early,'teal')}
        ${card('แพ็คก่อนวันจัดส่ง',early,'amber')}${card('แพ็คล่าช้า',late,'rose')}${card('ยังไม่ได้จัดส่ง',pend,'mute')}</div>
      <div class="sgrid">${card('Customers',cust)}${card('Platform',plat,'amber')}
        ${card('Walk-in',walk)}${card('ส่งปกติ',nor,'teal')}${card('ด่วน',urg,'rose')}</div>
