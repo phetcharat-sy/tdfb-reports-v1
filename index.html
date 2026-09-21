@@ -1933,15 +1933,15 @@ function secDiff(){
    (กราฟรายสัปดาห์มีได้ถึง 30+ จุด เบียดกันแน่นกว่ากราฟพยากรณ์มาก) */
 const diffLineLbl={id:'diffLineLbl',
   beforeLayout(ch,a,op){ if(!op||!op.display)return;
-    const need=Math.round(120*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
+    const need=Math.round(150*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
     if(typeof p==='object'&&p){ if((p.top||0)<need)p.top=need; }
     else ch.options.layout={padding:{top:need}}; },
   afterDatasetsDraw(ch,a,op){
     if(!op||!op.display)return;
     const x=ch.ctx, m=ch.getDatasetMeta(0); if(!m||m.hidden)return;
     const ds=ch.data.datasets[0];
-    x.save(); x.font='bold '+cf(24)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
-    const step=Math.round(28*CFZ);
+    x.save(); x.font='bold '+cf(30)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
+    const step=Math.round(34*CFZ);
     let placed=[];
     m.data.forEach((pt,i)=>{
       const v=ds.data[i]; if(v==null)return;
@@ -1964,12 +1964,10 @@ const diffTargetLine={id:'diffTargetLine',
     const yPix=y.getPixelForValue(op.target);
     if(yPix<ar.top||yPix>ar.bottom)return;
     x.save();
+    /* ตัดข้อความ "ต้องผ่านเกณฑ์ X%" ออก — ไปทับกับป้าย % ของจุดแรกๆ เหลือแค่เส้นประพอ */
     x.setLineDash([7,5]); x.strokeStyle='#DC2626'; x.lineWidth=2;
     x.beginPath(); x.moveTo(ar.left,yPix); x.lineTo(ar.right,yPix); x.stroke();
     x.setLineDash([]);
-    x.fillStyle='#DC2626'; x.font='bold '+cf(22)+'px "Baloo 2"';
-    x.textAlign='left'; x.textBaseline='bottom';
-    x.fillText('ต้องผ่านเกณฑ์ '+op.target+'%',ar.left+8,yPix-6);
     x.restore();
   }};
 if(window.Chart&&!Chart.registry.plugins.get('diffTargetLine'))Chart.register(diffTargetLine);
@@ -1996,8 +1994,9 @@ function drawDiff(){
       label:c=>[`นับตรง ${(+c.raw).toFixed(2)}%  (Stock Variance ${(100-c.raw).toFixed(2)}%)`,
                 `นับทั้งหมด ${fmt(meta[c.dataIndex].n)} · ไม่ตรง ${fmt(meta[c.dataIndex].bad)} รายการ`]};
     if(t==='line'){
-      /* เอาป้ายตัวเลข % ลอยบนกราฟออก — จุดเบียดกันแน่นเกินไป (30 กว่าสัปดาห์) ต่อให้ไล่ซ้อนชั้นก็ยังอ่านยาก
-         ใช้สีจุด (แดง=ไม่ผ่านเกณฑ์/เขียว=ผ่าน) กับ tooltip ตอนชี้แทน ตัวเลขจริงดูที่ตารางด้านล่างได้ */
+      /* เอาป้ายตัวเลข % กลับมาใส่ตามที่ขอ — ขยายใหญ่กว่ารอบก่อน และตัดข้อความ "ต้องผ่านเกณฑ์" ออก
+         (เหลือแค่เส้นประเฉยๆ กันไปทับตัวเลขจุดแรกๆ) */
+      o.plugins.diffLineLbl={display:true,target:98};
       o.plugins.diffTargetLine={display:true,target:98};
       CH[key]=new Chart(el2,{type:'line',
         data:{labels,datasets:[{data:vals,
