@@ -2715,7 +2715,9 @@ function fcAccTable(bt,unit){
    กันเส้น/ตัวเลขโดนตัดขอบบนกราฟตอนพยากรณ์พุ่งสูง ด้วยการเผื่อ padding ด้านบนไว้ */
 const fcPtLbl={id:'fcPtLbl',
   beforeLayout(ch,a,op){ if(!op||!op.display)return;
-    const need=Math.round(50*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
+    /* จุดพยากรณ์รายวันเบียดกันแน่นกว่ารายสัปดาห์ ป้ายอาจต้องเรียงซ้อนขึ้น 2-3 ชั้น
+       เผื่อพื้นที่ด้านบนให้พอ กันข้อความชนขอบบนกราฟ */
+    const need=Math.round(110*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
     if(typeof p==='object'&&p){ if((p.top||0)<need)p.top=need; }
     else ch.options.layout={padding:{top:need}}; },
   afterDatasetsDraw(ch,a,op){
@@ -2723,11 +2725,17 @@ const fcPtLbl={id:'fcPtLbl',
     const x=ch.ctx, m=ch.getDatasetMeta(1); if(!m||m.hidden)return;
     const ds=ch.data.datasets[1];
     x.save(); x.font='bold '+cf(19)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
+    const step=Math.round(22*CFZ);
+    let placed=[];   /* กันป้ายทับกัน — จุดพยากรณ์ชิดกันตอนดูรายวัน เลยไล่ซ้อนขึ้นเป็นชั้นแทนวางระดับเดียวกันหมด */
     m.data.forEach((pt,i)=>{
       if(i<op.nH)return;
       const v=ds.data[i]; if(v==null)return;
+      const t=fmt(v), w=x.measureText(t).width;
+      let level=0;
+      while(placed.some(b=>b.level===level&&Math.abs(b.x-pt.x)<(b.w+w)/2+6))level++;
+      placed.push({x:pt.x,w,level});
       x.fillStyle='#B45309';
-      x.fillText(fmt(v),pt.x,pt.y-10);
+      x.fillText(t,pt.x,pt.y-10-level*step);
     });
     x.restore();
   }};
