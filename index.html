@@ -230,6 +230,8 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .chsub{font-size:22.8px;font-weight:normal;color:var(--mute);margin-top:2px}
 #vKPI .chpct{font-size:43.3px;font-weight:bold;color:var(--teal-d);white-space:nowrap}
 #vKPI .tscroll{max-height:560px;overflow:auto}
+/* โชว์พอดี 10 แถวแรกของตารางรายการที่นับไม่ตรง เลื่อนดูที่เหลือ (แถวนี้สูงกว่าปกติเพราะมี 2 บรรทัดต่อแถว) */
+#vKPI .tscroll.t10{max-height:1150px}
 #vKPI .chip{display:inline-block;padding:3px 12px;border-radius:7px;font-weight:bold;font-size:23.9px}
 #vKPI .qty{display:inline-block;background:#F7E4DF;color:var(--bad);font-weight:bold;
   padding:2px 10px;border-radius:6px}
@@ -1369,7 +1371,7 @@ const linePt={id:'linePt',
     if(!op||!op.display)return;
     const x=ch.ctx, area=ch.chartArea;
     x.save();
-    x.font='bold '+cf(24)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
+    x.font='bold '+cf(30)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
     ch.data.datasets.forEach((ds,di)=>{
       const m=ch.getDatasetMeta(di); if(m.hidden)return;
       /* แสดงทุกจุด — จุดที่เลขจะทับกัน ให้สลับไปวางใต้จุดแทน */
@@ -1906,7 +1908,7 @@ function secDiff(){
    +`</tbody></table></div>
 
      <h2 class="sec">รายการที่นับไม่ตรง <em>${fmt(bad.length)} รายการ · เรียงตามวันที่ เก่า → ใหม่</em><span></span></h2>`
-   +(bad.length?`<div class="tscroll"><table class="dt big-rows"><thead><tr>
+   +(bad.length?`<div class="tscroll t10"><table class="dt big-rows"><thead><tr>
        <th class="c-date">วันที่</th><th class="c-prod">สินค้า · Lot · Location</th>
        <th class="num c-n">Odoo</th><th class="num c-n">นับได้</th>
        <th class="num c-gap">ผลต่าง</th>
@@ -1931,15 +1933,15 @@ function secDiff(){
    (กราฟรายสัปดาห์มีได้ถึง 30+ จุด เบียดกันแน่นกว่ากราฟพยากรณ์มาก) */
 const diffLineLbl={id:'diffLineLbl',
   beforeLayout(ch,a,op){ if(!op||!op.display)return;
-    const need=Math.round(90*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
+    const need=Math.round(120*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
     if(typeof p==='object'&&p){ if((p.top||0)<need)p.top=need; }
     else ch.options.layout={padding:{top:need}}; },
   afterDatasetsDraw(ch,a,op){
     if(!op||!op.display)return;
     const x=ch.ctx, m=ch.getDatasetMeta(0); if(!m||m.hidden)return;
     const ds=ch.data.datasets[0];
-    x.save(); x.font='bold '+cf(17)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
-    const step=Math.round(20*CFZ);
+    x.save(); x.font='bold '+cf(24)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
+    const step=Math.round(28*CFZ);
     let placed=[];
     m.data.forEach((pt,i)=>{
       const v=ds.data[i]; if(v==null)return;
@@ -1965,7 +1967,7 @@ const diffTargetLine={id:'diffTargetLine',
     x.setLineDash([7,5]); x.strokeStyle='#DC2626'; x.lineWidth=2;
     x.beginPath(); x.moveTo(ar.left,yPix); x.lineTo(ar.right,yPix); x.stroke();
     x.setLineDash([]);
-    x.fillStyle='#DC2626'; x.font='bold '+cf(17)+'px "Baloo 2"';
+    x.fillStyle='#DC2626'; x.font='bold '+cf(22)+'px "Baloo 2"';
     x.textAlign='left'; x.textBaseline='bottom';
     x.fillText('ต้องผ่านเกณฑ์ '+op.target+'%',ar.left+8,yPix-6);
     x.restore();
