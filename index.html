@@ -373,11 +373,11 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .fnote summary::before{content:"▸";display:inline-block;color:var(--plum);
   transition:transform .15s ease;font-size:.85em}
 #vKPI .fnote[open] summary::before{transform:rotate(90deg)}
-#vKPI .fnote .fbody{padding-bottom:22px}
+#vKPI .fnote .fbody{padding-bottom:22px;font-size:30px}
 #vKPI .fnote code{display:block;margin-top:12px;background:var(--soft);border-radius:9px;
-  padding:12px 16px;font-family:'JetBrains Mono',monospace,Tahoma;font-size:24px;
+  padding:12px 16px;font-family:'JetBrains Mono',monospace,Tahoma;font-size:28px;
   color:var(--plum-d);line-height:1.6}
-#vKPI .fwarn{margin-top:12px;color:var(--bad);font-size:26px}
+#vKPI .fwarn{margin-top:12px;color:var(--bad);font-size:30px}
 /* ---------- Forecast Accuracy — การ์ดสไตล์สว่าง แยกจากธีมมืดหลักตามที่ขอ (อ่านง่าย สบายตา) ---------- */
 #vKPI .fcacc{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:20px;
   padding:26px 28px 8px;margin-bottom:18px;
@@ -387,11 +387,11 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .fcacc-card{background:#fff;border:1px solid #E2E8F0;border-radius:14px;
   padding:20px 18px;text-align:center;display:flex;flex-direction:column;
   align-items:center;gap:6px}
-#vKPI .fcacc-card i{font-style:normal;font-size:26px;color:#0D9488}
-#vKPI .fcacc-card b{font-size:20px;font-weight:600;color:#475569}
-#vKPI .fcacc-card span{font-size:38px;font-weight:800;color:#0F172A;letter-spacing:-.5px}
+#vKPI .fcacc-card i{font-style:normal;font-size:32px;color:#0D9488}
+#vKPI .fcacc-card b{font-size:26px;font-weight:600;color:#475569}
+#vKPI .fcacc-card span{font-size:48px;font-weight:800;color:#0F172A;letter-spacing:-.5px}
 #vKPI .fcacc-card span.up{color:#B45309}#vKPI .fcacc-card span.down{color:#0F766E}
-#vKPI .fcacc-card small{font-size:16px;color:#64748B}
+#vKPI .fcacc-card small{font-size:22px;color:#64748B}
 #vKPI .fcacc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 /* v136: การ์ดขวา (จำนวนสินค้า/วัน) ไม่มี min-width:0 — เนื้อหาข้างในกว้างกว่าคอลัมน์
    (ตัวเลขแกน Y หลักพัน + ตารางแคบ) เลยดันกรอบล้นออกมาทับการ์ดซ้าย ทั้งที่ grid เป็น 1fr 1fr แล้ว
@@ -400,9 +400,9 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 @media(max-width:1300px){#vKPI .fcacc-grid{grid-template-columns:1fr}}
 #vKPI .fcacc-panel{background:#fff;border:1px solid #E2E8F0;border-radius:16px;
   padding:20px 22px 4px;margin-bottom:22px}
-#vKPI .fcacc-h{font-size:24px;font-weight:700;color:#0F172A;margin-bottom:10px}
+#vKPI .fcacc-h{font-size:32px;font-weight:700;color:#0F172A;margin-bottom:10px}
 #vKPI .fcacc-h em{display:block;font-style:normal;font-weight:normal;
-  font-size:18px;color:#64748B;margin-top:2px}
+  font-size:24px;color:#64748B;margin-top:2px}
 #vKPI .fcacc-chartbox{position:relative;height:320px;margin-bottom:14px}
 #vKPI .fcacc-tblwrap{max-height:320px;overflow:auto;border-top:1px solid #E2E8F0}
 #vKPI .fcacc-tbl{width:100%;border-collapse:collapse;font-size:19px}
@@ -1619,12 +1619,12 @@ function secOnTime(){
 
   const ord=toOrderLevel(lines);
   const total=uniqOrders(lines);
-  const onT=ord.filter(r=>r._worst==='ontime'||r._worst==='early').length;
+  const ontime=ord.filter(r=>r._worst==='ontime').length;
+  const early=ord.filter(r=>r._worst==='early').length;
+  const onT=ontime+early;   /* ทั้งหมดที่แพ็คตรงวันหรือก่อนวัน */
   const late=ord.filter(r=>r._worst==='late').length;
   const pend=ord.filter(r=>isPending(r.dstat)).length;
   const denom=onT+late||1, p=onT/denom*100;   /* ไม่ปัดตรงนี้ — ให้ ringHTML จัดการทศนิยม */
-
-  const early=ord.filter(r=>r._worst==='early').length;
   const cust=new Set(ord.map(r=>r.customer).filter(Boolean)).size;
   const plat=ord.filter(r=>isPlatform(r.source)).length;
   const walk=total-plat;
@@ -1634,7 +1634,7 @@ function secOnTime(){
   ONTIME_CTX={ord,lines,onT,late,plat,walk};
 
   return ringHTML(p,98,`<span>แพ็คเสร็จตามวันที่ต้องการ</span><span>เป้าหมาย <b>≥ 98%</b></span>`)
-   +`<div class="sgrid">${card('Orders',total)}${card('Packed On Time',onT+early,'teal')}
+   +`<div class="sgrid">${card('Orders',total)}${card('Packed On Time',ontime,'teal')}
        ${card('แพ็คก่อนวันจัดส่ง',early,'amber')}${card('แพ็คล่าช้า',late,'rose')}${card('ยังไม่ได้จัดส่ง',pend,'mute')}</div>
      <div class="sgrid">${card('Customers',cust)}${card('Platform',plat,'amber')}
        ${card('Walk-in',walk)}${card('ส่งปกติ',nor,'teal')}${card('ด่วน',urg,'rose')}</div>
