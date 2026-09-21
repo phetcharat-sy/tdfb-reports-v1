@@ -1996,7 +1996,8 @@ function drawDiff(){
       label:c=>[`นับตรง ${(+c.raw).toFixed(2)}%  (Stock Variance ${(100-c.raw).toFixed(2)}%)`,
                 `นับทั้งหมด ${fmt(meta[c.dataIndex].n)} · ไม่ตรง ${fmt(meta[c.dataIndex].bad)} รายการ`]};
     if(t==='line'){
-      o.plugins.diffLineLbl={display:true,target:98};
+      /* เอาป้ายตัวเลข % ลอยบนกราฟออก — จุดเบียดกันแน่นเกินไป (30 กว่าสัปดาห์) ต่อให้ไล่ซ้อนชั้นก็ยังอ่านยาก
+         ใช้สีจุด (แดง=ไม่ผ่านเกณฑ์/เขียว=ผ่าน) กับ tooltip ตอนชี้แทน ตัวเลขจริงดูที่ตารางด้านล่างได้ */
       o.plugins.diffTargetLine={display:true,target:98};
       CH[key]=new Chart(el2,{type:'line',
         data:{labels,datasets:[{data:vals,
