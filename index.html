@@ -3565,6 +3565,8 @@ function secPack(){
        ${card('ออเดอร์วันล่าสุด ('+(S.last||'-')+')',S.lastQty,'plum')}
        ${card('เฉลี่ยแพ็คต่อวัน (รวมทีม)',S.avgDay,'teal')}
        ${card('ความเร็วแพ็คเฉลี่ย (ออเดอร์/ชม.)',S.speed,'amber')}
+       ${card('พีคไทม์',(()=>{const e=Object.entries(S.hrs).filter(x=>x[0]!=='ไม่ระบุ')
+           .sort((a,b)=>b[1]-a[1])[0]; return e?e[0]:'—';})(),'rose')}
        ${card('TEAM UTIL. (เป้า '+PACK_TARGET+'/คน/วัน)',S.util+'%',S.util>=80?'teal':'rose')}</div>
 
      <div class="pkpair">
