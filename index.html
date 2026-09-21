@@ -161,13 +161,13 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .rbar i{display:block;height:100%;border-radius:8px}
 #vKPI .rval{font-size:31px;font-weight:800;color:var(--ink);
   font-variant-numeric:tabular-nums;min-width:150px;text-align:right}
-#vKPI .pkstations{display:flex;flex-wrap:wrap;gap:24px;justify-content:center;
+#vKPI .pkstations{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
   align-content:center;padding:14px 0;flex:1}
-#vKPI .pkgauge{width:28%;min-width:240px;display:flex;flex-direction:column;align-items:center}
-#vKPI .pkgauge .gwrap{position:relative;width:100%;height:260px}
-#vKPI .pkgauge .gval{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
-  font-size:52px;font-weight:800}
-#vKPI .pkgauge .gname{font-size:34px;font-weight:700;color:var(--ink);margin-top:8px}
+#vKPI .pkgauge{width:45%;min-width:190px;display:flex;flex-direction:column;align-items:center}
+#vKPI .pkgauge .gwrap{position:relative;width:100%;height:210px}
+#vKPI .pkgauge .gval{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  font-size:43px;font-weight:800}
+#vKPI .pkgauge .gname{font-size:30px;font-weight:700;color:var(--ink);margin-top:6px}
 #vKPI .pkcards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
 @media(max-width:1100px){#vKPI .pkcards{grid-template-columns:1fr}}
 #vKPI .pkcard{background:var(--card);border:1px solid var(--line);border-top:6px solid var(--line);
@@ -3573,7 +3573,7 @@ function secPack(){
            .sort((a,b)=>b[1]-a[1])[0]; return e?e[0]:'—';})(),'rose')}
        ${card('TEAM UTIL. (เป้า '+PACK_TARGET+'/คน/วัน)',S.util+'%',S.util>=80?'teal':'rose')}</div>
 
-     <div class="pkpair" style="grid-template-columns:1fr">
+     <div class="pkpair">
        <div><h2 class="sec">ผลงานพนักงานแพ็ค (Leaderboard)<span></span></h2>
          <div class="cpanel"><div class="pkrank">${
            S.pArr.map((n,i)=>{
@@ -3586,10 +3586,9 @@ function secPack(){
                  background:${['#6B5CA5','#3E8E8C','#D89A2E'][i]||'#9AA1AE'}"></i></span>
                <span class="rval">${fmt(v)}</span></div>`;
            }).join('')}</div></div></div>
+       <div><h2 class="sec">Station Utilization <em>วันที่สถานีถูกใช้ ÷ วันทำงาน</em><span></span></h2>
+         <div class="cpanel"><div id="pkStations" class="pkstations"></div></div></div>
      </div>
-
-     <h2 class="sec">Station Utilization <em>วันที่สถานีถูกใช้ ÷ วันทำงาน</em><span></span></h2>
-     <div class="cpanel"><div id="pkStations" class="pkstations"></div></div>
 
      <h2 class="sec">แนวโน้มการแพ็ค <em>${tSpan==='w'?'รายสัปดาห์ — ตามฟิลเตอร์ '+fWeekLabel():'รายเดือน'} · ${tStack?'ซ้อนแท่ง = ยอดรวมทีม':'แยกแท่งรายคน'}</em><span></span></h2>
      ${chipOne('pk2_stack','รูปแบบ',[['0','แยกแท่ง (เทียบรายคน)'],['1','ซ้อนแท่ง (ดูยอดรวม)']],tStack?'1':'0')}
