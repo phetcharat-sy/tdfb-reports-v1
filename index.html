@@ -1878,6 +1878,8 @@ function secDiff(){
       ${card('ไม่ตรง',bad.length,'rose')}${card('ตรง',rows.length-bad.length,'teal')}
       ${card('ผลต่างรวม (ชิ้น)',gapSum,'amber')}</div>
 
+     ${chipOne('diff_ch','รูปแบบกราฟ',[['line','เส้น (จุดแดง = ไม่ผ่านเกณฑ์)'],['bar','แท่ง']],sf('diff_ch','line'))}
+
      <h2 class="sec">ความแม่นยำรายเดือน <em>% ที่นับตรงกับระบบ</em><span></span></h2>
      <div class="cpanel">
        <div class="cscroll"><div class="cbox" style="height:520px;min-width:${Math.max(900,mk.length*140)}px">
@@ -1929,26 +1931,37 @@ function secDiff(){
 function drawDiff(){
   if(!DIFF_CTX)return;
   const {byW,wk,wpct,multiYear,byM,mk,monLbl}=DIFF_CTX;
+  const chType=sf('diff_ch','line');
 
-  /* กราฟทั้งสองแสดง "% ที่นับตรง" = 100 − Stock Diff · เป้าหมาย ≥ 98% */
-  const mkChart=(id,key,labels,vals,meta,minW)=>{
+  /* กราฟทั้งสองแสดง "% ที่นับตรง" = 100 − Stock Diff · เป้าหมาย ≥ 98%
+     เลือกได้ 2 แบบ (chipOne "diff_ch") — เส้น (default) จุดไหนต่ำกว่าเกณฑ์ขึ้นจุดแดง / แท่งสีเดียวกับก่อนหน้า */
+  const mkChart=(id,key,labels,vals,meta)=>{
     const el2=document.getElementById(id); if(!el2||!labels.length)return;
     destroy(key);
     const o=baseOpts(false); o.layout={padding:{top:34}};
     o.scales.y.ticks.callback=v=>v+'%';
     o.scales.y.max=100;
     o.scales.y.suggestedMin=Math.max(0,Math.floor(Math.min(...vals)/5)*5-2);
-    o.plugins.barPct={display:true,digits:2,target:98};
     o.scales.x.ticks.font={size:cf(26)};
     o.scales.y.ticks.font={size:cf(26)};
     o.plugins.tooltip.callbacks={
       title:c=>meta[c[0].dataIndex].title,
       label:c=>[`นับตรง ${(+c.raw).toFixed(2)}%  (Stock Variance ${(100-c.raw).toFixed(2)}%)`,
                 `นับทั้งหมด ${fmt(meta[c.dataIndex].n)} · ไม่ตรง ${fmt(meta[c.dataIndex].bad)} รายการ`]};
-    CH[key]=new Chart(el2,{type:'bar',
-      data:{labels,datasets:[{data:vals,
-        backgroundColor:vals.map(v=>v>=98?C.teal:C.rose),borderRadius:6,
-        maxBarThickness:70,minBarLength:2}]},options:o});
+    if(chType==='line'){
+      CH[key]=new Chart(el2,{type:'line',
+        data:{labels,datasets:[{data:vals,
+          borderColor:C.teal,backgroundColor:'rgba(13,148,136,.12)',
+          borderWidth:3,tension:.25,fill:true,
+          pointRadius:7,pointHoverRadius:9,pointBorderColor:'#fff',pointBorderWidth:2,
+          pointBackgroundColor:vals.map(v=>v>=98?C.teal:C.rose)}]},options:o});
+    }else{
+      o.plugins.barPct={display:true,digits:2,target:98};
+      CH[key]=new Chart(el2,{type:'bar',
+        data:{labels,datasets:[{data:vals,
+          backgroundColor:vals.map(v=>v>=98?C.teal:C.rose),borderRadius:6,
+          maxBarThickness:70,minBarLength:2}]},options:o});
+    }
   };
 
   /* รายเดือน */
@@ -3032,7 +3045,7 @@ function drawRetEmbed(){
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
   doc=doc.replace('</head>',
-    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important}\n     .donuts svg{max-width:420px;margin:0 auto}</style></head>');
+    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important;zoom:1.35}\n     .donuts svg{max-width:420px;margin:0 auto}</style></head>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800);
     try{
