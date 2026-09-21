@@ -3032,7 +3032,7 @@ function drawRetEmbed(){
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
   doc=doc.replace('</head>',
-    '<style>.wrap{max-width:none!important;padding-left:5%!important;padding-right:5%!important}</style></head>');
+    '<style>.wrap{max-width:1500px!important;padding-left:4%!important;padding-right:4%!important}\n     .donuts svg{max-width:420px;margin:0 auto}</style></head>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800);
     try{
