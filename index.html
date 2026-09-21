@@ -4480,8 +4480,14 @@ function secRepl(){
     <h2 class="sec">สาเหตุที่ยังไม่ได้เติม <em>Products blocked, by reason</em><span></span></h2>
     <div class="cpanel"><div class="cbox"><canvas id="c_remark"></canvas></div></div>
     ${byQty.length?`<div class="tscroll"><table class="dt"><thead><tr>
-       <th>Product</th><th class="num">จำนวนที่ต้องเติม</th><th>Remark</th></tr></thead><tbody>`
+       <th>Product</th><th class="num">QUOTA</th><th class="num">Plan PD</th>
+       <th class="num">FAC16</th><th class="num">Quarantine</th>
+       <th class="num">จำนวนที่ต้องเติม</th><th>Remark</th></tr></thead><tbody>`
       +byQty.map(r=>`<tr><td><b>${esc(r.product)}</b></td>
+        <td class="num">${esc(r.quota||'—')}</td>
+        <td class="num">${esc(r.planPd||'—')}</td>
+        <td class="num">${esc(r.fac16||'—')}</td>
+        <td class="num">${esc(r.quarantine||'—')}</td>
         <td class="num"><span class="qty">${fmt(r.qty)}</span></td>
         <td>${esc(r.remark||'—')}</td></tr>`).join('')+'</tbody></table></div>':''}
 
