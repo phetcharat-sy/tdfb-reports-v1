@@ -3885,6 +3885,7 @@ function drawPick(){
     o.plugins.tooltip.callbacks={
       label:c=>`${fmt(c.raw)} batch · ${(c.raw/tb*100).toFixed(1)}%`};
     o.plugins.barEnd={display:true,vals:bk.map(p=>p.batches),
+      pctOnly:true,
       pcts:bk.map(p=>Math.round(p.batches/tb*1000)/10)};
     CH.pkbat=new Chart(el2,{type:'bar',
       data:{labels:bk.map(p=>p.who),
@@ -4111,7 +4112,7 @@ const barEnd={id:'barEnd',
     x.save(); x.textAlign='left'; x.textBaseline='middle';
     x.font='bold '+cf(24)+'px "Baloo 2"';
     m.data.forEach((bar,i)=>{
-      const t=fmt(op.vals[i])+'  ·  '+op.pcts[i]+'%';
+      const t=op.pctOnly?op.pcts[i]+'%':fmt(op.vals[i])+'  ·  '+op.pcts[i]+'%';
       x.fillStyle='#1E1B33';
       x.fillText(t,bar.x+12,bar.y);
     });
