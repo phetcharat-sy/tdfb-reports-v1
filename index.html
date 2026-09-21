@@ -168,35 +168,35 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .pkgauge .gval{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
   font-size:40px;font-weight:800}
 #vKPI .pkgauge .gname{font-size:28px;font-weight:700;color:var(--ink);margin-top:6px}
-#vKPI .pkcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-@media(max-width:1500px){#vKPI .pkcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#vKPI .pkcards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media(max-width:1100px){#vKPI .pkcards{grid-template-columns:1fr}}
 #vKPI .pkcard{background:var(--card);border:1px solid var(--line);border-top:6px solid var(--line);
-  border-radius:22px;padding:24px}
-#vKPI .pkhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
-#vKPI .pkname{font-size:41px;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#vKPI .pkutil{font-size:27px;font-weight:700;padding:6px 16px;border-radius:12px;white-space:nowrap}
+  border-radius:22px;padding:34px}
+#vKPI .pkhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:10px}
+#vKPI .pkname{font-size:50px;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#vKPI .pkutil{font-size:32px;font-weight:700;padding:8px 20px;border-radius:12px;white-space:nowrap}
 #vKPI .pkutil.teal{background:#E6F2F1;color:#2F6F6D}
 #vKPI .pkutil.plum{background:#EEEBF7;color:#514682}
 #vKPI .pkutil.amber{background:#FBF0DC;color:#8A5A2E}
 #vKPI .pkutil.rose{background:#F8E7E3;color:#B4462F}
-#vKPI .pklbl{font-size:25px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.4px}
-#vKPI .pkbar{width:100%;height:12px;background:#E9ECF1;border-radius:8px;overflow:hidden;margin:8px 0 18px}
+#vKPI .pklbl{font-size:29px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.4px}
+#vKPI .pkbar{width:100%;height:16px;background:#E9ECF1;border-radius:8px;overflow:hidden;margin:12px 0 24px}
 #vKPI .pkbar i{display:block;height:100%;border-radius:8px}
 #vKPI .pkbar i.teal{background:#3E8E8C}#vKPI .pkbar i.plum{background:#6B5CA5}
 #vKPI .pkbar i.amber{background:#D89A2E}#vKPI .pkbar i.rose{background:#B4462F}
-#vKPI .pkmain{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}
-#vKPI .pkbig{font-size:54px;font-weight:800;color:var(--teal)}
-#vKPI .pkbig span{font-size:27px;font-weight:400;color:var(--ink-faint)}
-#vKPI .pkbig2{font-size:46px;font-weight:800;color:var(--ink)}
+#vKPI .pkmain{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:22px}
+#vKPI .pkbig{font-size:68px;font-weight:800;color:var(--teal)}
+#vKPI .pkbig span{font-size:32px;font-weight:400;color:var(--ink-faint)}
+#vKPI .pkbig2{font-size:58px;font-weight:800;color:var(--ink)}
 #vKPI .pkrow{display:flex;justify-content:space-between;align-items:center;gap:10px;
-  flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px 18px;
-  font-size:27px;color:var(--ink-faint);margin-bottom:14px}
-#vKPI .pkrow b{color:var(--plum);font-size:29px;white-space:nowrap}
-#vKPI .pkgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-#vKPI .pkcell{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px}
-#vKPI .pkv{font-size:31px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:18px 22px;
+  font-size:32px;color:var(--ink-faint);margin-bottom:20px}
+#vKPI .pkrow b{color:var(--plum);font-size:34px;white-space:nowrap}
+#vKPI .pkgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#vKPI .pkcell{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:20px}
+#vKPI .pkv{font-size:38px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #vKPI .pkv.amber{color:var(--amber)}#vKPI .pkv.plum{color:var(--plum)}
-#vKPI .pksub{font-size:25px;color:var(--ink-faint)}
+#vKPI .pksub{font-size:29px;color:var(--ink-faint)}
 #vKPI .cscroll{overflow-x:auto;overflow-y:hidden;padding-bottom:6px}
 #vKPI .cscroll::-webkit-scrollbar{height:12px}
 #vKPI .cscroll::-webkit-scrollbar-thumb{background:#CBD0D9;border-radius:6px}
@@ -3730,11 +3730,16 @@ function drawPack(){
   /* Peak hours */
   const hArr=[...new Set(PACK.list.map(x=>x.hr))].filter(h=>h!=='ไม่ระบุ').sort();
   destroy('pkHour');
+  const oHour=baseOpts(true);
+  /* ค่า default ของ Chart.js ต้องชี้เป๊ะจุดถึงจะขึ้น tooltip (intersect:true) — เส้นโค้งบางจุดเล็ก
+     กดแล้วไม่ขึ้นอะไรเลย เปลี่ยนเป็นชี้ตรงคอลัมน์ไหนก็ได้ (ไม่ต้องตรงจุดเป๊ะ) แล้วโชว์ทุกเส้นพร้อมกัน */
+  oHour.interaction={mode:'index',intersect:false};
+  oHour.plugins.tooltip.callbacks={label:c=>`${c.dataset.label}: ${fmt(c.raw)} ใบ`};
   CH.pkHour=new Chart(document.getElementById('c_pkHour'),{type:'line',
     data:{labels:hArr,datasets:S.pArr.map((n,i)=>({label:n,
       data:hArr.map(h=>S.per[n].hr[h]||0),borderColor:col(i),
-      backgroundColor:col(i)+'22',fill:true,tension:.4,pointRadius:3}))},
-    options:baseOpts(true)});
+      backgroundColor:col(i)+'22',fill:true,tension:.4,pointRadius:3,pointHoverRadius:6}))},
+    options:oHour});
 }
 
 function secPick(){
