@@ -232,6 +232,8 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .tscroll{max-height:560px;overflow:auto}
 /* โชว์พอดี 10 แถวแรกของตารางรายการที่นับไม่ตรง เลื่อนดูที่เหลือ (แถวนี้สูงกว่าปกติเพราะมี 2 บรรทัดต่อแถว) */
 #vKPI .tscroll.t10{max-height:1150px}
+/* โชว์พอดี 10 แถวแรกของตาราง Order Detail (แถวเดียว บรรทัดเดียวต่อแถว เตี้ยกว่า t10) */
+#vKPI .tscroll.t10b{max-height:880px}
 #vKPI .chip{display:inline-block;padding:3px 12px;border-radius:7px;font-weight:bold;font-size:23.9px}
 #vKPI .qty{display:inline-block;background:#F7E4DF;color:var(--bad);font-weight:bold;
   padding:2px 10px;border-radius:6px}
@@ -1582,7 +1584,7 @@ function detailTable(rows,mode){
   const seen=new Set(), out=[];
   sorted.forEach(r=>{ if(!r.key||seen.has(r.key))return; seen.add(r.key); out.push(r); });
   if(!out.length)return '<div class="empty2">ไม่มีรายการที่ตรงกับตัวกรองนี้</div>';
-  return `<div class="tscroll"><table class="dt"><thead><tr>
+  return `<div class="tscroll t10b"><table class="dt"><thead><tr>
     <th style="width:270px">วันที่ต้องการส่ง</th>
     <th>Order Ref</th><th>Source</th><th>Product</th>
     <th>สถานะ</th><th>Remark Team</th></tr></thead><tbody>`
@@ -1622,6 +1624,10 @@ function secOnTime(){
   const pend=ord.filter(r=>isPending(r.dstat)).length;
   const denom=onT+late||1, p=onT/denom*100;   /* ไม่ปัดตรงนี้ — ให้ ringHTML จัดการทศนิยม */
 
+  /* แพ็คก่อนวันจัดส่ง — ย้ายมาจากหน้า Out Of Stock (เดิมการ์ด "จัดส่งก่อนกำหนด")
+     คิดจากจำนวนชิ้นแบบเดียวกับที่ OOS เคยคำนวณ ไม่ใช่จำนวนออเดอร์ */
+  let earlyQty=0; lines.forEach(r=>{ if(classify(r.wh)==='early')earlyQty+=r.qty; });
+
   const cust=new Set(ord.map(r=>r.customer).filter(Boolean)).size;
   const plat=ord.filter(r=>isPlatform(r.source)).length;
   const walk=total-plat;
@@ -1632,7 +1638,7 @@ function secOnTime(){
 
   return ringHTML(p,98,`<span>แพ็คเสร็จตามวันที่ต้องการ</span><span>เป้าหมาย <b>≥ 98%</b></span>`)
    +`<div class="sgrid">${card('Orders',total)}${card('Packed On Time',onT,'teal')}
-       ${card('แพ็คล่าช้า',late,'rose')}${card('ยังไม่ได้จัดส่ง',pend,'mute')}</div>
+       ${card('แพ็คก่อนวันจัดส่ง',earlyQty,'amber')}${card('แพ็คล่าช้า',late,'rose')}${card('ยังไม่ได้จัดส่ง',pend,'mute')}</div>
      <div class="sgrid">${card('Customers',cust)}${card('Platform',plat,'amber')}
        ${card('Walk-in',walk)}${card('ส่งปกติ',nor,'teal')}${card('ด่วน',urg,'rose')}</div>
 
@@ -1752,7 +1758,9 @@ function secOOS(){
    +(stSel.length?`<div class="chint">กำลังกรอง — แสดง ${fmt(tq)} ชิ้น จากทั้งหมด ${fmt(totQ)} ชิ้นในช่วงนี้</div>`:'')
    +ringHTML(p,99,`<span>WH ส่งของให้ Packing ตามกำหนด</span><span>เป้าหมาย <b>≥ 99%</b></span>`)
    +`<div class="sgrid">${card('จำนวนสินค้า (ชิ้น)',tq)}${card('On-Time Dispatch',on,'teal')}
-      ${card('จัดส่งก่อนกำหนด',ea,'amber')}${card('จัดส่งล่าช้า',la,'rose')}${card('Orders',ord)}</div>
+      ${card('จัดส่งล่าช้า',la,'rose')}${card('Orders',ord)}</div>
+     <!-- "จัดส่งก่อนกำหนด" ย้ายไปแสดงที่หน้า On-Time Performance แล้ว — % ยังคำนวณ (on+early)/total เหมือนเดิม
+          เพราะ on-time กับ early ยังนับเป็นผ่านเกณฑ์ทั้งคู่ มีแค่ late เท่านั้นที่ไม่ผ่าน -->
 
      <h2 class="sec">Weekly Line Items <em>จำนวนชิ้นที่ออกต่อสัปดาห์</em><span></span></h2>
      <div class="cpanel"><div class="cbox"><canvas id="c_wk2"></canvas></div></div>
