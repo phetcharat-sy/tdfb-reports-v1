@@ -23,8 +23,8 @@
   font-size:30.7px;padding:13px 24px;border-radius:7px;cursor:pointer}#vKPI .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:normal}#vKPI .btn:disabled{opacity:.5;cursor:default}#vKPI select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:7px;
   padding:13px 16px;font-family:inherit;font-size:30.7px}#vKPI .btn:focus-visible, #vKPI select:focus-visible{outline:2px solid var(--plum);outline-offset:2px}#vKPI .stat{color:var(--mute);font-size:28.5px;margin-left:auto}#vKPI .stat b{color:var(--teal-d)}#vKPI .stat.err b{color:var(--rose)}#vKPI .tabs{display:flex;gap:6px;background:var(--soft);padding:5px;border-radius:11px;width:fit-content;margin-bottom:14px}#vKPI .tabs a{text-decoration:none;font-size:29.2px;padding:10px 26px;border-radius:8px;color:var(--mute)}#vKPI .tabs a.on{background:var(--teal);color:#fff;font-weight:bold}#vKPI #kShot{background:transparent;border:0;box-shadow:none;padding:8px 0 40px;
   box-shadow:0 1px 3px rgba(20,24,40,.07),0 8px 24px rgba(20,24,40,.05)}#vKPI header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
-  flex-wrap:wrap;border-bottom:2px solid var(--teal);padding-bottom:20px;margin-bottom:26px}#vKPI h1{margin:0;font-size:75.2px;letter-spacing:-.6px;line-height:1.2;font-weight:bold;color:var(--page-ink);
-  border-left:8px solid var(--teal);padding-left:20px}#vKPI .sub{color:var(--page-mute);font-size:33.5px;margin:10px 0 0 21px;line-height:1.4}#vKPI .period{text-align:right;color:var(--page-mute);font-size:28.5px}#vKPI .period b{display:block;color:var(--page-ink);font-size:45.5px;font-weight:normal}
+  flex-wrap:wrap;border-bottom:2px solid var(--teal);padding-bottom:20px;margin-bottom:26px}#vKPI h1{margin:0;font-size:75.2px;letter-spacing:-.6px;line-height:1.4;font-weight:bold;color:var(--page-ink);
+  border-left:8px solid var(--teal);padding-left:20px}#vKPI .sub{color:var(--page-mute);font-size:33.5px;margin:16px 0 0 21px;line-height:1.4}#vKPI .period{text-align:right;color:var(--page-mute);font-size:28.5px}#vKPI .period b{display:block;color:var(--page-ink);font-size:45.5px;font-weight:normal}
 #vKPI .toolbar{background:var(--card);border:1px solid var(--line);border-radius:20px;
   padding:20px 24px;gap:16px;align-items:flex-end;
   box-shadow:0 1px 2px rgba(20,24,40,.05),0 10px 28px rgba(20,24,40,.07)}
@@ -393,6 +393,10 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .fcacc-card span.up{color:#B45309}#vKPI .fcacc-card span.down{color:#0F766E}
 #vKPI .fcacc-card small{font-size:16px;color:#64748B}
 #vKPI .fcacc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+/* v136: การ์ดขวา (จำนวนสินค้า/วัน) ไม่มี min-width:0 — เนื้อหาข้างในกว้างกว่าคอลัมน์
+   (ตัวเลขแกน Y หลักพัน + ตารางแคบ) เลยดันกรอบล้นออกมาทับการ์ดซ้าย ทั้งที่ grid เป็น 1fr 1fr แล้ว
+   แก้แบบเดียวกับ .cgrid2>*{min-width:0} ที่ใช้อยู่แล้วในหน้าอื่น */
+#vKPI .fcacc-grid>*{min-width:0}
 @media(max-width:1300px){#vKPI .fcacc-grid{grid-template-columns:1fr}}
 #vKPI .fcacc-panel{background:#fff;border:1px solid #E2E8F0;border-radius:16px;
   padding:20px 22px 4px;margin-bottom:22px}
@@ -2363,6 +2367,25 @@ function backtestDaily(byDate,days){
   return {rows:out,mape,bias,within10,total:wp.length,
           accuracy:mape!=null?Math.max(0,100-mape):null};
 }
+/* v136: รวมผลย้อนหลังรายวัน (backtestDaily) เป็นรายสัปดาห์ — สำหรับสลับมุมมองกราฟเฉยๆ
+   การ์ดสรุป/ตารางรายวันด้านล่างยังคงใช้ชุดรายวันเดิม ไม่แตะ */
+function btWeekly(bt){
+  if(!bt||!bt.rows.length)return null;
+  const byW={};
+  bt.rows.forEach(r=>{
+    const y=r.date.slice(0,4), w=isoWeek(r.date), k=y+'-W'+w;
+    const o=byW[k]=byW[k]||{k,w,actual:0,pred:0,d0:'',d1:''};
+    o.actual+=r.actual; o.pred+=r.pred;
+    if(!o.d0||r.date<o.d0)o.d0=r.date;
+    if(!o.d1||r.date>o.d1)o.d1=r.date;
+  });
+  const keys=Object.keys(byW).sort((a,b)=>byW[a].d0.localeCompare(byW[b].d0));
+  const rows=keys.map(k=>{
+    const o=byW[k], diff=o.pred-o.actual, pct=o.actual!==0?(diff/o.actual*100):null;
+    return {date:o.d0,wlabel:'W'+o.w,pred:o.pred,actual:o.actual,diff,pct};
+  });
+  return {...bt,rows};
+}
 
 /* เกณฑ์กำลังคน — ยกมาจาก dashboard v2 ตรงๆ */
 const STAFF={ordPerPerson:200,packHours:6,endOfLine:1,
@@ -2512,7 +2535,9 @@ function secForecast(){
 
   const items1=depItems(dep,1), items4=depItems(dep,4);
   const btOrd=backtestDaily(ordCntDate,30), btQty=backtestDaily(qtyByDate,30);
-  FC_CTX={wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty};
+  /* v136: สลับกราฟความแม่นยำย้อนหลังเป็นรายวัน/รายสัปดาห์ได้ — การ์ดสรุป+ตารางด้านล่างยังคงรายวันเสมอ */
+  const fcGr=sf('fcacc_gr','day');
+  FC_CTX={wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty,fcGr};
   STAFF_ROWS=staff;
   if(Number(STAFF_IN.pIdx)>=staff.length)STAFF_IN.pIdx=0;
   if(Number(STAFF_IN.wIdx)>=staff.length)STAFF_IN.wIdx=0;
@@ -2573,14 +2598,15 @@ function secForecast(){
       <summary>วิธีคิด — ทำไมไม่ต้องเก็บไฟล์พยากรณ์เก่าไว้</summary>
       <div class="fbody">ย้อนเวลากลับไปพยากรณ์ทีละวันด้วยข้อมูลเท่าที่ "มีอยู่จริงในวันนั้น" เท่านั้น (ตัดข้อมูลหลังจากนั้นทิ้งชั่วคราว แล้วรันสูตร Holt's Exponential Smoothing เดียวกับด้านบน) ได้พยากรณ์ล่วงหน้า 1 วัน แล้วเทียบกับยอดจริงที่เกิดขึ้นจริงในวันนั้น ทำแบบนี้ย้อนหลังไป 30 วัน เพื่อดูว่าที่ผ่านมาพยากรณ์แม่นแค่ไหน</div>
     </details>
+    ${chipOne('fcacc_gr','มุมมองกราฟ',[['day','รายวัน'],['week','รายสัปดาห์']],fcGr)}
     <div class="fcacc">
       ${fcAccCards(btOrd)}
       <div class="fcacc-grid">
-        <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / วัน
+        <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / ${fcGr==='week'?'สัปดาห์':'วัน'}
             <em>${btOrd?`MAPE ${btOrd.mape.toFixed(1)}% · ความแม่น ${btOrd.accuracy.toFixed(1)}% (${btOrd.total} วัน)`:''}</em></div>
           <div class="fcacc-chartbox"><canvas id="c_btord"></canvas></div>
           ${fcAccTable(btOrd,'ออเดอร์')}</div>
-        <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / วัน
+        <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / ${fcGr==='week'?'สัปดาห์':'วัน'}
             <em>${btQty?`MAPE ${btQty.mape.toFixed(1)}% · ความแม่น ${btQty.accuracy.toFixed(1)}% (${btQty.total} วัน)`:''}</em></div>
           <div class="fcacc-chartbox"><canvas id="c_btqty"></canvas></div>
           ${fcAccTable(btQty,'ชิ้น')}</div>
@@ -2804,7 +2830,7 @@ function fcAccChart(id,key,bt,unit){
       y:{ticks:{color:'#64748B',font:{size:cf(18)},callback:v=>fmt(v)},
           grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
   CH[key]=new Chart(el2,{type:'line',
-    data:{labels:rows.map(r=>showD(r.date)),
+    data:{labels:rows.map(r=>r.wlabel||showD(r.date)),
       datasets:[
         {label:'ยอดจริง',data:rows.map(r=>r.actual),borderColor:'#0D9488',
          backgroundColor:'rgba(13,148,136,.14)',borderWidth:3,tension:.3,fill:true,pointRadius:2},
@@ -2841,13 +2867,14 @@ function fcStackChart(id,key,items,weeks){
 
 function drawForecast(){
   if(!FC_CTX)return;
-  const {wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty}=FC_CTX;
+  const {wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty,fcGr}=FC_CTX;
   fcLineChart('c_fcwo','fcwo',wOrd,'ออเดอร์');
   fcLineChart('c_fcwq','fcwq',wQty,'ชิ้น');
   fcLineChart('c_fcdo','fcdo',dOrd,'ออเดอร์');
   fcLineChart('c_fcdq','fcdq',dQty,'ชิ้น');
-  fcAccChart('c_btord','btord',btOrd,'ออเดอร์');
-  fcAccChart('c_btqty','btqty',btQty,'ชิ้น');
+  /* v136: การ์ด/ตารางใต้กราฟยังคงอิงรายวันเสมอ — สลับเฉพาะกราฟเส้นเป็นรายสัปดาห์เมื่อเลือก */
+  fcAccChart('c_btord','btord',fcGr==='week'?btWeekly(btOrd):btOrd,'ออเดอร์');
+  fcAccChart('c_btqty','btqty',fcGr==='week'?btWeekly(btQty):btQty,'ชิ้น');
   fcStackChart('c_fc1w','fc1w',items1,1);
   fcStackChart('c_fc4w','fc4w',items4,4);
   recalcStaff();
@@ -3198,6 +3225,9 @@ function secShip(){
   if(!list.length)return bar+'<div class="empty2">ไม่มีข้อมูลตามตัวกรองนี้</div>';
 
   const S=shipStats(list);
+  /* v136: ไม่ได้กรอง MONTH/WEEK/DAY (ดูทั้งช่วง เช่นทั้งปี) → กราฟรายวันด้านล่างรวมเป็นรายเดือนแทน
+     เลือกกรองเดือน/สัปดาห์/วันเมื่อไหร่ ค่อยสลับกลับมาแสดงรายวันของช่วงที่กรอง */
+  S.fineGrain=!!(DAYSEL||WKSEL.length||shipYM);
   SHIP_CTX=S;
 
   /* v133: หน้านี้ไม่มีเป้า KPI — ส่ง target เป็น null
@@ -3216,7 +3246,7 @@ function secShip(){
        ${card('ขนส่งที่ใช้มากสุด',esc(S.topCarrier),'plum')}
        ${card('วันพีคสุด ('+(S.peak||'-')+')',S.peakQty,'amber')}</div>
 
-     <h2 class="sec">ออเดอร์จัดส่งรายวัน <em>นับออเดอร์ไม่ซ้ำ ตาม Expected Delivery</em><span></span></h2>
+     <h2 class="sec">${S.fineGrain?'ออเดอร์จัดส่งรายวัน':'ออเดอร์จัดส่งรายเดือน'} <em>${S.fineGrain?'นับออเดอร์ไม่ซ้ำ ตาม Expected Delivery':'นับออเดอร์ไม่ซ้ำ ตาม Expected Delivery · เลือกเดือน/สัปดาห์/วัน ด้านบนเพื่อดูแยกรายวัน'}</em><span></span></h2>
      <div class="cpanel"><div class="cbox"><canvas id="c_shDay"></canvas></div></div>
 
      <div class="g2">
@@ -3234,18 +3264,38 @@ function drawShip(){
   if(!SHIP_CTX)return;
   const S=SHIP_CTX;
 
-  /* รายวัน — v134: ลดเหลือ 30 วันล่าสุด + ย่อป้ายเป็น 18px
-     เพื่อให้ตัวเลขขึ้นครบทุกแท่ง (60 วันช่องแคบเกินไป ป้ายถูกข้ามกว่าครึ่ง) */
-  const SHIP_DAYS_SHOWN=30;
-  const d=S.days.slice(-SHIP_DAYS_SHOWN);
+  /* v136: เดิมตัดเหลือ 30 วันล่าสุดเสมอ — ถ้าไม่ได้กรองเดือน/สัปดาห์/วัน (ดูทั้งปี)
+     ข้อมูลเดือนเก่าๆ จะหายไปเงียบๆ โดยผู้ใช้ไม่รู้ตัว
+     เปลี่ยนเป็น: ไม่ได้กรองละเอียด (เดือน/สัปดาห์/วัน) → รวมเป็นรายเดือนแทน
+                 กรองแล้ว (เลือกเดือน/สัปดาห์/วัน) → กลับมาแสดงรายวันของช่วงที่กรอง */
   destroy('shDay');
-  CH.shDay=new Chart(document.getElementById('c_shDay'),{type:'bar',
-    data:{labels:d,datasets:[{label:'ออเดอร์',data:d.map(k=>S.byDay[k].size),
-      backgroundColor:C.plum,borderRadius:4}]},
-    options:Object.assign(baseOpts(false),{
-      plugins:Object.assign({},baseOpts(false).plugins,{
-        legend:{display:false},
-        barPct:{display:true,raw:true,size:18}})})});
+  if(S.fineGrain){
+    const SHIP_DAYS_MAX=62;   /* กันช่วงกว้างเกิน (เลือกหลายสัปดาห์) ไม่ให้แท่งแน่นเกิน */
+    const d=S.days.length>SHIP_DAYS_MAX?S.days.slice(-SHIP_DAYS_MAX):S.days;
+    CH.shDay=new Chart(document.getElementById('c_shDay'),{type:'bar',
+      data:{labels:d,datasets:[{label:'ออเดอร์',data:d.map(k=>S.byDay[k].size),
+        backgroundColor:C.plum,borderRadius:4}]},
+      options:Object.assign(baseOpts(false),{
+        plugins:Object.assign({},baseOpts(false).plugins,{
+          legend:{display:false},
+          barPct:{display:true,raw:true,size:18}})})});
+  }else{
+    const byMonth={};
+    S.days.forEach(k=>{
+      const mk=k.slice(0,7);
+      (byMonth[mk]=byMonth[mk]||new Set());
+      S.byDay[k].forEach(o=>byMonth[mk].add(o));
+    });
+    const mk=Object.keys(byMonth).sort();
+    const monLbl=k=>{const[y,m]=k.split('-');return MON_S[+m-1]+' '+String(+y).slice(2);};
+    CH.shDay=new Chart(document.getElementById('c_shDay'),{type:'bar',
+      data:{labels:mk.map(monLbl),datasets:[{label:'ออเดอร์',data:mk.map(k=>byMonth[k].size),
+        backgroundColor:C.plum,borderRadius:6}]},
+      options:Object.assign(baseOpts(false),{
+        plugins:Object.assign({},baseOpts(false).plugins,{
+          legend:{display:false},
+          barPct:{display:true,raw:true}})})});
+  }
 
   /* โดนัทช่องทางขาย Top 5 — plot เป็น % ให้ pieLbl เขียนตัวเลขบนวงได้
      ที่เหลือรวมเป็น "อื่นๆ" กันชิ้นบางเรียงกันเป็นเสี้ยนรอบวง */
@@ -3265,18 +3315,21 @@ function drawShip(){
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('+fmt(chVal[c.dataIndex])+' ออเดอร์)'}}}}});
 
-  /* โดนัทสถานะพัสดุ — สำเร็จ vs ค้างส่ง พร้อม % ตรงกลางวง */
+  /* โดนัทสถานะพัสดุ — สำเร็จ vs ค้างส่ง พร้อม % ตรงกลางวง
+     v135: ของเดิมปัดแค่ 1 ตำแหน่ง (Math.round(v/t*1000)/10) ทำให้ 19 ออเดอร์ค้างส่งจาก 133,186
+     (99.99%) ถูกปัดขึ้นเป็น "100%" ทั้งที่การ์ด "ค้างส่ง" ข้างบนยังโชว์ 19 อยู่ — ขัดกันเอง
+     เปลี่ยนมาใช้ pctSet() ตัวเดียวกับที่วงแหวน On-Time/OOS ใช้ (เพิ่มทศนิยมจนกว่าค่าที่ไม่ใช่ 0%/100% จริง จะไม่โดนปัดทับ) */
   const done=Math.max(0,S.orders-S.pending);
   const stTot=done+S.pending||1;
-  const donePct=Math.round(done/stTot*1000)/10;
+  const stPS=pctSet([done,S.pending],stTot);
   destroy('shSt');
   CH.shSt=new Chart(document.getElementById('c_shSt'),{type:'doughnut',
     data:{labels:['จัดส่งสำเร็จ','ค้างส่ง'],datasets:[{
-      data:[Math.round(done/stTot*1000)/10, Math.round(S.pending/stTot*1000)/10],
+      data:stPS.data,
       backgroundColor:[C.good,C.rose],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'62%',layout:{padding:10},
       plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(22)},boxWidth:20}},
-        donutMid:{display:true,top:pct1(donePct),bot:'จัดส่งสำเร็จ'},
+        donutMid:{display:true,top:stPS.data[0].toFixed(stPS.digits)+'%',bot:'จัดส่งสำเร็จ'},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('
             +fmt(c.dataIndex===0?done:S.pending)+' ออเดอร์)'}}}}});
