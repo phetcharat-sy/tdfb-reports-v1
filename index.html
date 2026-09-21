@@ -1624,6 +1624,7 @@ function secOnTime(){
   const pend=ord.filter(r=>isPending(r.dstat)).length;
   const denom=onT+late||1, p=onT/denom*100;   /* ไม่ปัดตรงนี้ — ให้ ringHTML จัดการทศนิยม */
 
+  const early=ord.filter(r=>r._worst==='early').length;
   const cust=new Set(ord.map(r=>r.customer).filter(Boolean)).size;
   const plat=ord.filter(r=>isPlatform(r.source)).length;
   const walk=total-plat;
@@ -1634,7 +1635,7 @@ function secOnTime(){
 
   return ringHTML(p,98,`<span>แพ็คเสร็จตามวันที่ต้องการ</span><span>เป้าหมาย <b>≥ 98%</b></span>`)
    +`<div class="sgrid">${card('Orders',total)}${card('Packed On Time',onT,'teal')}
-       ${card('แพ็คล่าช้า',late,'rose')}${card('ยังไม่ได้จัดส่ง',pend,'mute')}</div>
+       ${card('แพ็คก่อนวันจัดส่ง',early,'amber')}${card('แพ็คล่าช้า',late,'rose')}${card('ยังไม่ได้จัดส่ง',pend,'mute')}</div>
      <div class="sgrid">${card('Customers',cust)}${card('Platform',plat,'amber')}
        ${card('Walk-in',walk)}${card('ส่งปกติ',nor,'teal')}${card('ด่วน',urg,'rose')}</div>
 
