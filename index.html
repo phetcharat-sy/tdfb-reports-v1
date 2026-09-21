@@ -3800,6 +3800,11 @@ function secPick(){
   const hrBy={}; per.forEach(p=>hrBy[p.who]=hrs.map(()=>0));
   list.forEach(r=>{const i=hrs.indexOf(r.hour); if(i>=0&&hrBy[r.who])hrBy[r.who][i]+=r.qty;});
 
+  /* พีคไทม์ — ชั่วโมงที่หยิบรวมทุกคนมากที่สุด */
+  const hrTotal=hrs.map((h,i)=>per.reduce((s,p)=>s+(hrBy[p.who][i]||0),0));
+  const peakIdx=hrTotal.length?hrTotal.indexOf(Math.max(...hrTotal)):-1;
+  const peakHour=peakIdx>=0?hrs[peakIdx]:null;
+
   PICK_CTX={per,days,dayBy,hrs,hrBy};
 
   return bar
@@ -3807,6 +3812,7 @@ function secPick(){
       ${card('รวมสินค้าที่หยิบ (ชิ้น)',fmt(totQty))}
       ${card('จำนวน Batch',fmt(batches),'plum')}
       ${card('ความเร็วเฉลี่ย (ชิ้น/ชม.)',avgRate==null?'—':fmt(Math.round(avgRate)),'teal')}
+      ${card('พีคไทม์',peakHour!=null?String(peakHour).padStart(2,'0')+':00':'—','rose')}
       ${card('ผลงานยอดเยี่ยม',top?esc(top.who):'—','amber')}</div>
 
      <div class="cgrid2">
