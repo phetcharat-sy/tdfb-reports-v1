@@ -1747,7 +1747,7 @@ function secOOS(){
     const c=classify(r.wh);
     if(c==='ontime')on+=q; else if(c==='early')ea+=q; else la+=q;});
   const ord=uniqOrders(rows);
-  const p=((on+ea)/(tq||1))*100;   /* ไม่ปัดตรงนี้ — ให้ ringHTML จัดการทศนิยม */
+  const p=(on/(tq||1))*100;   /* ไม่ปัดตรงนี้ — ให้ ringHTML จัดการทศนิยม · เฉพาะ on-time เท่านั้น ไม่รวม early */
   OOS_CTX={rows,on,ea,la};
 
   const totQ=all0.reduce((s,r)=>s+r.qty,0);
