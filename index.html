@@ -3398,7 +3398,13 @@ async function loadPack(force){
     if(txt.trim().startsWith('<'))throw new Error('ชีตยังไม่ได้ publish เป็น CSV');
     const rows=(typeof Papa!=='undefined')?Papa.parse(txt,{skipEmptyLines:true}).data:parseCSV(txt);
     if(!rows||rows.length<2)throw new Error('ได้ข้อมูลว่าง');
-    const CP=1,CD=2,CT=3,CC=5,CST=14,CDUR=21;
+    /* หาคอลัมน์ "ช่องทางการขาย" จากหัวตารางจริงแทนการเดาตำแหน่งตายตัว (เดิม index 5 ผิด
+       ไปตรงกับคอลัมน์อื่นแทน) หัวตารางที่ตรงกับ "Source" คือคอลัมน์ที่ต้องการ
+       ถ้าหาไม่เจอเลย fallback กลับไปที่ index 5 แบบเดิม กันพังทั้งหมด */
+    const hdr=(rows[0]||[]).map(h=>String(h||'').trim().toLowerCase());
+    let CC_AUTO=hdr.findIndex(h=>h==='source'||h==='ช่องทางการขาย'||h==='ช่องทาง');
+    if(CC_AUTO<0)CC_AUTO=hdr.findIndex(h=>/source|ช่องทาง/.test(h));
+    const CP=1,CD=2,CT=3,CC=CC_AUTO>=0?CC_AUTO:5,CST=14,CDUR=21;
     const list=[];
     rows.slice(1).forEach(r=>{
       if(!r||r.length<=CP)return;
@@ -3418,7 +3424,8 @@ async function loadPack(force){
     });
     if(!list.length)throw new Error('อ่านได้ 0 แถว (เช็คคอลัมน์ชื่อพนักงาน/วันที่)');
     PACK={list};
-    SHEET_STATE.pack=fmt(list.length)+' ออเดอร์';
+    SHEET_STATE.pack=fmt(list.length)+' ออเดอร์'
+      +(CC_AUTO>=0?` · ช่องทางขายอ่านจากคอลัมน์ "${(rows[0]||[])[CC_AUTO]}"`:' · หาคอลัมน์ช่องทางขายไม่เจอ (ใช้ index 5 แทน)');
   }catch(e){ PACK=null; PACK_ERR=e.message; SHEET_STATE.pack='ผิดพลาด — '+e.message; }
   PACK_LOADING=false;
   return PACK;
