@@ -3595,7 +3595,7 @@ function secPack(){
      <div class="cpanel"><div class="cbox xl"><canvas id="c_pkWk"></canvas></div></div>
 
      <h2 class="sec">สัดส่วนการแพ็ค (เทียบรายบุคคล)<span></span></h2>
-     <div class="cpanel"><div class="cbox"><canvas id="c_pkShare"></canvas></div></div>
+     <div class="cpanel"><div class="cbox" style="height:640px"><canvas id="c_pkShare"></canvas></div></div>
 
      <h2 class="sec">เวลาที่ใช้งานหนาแน่น (Peak Hours - เปรียบเทียบ)<span></span></h2>
      <div class="cpanel"><div class="cbox"><canvas id="c_pkHour"></canvas></div></div>
@@ -3714,8 +3714,8 @@ function drawPack(){
     data:{labels:S.pArr,datasets:[{data:sharePct,
       backgroundColor:S.pArr.map((n,i)=>col(i)),borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',layout:{padding:10},
-      plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(20)},boxWidth:18}},
-        pieLbl:{display:true,minPercent:3,size:20,fit:true},
+      plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(24)},boxWidth:20}},
+        pieLbl:{display:true,minPercent:3,size:30,fit:true},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('
             +fmt(shareVal[c.dataIndex])+' กล่อง)'}}}}});
