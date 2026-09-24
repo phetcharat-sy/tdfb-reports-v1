@@ -451,6 +451,35 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .stfres{flex:1 1 100%;font-size:27px;line-height:1.6;color:var(--ink);
   border-top:1px dashed var(--line);padding-top:12px;min-height:6px}
 #vKPI .stfres:empty{border:0;padding:0;min-height:0}
+#shotMenu{position:fixed;z-index:9999;background:#fff;border-radius:16px;padding:14px;width:520px;
+  box-shadow:0 18px 44px rgba(15,10,40,.35);border:2px solid var(--plum);font-family:inherit}
+#shotMenu .sm-h{font-size:24px;font-weight:bold;color:var(--plum-d);padding:4px 10px 10px}
+#shotMenu button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;
+  text-align:left;border:0;background:transparent;border-radius:12px;padding:12px 14px;cursor:pointer;font-family:inherit}
+#shotMenu button:hover{background:#F1EAFE}
+#shotMenu b{font-size:26px;color:var(--ink)}
+#shotMenu span{font-size:21px;color:var(--mute)}
+/* v-stf2: ช่องลองคำนวณกำลังคน — ทำให้เด่น ชวนให้ลองกรอก */
+#vKPI .stfbar{background:linear-gradient(135deg,#EDE7FB 0%,#E3F4F1 100%);
+  border:3px solid var(--plum);border-radius:18px;padding:22px 26px 24px;gap:24px;
+  box-shadow:0 6px 18px rgba(109,40,217,.18);margin-bottom:22px}
+#vKPI .stf-t{flex:1 1 100%;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  font-size:32px;font-weight:bold;color:var(--plum-d);margin-bottom:-4px}
+#vKPI .stf-t i{font-style:normal;font-size:40px}
+#vKPI .stf-t em{font-style:normal;font-size:24px;font-weight:600;color:#fff;background:var(--plum);
+  padding:3px 14px;border-radius:20px}
+#vKPI .stfbar label{font-size:28px;font-weight:bold;color:var(--ink);letter-spacing:0;gap:8px}
+#vKPI .stfbar select,#vKPI .stfbar input{font-size:38px;font-weight:bold;padding:12px 18px;
+  border:3px solid var(--teal);border-radius:12px;background:#fff;min-height:74px}
+#vKPI .stfbar input{max-width:230px;width:230px}
+#vKPI .stfbar select:focus,#vKPI .stfbar input:focus{outline:none;border-color:var(--plum);
+  box-shadow:0 0 0 5px rgba(124,58,237,.25)}
+#vKPI .stfbar input:placeholder-shown{animation:stfPulse 1.8s ease-in-out infinite}
+@keyframes stfPulse{0%,100%{box-shadow:0 0 0 0 rgba(13,148,136,.45)}50%{box-shadow:0 0 0 9px rgba(13,148,136,0)}}
+#vKPI .stfres{font-size:30px;border-top:2px dashed rgba(109,40,217,.35)}
+#vKPI .stfres:empty{display:block;border-top:2px dashed rgba(109,40,217,.35);padding-top:12px}
+#vKPI .stfres:empty::before{content:'👆 กรอกจำนวนคน แล้วระบบจะบอกเวลาเสร็จงาน และต้องทำ OT กี่ชั่วโมง';
+  color:var(--plum-d);font-size:27px;font-weight:600}
 
 #vKPI .retnote{display:block;font-size:29px;color:var(--mute);line-height:1.45}
 /* ตารางสัดส่วนในหน้า Return
@@ -2777,6 +2806,7 @@ function secForecast(){
       <div class="cpanel">
         <div class="chname2">Packing / Delivery <span class="dim">(เริ่มกะ ${STAFF.shiftStart} น.)</span></div>
         <div class="stfbar">
+          <div class="stf-t"><i>🧮</i>ลองคำนวณ: คนแพ็คเท่านี้ เสร็จกี่โมง? <em>กรอกได้เลย</em></div>
           <label>วันที่ <select id="stfPDate" data-stf="pIdx">${
             staff.map((s,i)=>`<option value="${i}"${String(STAFF_IN.pIdx)===String(i)?' selected':''}>${esc(s.lbl)}${s.dd?' ⚡':''}</option>`).join('')}</select></label>
           <label>จำนวนคนที่มาทำงานจริง <input type="number" min="2" id="stfPStaff" data-stf="pStaff"
@@ -2796,6 +2826,7 @@ function secForecast(){
       <div class="cpanel">
         <div class="chname2">WH <span class="dim">(เริ่มกะ ${STAFF.shiftStart} น.)</span></div>
         <div class="stfbar">
+          <div class="stf-t"><i>🧮</i>ลองคำนวณ: คนหยิบของเท่านี้ เสร็จกี่โมง? <em>กรอกได้เลย</em></div>
           <label>วันที่ <select id="stfWDate" data-stf="wIdx">${
             staff.map((s,i)=>`<option value="${i}"${String(STAFF_IN.wIdx)===String(i)?' selected':''}>${esc(s.lbl)}${s.dd?' ⚡':''}</option>`).join('')}</select></label>
           <label>จำนวนคนที่มีจริง <input type="number" min="1" id="stfWStaff" data-stf="wStaff"
@@ -5296,6 +5327,9 @@ function shotIsolate(doc,el,width){
     cur=par;
   }
   imp(doc.documentElement,'zoom','1');
+  /* v-shot4: html2canvas วาดเนื้อหาใน <details> ที่ปิดอยู่ออกมาด้วย จนตัวหนังสือซ้อนทับกราฟ
+     → ซ่อนทุกอย่างใน details ที่ปิด ยกเว้นหัวข้อ (summary) */
+  doc.querySelectorAll('details:not([open])>*:not(summary)').forEach(e=>imp(e,'display','none'));
   imp(el,'width',width+'px'); imp(el,'max-width','none'); imp(el,'margin','0'); imp(el,'zoom','1');
 }
 /* ตัดขอบล่างที่ว่างเปล่า (สีพื้นหลัง) ออก */
@@ -5315,7 +5349,7 @@ function shotTrim(c,bg){
   o.getContext('2d').drawImage(c,0,0); return o;
 }
 
-async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE'}){
+async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',mode='both'}){
   const doc=root.ownerDocument;
   const label=btn?btn.textContent:'';
   const say=t=>{if(btn)btn.textContent=t;};
@@ -5328,7 +5362,10 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE'})
   root.style.width=w0+'px'; root.style.maxWidth='none';
   const S=Math.min(5,Math.max(2.5,(SHOT_SLIDE_W+60)/w0));
   const charts=doc===document?Object.values(CH):[];
-  charts.forEach(c=>{try{c.options.devicePixelRatio=S;c.resize();}catch(e){}});
+  /* ปิด tooltip ที่ค้างอยู่ตอนเอาเมาส์ชี้กราฟ ไม่ให้ติดไปในภาพ */
+  charts.forEach(c=>{try{c.options.devicePixelRatio=S;
+    if(c.tooltip)c.tooltip.setActiveElements([],{x:0,y:0}); c.setActiveElements([]);
+    c.resize(); c.update('none');}catch(e){}});
   await shotFrame(); await shotWait(250);
   const marked=[];
   const mark=(e,k,v)=>{e.dataset[k]=v;marked.push([e,k]);};
@@ -5372,7 +5409,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE'})
     };
     const pad2=n=>String(n).padStart(2,'0');
     /* ---- แบบที่ 1: สไลด์ 16:9 ---- */
-    for(let i=0;i<pages.length;i++){
+    for(let i=0;mode!=='charts'&&i<pages.length;i++){
       say(`กำลังสร้างสไลด์ ${i+1}/${pages.length}…`);
       const pg=pages[i], hh=pg[pg.length-1].bot-pg[0].top;
       let c=await shoot(w0,Math.ceil(hh+260),S,d=>{
@@ -5393,36 +5430,39 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE'})
       zip.file(`1-สไลด์ 16x9/slide-${pad2(i+1)}.png`,await shotBlob(sl));
       c.width=c.height=0;
     }
-    /* ---- แบบที่ 2: ทีละกราฟ/การ์ด — ถ่ายแยกเฉพาะช่องนั้น ขนาดตามช่องบนแดชบอร์ด ---- */
-    let items=[...root.querySelectorAll(SHOT_PANEL_SEL)]
-      .filter(e=>{const r=e.getBoundingClientRect();return r.width>40&&r.height>40;});
-    items=items.filter(e=>!items.some(o=>o!==e&&o.contains(e)));
-    for(let j=0;j<items.length;j++){
-      say(`กำลังสร้างภาพกราฟ ${j+1}/${items.length}…`);
-      const e=items[j], r=e.getBoundingClientRect();
-      const hd=e.previousElementSibling;
-      const withHead=e.classList.contains('kpi')&&hd&&hd.classList.contains('kpi-head');
-      const hh=withHead?hd.getBoundingClientRect().height+14:0;
-      const P=18;
-      mark(e,'shotT','1'); if(withHead)mark(hd,'shotKeep','1');
-      let c=await shoot(Math.ceil(r.width+P*2),Math.ceil(r.height+hh+P*2+40),S,d=>{
-        const t=d.querySelector('[data-shot-t="1"]'); if(!t)return;
-        shotIsolate(d,t,Math.ceil(r.width));
-        const par=t.parentElement;
-        par.style.setProperty('padding',P+'px','important');
-        par.style.setProperty('width',(Math.ceil(r.width)+P*2)+'px','important');
-        if(withHead){const h=t.previousElementSibling; if(h){h.style.setProperty('margin','0 0 14px','important');h.style.removeProperty('display');}}
+    /* ---- แบบที่ 2 (v-shot6): แยกทีละหัวข้อ — หัวข้อ + เนื้อหาใต้หัวข้อนั้นจนถึงหัวข้อถัดไป
+       เป็น 1 ภาพ (เช่น ชื่อหน้า + วงแหวน + การ์ดตัวเลข) ภาพจึงมีหัวข้อติดมาเสมอ ---- */
+    const groups=[];
+    if(mode!=='slides'){
+      let g=null;
+      bands.forEach(b=>{
+        if(!g||(b.head&&g.some(x=>!x.head))){g=[];groups.push(g);}
+        g.push(b);
       });
-      delete e.dataset.shotT; if(withHead)delete hd.dataset.shotKeep;
+      groups.forEach((gp,gi)=>gp.forEach(b=>b.items.forEach(it=>mark(it.el,'shotGp',String(gi)))));
+    }
+    for(let j=0;j<groups.length;j++){
+      say(`กำลังสร้างภาพแยก ${j+1}/${groups.length}…`);
+      const gp=groups[j], hh=gp[gp.length-1].bot-gp[0].top;
+      let c=await shoot(w0,Math.ceil(hh+260),S,d=>{
+        const rc=d.querySelector('[data-shot-root="1"]'); if(!rc)return;
+        shotIsolate(d,rc,w0);
+        d.querySelectorAll('[data-shot-gp]').forEach(e=>{if(e.dataset.shotGp!==String(j))e.style.setProperty('display','none','important');});
+      });
       c=shotTrim(c,bg);
-      const nameEl=e.querySelector('.fcacc-h,.chname2,.l,h2,h3')||(withHead?hd.querySelector('b'):null);
-      const nm=nameEl?((nameEl.childNodes[0]&&nameEl.childNodes[0].textContent)||nameEl.textContent):'';
-      zip.file(`2-แยกทีละกราฟ/${pad2(j+1)}-${shotSafe(nm)}.png`,await shotBlob(c));
+      /* ตั้งชื่อไฟล์ตามหัวข้อแรกของภาพ */
+      let nm='';
+      for(const b of gp){ for(const it of b.items){
+        const h=it.el.matches('h1,h2,h3,.kpi-head,.fcacc-h,.chname2')?it.el:it.el.querySelector('h1,h2,.kpi-head b,.fcacc-h,.chname2,#kTitle');
+        if(h){nm=(h.childNodes[0]&&h.childNodes[0].textContent)||h.textContent; break;} } if(nm)break; }
+      if(!nm&&j===0)nm=title||'';
+      zip.file(`2-แยกทีละหัวข้อ/${pad2(j+1)}-${shotSafe(nm)}.png`,await shotBlob(c));
       c.width=c.height=0;
     }
     say('กำลังรวมไฟล์…');
     const blob=await zip.generateAsync({type:'blob'});
-    const a=document.createElement('a'); a.download=name+'.zip'; a.href=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.download=name+(mode==='slides'?'-slides':mode==='charts'?'-charts':'')+'.zip'; a.href=URL.createObjectURL(blob);
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   }catch(e){ alert('บันทึกรูปไม่สำเร็จ: '+e.message); }
@@ -5433,11 +5473,30 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE'})
   if(btn){btn.disabled=false;btn.textContent=label;}
 }
 
+/* v-shot5: กดบันทึกแล้วให้เลือกก่อน — สไลด์รวม / แยกทีละกราฟ / ทั้ง 2 แบบ */
+function shotMenu(btn,onPick){
+  let m=document.getElementById('shotMenu');
+  if(m){m.remove();return;}
+  m=document.createElement('div'); m.id='shotMenu';
+  m.innerHTML=`<div class="sm-h">บันทึกเป็นรูปแบบไหน?</div>
+    <button data-m="slides"><b>🖼️ แบบรวม · สไลด์ 16:9</b><span>ทั้งหน้าแบ่งเป็นสไลด์ ขนาด Google Slides</span></button>
+    <button data-m="charts"><b>🧩 แบบแยก · ทีละหัวข้อ</b><span>หัวข้อ + กราฟ/การ์ดใต้หัวข้อนั้น เป็น 1 ภาพ</span></button>
+    <button data-m="both"><b>📦 ทั้ง 2 แบบ</b><span>ได้ทั้งสไลด์และภาพแยก ในไฟล์ zip เดียว</span></button>`;
+  document.body.appendChild(m);
+  const r=btn.getBoundingClientRect(), z=parseFloat(getComputedStyle(document.body).zoom)||1;
+  m.style.top=(r.bottom/z+8)+'px'; m.style.left=(r.left/z)+'px';
+  const close=e=>{ if(!m.contains(e.target)&&e.target!==btn){m.remove();document.removeEventListener('mousedown',close,true);} };
+  setTimeout(()=>document.addEventListener('mousedown',close,true),0);
+  m.addEventListener('click',e=>{const b=e.target.closest('button[data-m]'); if(!b)return;
+    m.remove(); document.removeEventListener('mousedown',close,true); onPick(b.dataset.m);});
+}
 el('kSave').addEventListener('click',()=>{
-  const tag=[fYear(), fMonth()&&MONTH_EN[MONTH_ORDER.indexOf(fMonth())],
-             WKSEL.length&&('W'+WKSEL.join('_')), DAYSEL].filter(Boolean).join('-')||'all';
-  shotExport({root:el('kShot'),btn:el('kSave'),zoomEls:[document.body],
-    name:`kpi-${SEC}-${tag}`,title:el('kTitle').textContent});
+  shotMenu(el('kSave'),mode=>{
+    const tag=[fYear(), fMonth()&&MONTH_EN[MONTH_ORDER.indexOf(fMonth())],
+               WKSEL.length&&('W'+WKSEL.join('_')), DAYSEL].filter(Boolean).join('-')||'all';
+    shotExport({root:el('kShot'),btn:el('kSave'),zoomEls:[document.body],mode,
+      name:`kpi-${SEC}-${tag}`,title:el('kTitle').textContent});
+  });
 });
 
 /* ---------- โหมดพรีเซนต์ของหน้า KPI ---------- */
