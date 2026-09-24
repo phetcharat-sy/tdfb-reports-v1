@@ -386,29 +386,33 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .fcacc{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:20px;
   padding:26px 28px 8px;margin-bottom:18px;
   box-shadow:0 1px 2px rgba(15,23,42,.06),0 10px 26px rgba(15,23,42,.10)}
-#vKPI .fcacc-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+#vKPI .fcacc-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:16px;margin-bottom:22px}
 #vKPI .fcacc-card{background:#fff;border:1px solid #E2E8F0;border-radius:14px;
   padding:20px 18px;text-align:center;display:flex;flex-direction:column;
   align-items:center;gap:6px}
-#vKPI .fcacc-card i{font-style:normal;font-size:30px;color:#0D9488}
-#vKPI .fcacc-card b{font-size:24px;font-weight:600;color:#475569}
-#vKPI .fcacc-card span{font-size:46px;font-weight:800;color:#0F172A;letter-spacing:-.5px}
+#vKPI .fcacc-card i{font-style:normal;font-size:38px;color:#0D9488}
+#vKPI .fcacc-card b{font-size:32px;font-weight:600;color:#475569}
+#vKPI .fcacc-card span{font-size:60px;font-weight:800;color:#0F172A;letter-spacing:-.5px}
 #vKPI .fcacc-card span.up{color:#B45309}#vKPI .fcacc-card span.down{color:#0F766E}
-#vKPI .fcacc-card small{font-size:19px;color:#64748B}
-#vKPI .fcacc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#vKPI .fcacc-card small{font-size:26px;color:#64748B}
+#vKPI .fcacc-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+/* v-fc2: กันคอลัมน์ขวาล้นจอ — ลูกของ grid ต้อง min-width:0 ไม่งั้น canvas/ตาราง/แถบพยากรณ์ดันกว้างเกินกรอบ */
+#vKPI .fcacc-grid>*{min-width:0}
+#vKPI .fcacc,#vKPI .fcacc-panel{min-width:0;max-width:100%;overflow:hidden}
+#vKPI .fcacc-chartbox canvas{max-width:100%}
 @media(max-width:1300px){#vKPI .fcacc-grid{grid-template-columns:1fr}}
 #vKPI .fcacc-panel{background:#fff;border:1px solid #E2E8F0;border-radius:16px;
   padding:20px 22px 4px;margin-bottom:22px}
-#vKPI .fcacc-h{font-size:28px;font-weight:700;color:#0F172A;margin-bottom:10px}
+#vKPI .fcacc-h{font-size:34px;font-weight:700;color:#0F172A;margin-bottom:10px}
 #vKPI .fcacc-h em{display:block;font-style:normal;font-weight:normal;
-  font-size:22px;color:#64748B;margin-top:2px}
-#vKPI .fcacc-chartbox{position:relative;height:320px;margin-bottom:14px}
-#vKPI .fcacc-tblwrap{max-height:320px;overflow:auto;border-top:1px solid #E2E8F0}
-#vKPI .fcacc-tbl{width:100%;border-collapse:collapse;font-size:26px}
+  font-size:28px;color:#64748B;margin-top:4px}
+#vKPI .fcacc-chartbox{position:relative;height:500px;margin-bottom:18px}
+#vKPI .fcacc-tblwrap{max-height:560px;overflow:auto;border-top:1px solid #E2E8F0}
+#vKPI .fcacc-tbl{width:100%;border-collapse:collapse;font-size:34px}
 #vKPI .fcacc-tbl th{position:sticky;top:0;background:#F1F5F9;text-align:left;
-  color:#64748B;font-weight:600;padding:10px 12px;font-size:23px}
-#vKPI .fcacc-tbl td{padding:10px 12px;border-top:1px solid #EEF1F5;color:#0F172A}
+  color:#64748B;font-weight:600;padding:14px 16px;font-size:30px}
+#vKPI .fcacc-tbl td{padding:14px 16px;border-top:1px solid #EEF1F5;color:#0F172A}
 #vKPI .fcacc-tbl .num{text-align:right;font-variant-numeric:tabular-nums}
 #vKPI .fcacc-tbl .up{color:#B45309;font-weight:600}
 #vKPI .fcacc-tbl .down{color:#0F766E;font-weight:600}
@@ -2598,10 +2602,10 @@ function secForecast(){
     </details>
     <div class="fcacc-grid">
       <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / สัปดาห์</div>
-        <div class="fcacc-chartbox" style="height:420px"><canvas id="c_fcwo"></canvas></div>
+        <div class="fcacc-chartbox" style="height:560px"><canvas id="c_fcwo"></canvas></div>
         ${fcStrip(wOrd,'ออเดอร์')}</div>
       <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / สัปดาห์</div>
-        <div class="fcacc-chartbox" style="height:420px"><canvas id="c_fcwq"></canvas></div>
+        <div class="fcacc-chartbox" style="height:560px"><canvas id="c_fcwq"></canvas></div>
         ${fcStrip(wQty,'ชิ้น')}</div>
     </div>
 
@@ -2620,10 +2624,10 @@ function secForecast(){
     </details>
     <div class="fcacc-grid">
       <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / วัน</div>
-        <div class="fcacc-chartbox" style="height:420px"><canvas id="c_fcdo"></canvas></div>
+        <div class="fcacc-chartbox" style="height:560px"><canvas id="c_fcdo"></canvas></div>
         ${fcStrip(dOrd,'ออเดอร์')}</div>
       <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / วัน</div>
-        <div class="fcacc-chartbox" style="height:420px"><canvas id="c_fcdq"></canvas></div>
+        <div class="fcacc-chartbox" style="height:560px"><canvas id="c_fcdq"></canvas></div>
         ${fcStrip(dQty,'ชิ้น')}</div>
     </div>`:'<div class="empty2">ข้อมูลรายวันไม่พอสำหรับพยากรณ์ (ต้องมีอย่างน้อย 7 วัน)</div>'}
 
@@ -2790,7 +2794,7 @@ const fcPtLbl={id:'fcPtLbl',
     /* จุดพยากรณ์รายวันเบียดกันแน่นกว่ารายสัปดาห์ ป้ายอาจต้องเรียงซ้อนขึ้น 2-3 ชั้น
        เผื่อพื้นที่ด้านบนให้พอ กันข้อความชนขอบบนกราฟ · เผื่อขวาไว้ด้วยกันป้ายจุดสุดท้าย
        (ซึ่งอยู่ริมขวาสุดของกราฟพอดี) ทะลุขอบกล่องออกไปเป็นเส้นตรงยาวๆ ที่เจอซ้ำๆ */
-    const need=Math.round(110*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
+    const need=Math.round(48*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
     const needR=Math.round(50*CFZ);
     if(typeof p==='object'&&p){ if((p.top||0)<need)p.top=need; if((p.right||0)<needR)p.right=needR; }
     else ch.options.layout={padding:{top:need,right:needR}}; },
@@ -2798,8 +2802,8 @@ const fcPtLbl={id:'fcPtLbl',
     if(!op||!op.display)return;
     const x=ch.ctx, m=ch.getDatasetMeta(1); if(!m||m.hidden)return;
     const ds=ch.data.datasets[1];
-    x.font='bold '+cf(19)+'px "Baloo 2"'; x.textBaseline='bottom';
-    const step=Math.round(22*CFZ);
+    x.font='bold '+cf(24)+'px "Baloo 2"'; x.textBaseline='bottom';
+    const step=Math.round(28*CFZ);
     const lastIdx=m.data.length-1;
     let placed=[];   /* กันป้ายทับกัน — จุดพยากรณ์ชิดกันตอนดูรายวัน เลยไล่ซ้อนขึ้นเป็นชั้นแทนวางระดับเดียวกันหมด */
     m.data.forEach((pt,i)=>{
@@ -2819,6 +2823,16 @@ const fcPtLbl={id:'fcPtLbl',
   }};
 if(window.Chart&&!Chart.registry.plugins.get('fcPtLbl'))Chart.register(fcPtLbl);
 
+/* v-fc2: ระยะเส้นแกน Y แบบเลขกลม ~4 ช่อง (เช่น max 1,000 → 0/300/600/900/1,200)
+   Chart.js เลือกเองจะเหลือแค่ 0 กับ 1,000 เพราะพื้นที่กราฟเตี้ย */
+function fcNiceY(vals){
+  const mx=Math.max(0,...vals.filter(v=>v!=null&&isFinite(v)));
+  if(!mx)return {};
+  const raw=mx/4, p=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/p;
+  const step=(f<=1?1:f<=2?2:f<=3?3:f<=5?5:10)*p;
+  /* เผื่อหัวกราฟ ~12% ให้ป้ายตัวเลขจุดพยากรณ์ไม่ชนขอบบน */
+  return {step,max:Math.ceil(mx*1.12/step)*step};
+}
 function fcLineChart(id,key,s,unit){
   const el2=document.getElementById(id); if(!el2||!s)return;
   destroy(key);
@@ -2826,6 +2840,7 @@ function fcLineChart(id,key,s,unit){
   const histData=[...s.hist,...s.fc.map(()=>null)];
   /* ต่อเส้นให้เนียน — จุดสุดท้ายของเส้นจริงเป็นจุดเริ่มของเส้นพยากรณ์ */
   const fcData=[...s.hist.map((v,i)=>i===nH-1?v:null),...s.fc];
+  const ny=fcNiceY([...s.hist,...s.fc]);
   const o={responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(25)},usePointStyle:true}},
@@ -2836,10 +2851,10 @@ function fcLineChart(id,key,s,unit){
             return s.labels[i]+(s.ranges&&s.ranges[i]?'  ·  '+s.ranges[i]:'');},
           label:c=>c.raw==null?null:`${c.dataset.label}: ${fmt(c.raw)} ${unit}`}},
       fcPtLbl:{display:true,nH}},
-    scales:{x:{ticks:{color:'#64748B',font:{size:cf(22)},maxRotation:0,autoSkip:true},
+    scales:{x:{ticks:{color:'#475569',font:{size:cf(26)},maxRotation:0,autoSkip:true},
                 grid:{display:false}},
-      y:{ticks:{color:'#64748B',font:{size:cf(22)},callback:v=>fmt(v)},
-          grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
+      y:{ticks:{color:'#475569',font:{size:cf(26)},callback:v=>fmt(v),stepSize:ny.step},
+          max:ny.max,grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
   CH[key]=new Chart(el2,{type:'line',
     data:{labels:s.labels,datasets:[
       {label:'ยอดจริง',data:histData,borderColor:'#0D9488',backgroundColor:'rgba(13,148,136,.12)',
@@ -2872,16 +2887,17 @@ function fcAccChart(id,key,bt,unit){
       actual:chunk.reduce((s,r)=>s+r.actual,0),
       pred:chunk.reduce((s,r)=>s+r.pred,0)});
   }
+  const ny=fcNiceY([...wk.map(w=>w.actual),...wk.map(w=>w.pred)]);
   const o={responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
-    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(25)},usePointStyle:true}},
+    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(26)},usePointStyle:true}},
       tooltip:{backgroundColor:'#1E293B',padding:10,cornerRadius:6,
         titleFont:{size:cf(25)},bodyFont:{size:cf(23)},
         callbacks:{title:c=>wk[c[0].dataIndex].range}}},
-    scales:{x:{ticks:{color:'#64748B',font:{size:cf(26)},maxRotation:0,autoSkip:true},
+    scales:{x:{ticks:{color:'#475569',font:{size:cf(26)},maxRotation:0,autoSkip:true},
                 grid:{display:false}},
-      y:{ticks:{color:'#64748B',font:{size:cf(24)},callback:v=>fmt(v)},
-          grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
+      y:{ticks:{color:'#475569',font:{size:cf(26)},callback:v=>fmt(v),stepSize:ny.step},
+          max:ny.max,grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
   CH[key]=new Chart(el2,{type:'line',
     data:{labels:wk.map(w=>w.label),
       datasets:[
