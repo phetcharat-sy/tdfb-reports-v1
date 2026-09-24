@@ -2787,16 +2787,19 @@ function fcAccTable(bt,unit){
 const fcPtLbl={id:'fcPtLbl',
   beforeLayout(ch,a,op){ if(!op||!op.display)return;
     /* จุดพยากรณ์รายวันเบียดกันแน่นกว่ารายสัปดาห์ ป้ายอาจต้องเรียงซ้อนขึ้น 2-3 ชั้น
-       เผื่อพื้นที่ด้านบนให้พอ กันข้อความชนขอบบนกราฟ */
+       เผื่อพื้นที่ด้านบนให้พอ กันข้อความชนขอบบนกราฟ · เผื่อขวาไว้ด้วยกันป้ายจุดสุดท้าย
+       (ซึ่งอยู่ริมขวาสุดของกราฟพอดี) ทะลุขอบกล่องออกไปเป็นเส้นตรงยาวๆ ที่เจอซ้ำๆ */
     const need=Math.round(110*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
-    if(typeof p==='object'&&p){ if((p.top||0)<need)p.top=need; }
-    else ch.options.layout={padding:{top:need}}; },
+    const needR=Math.round(50*CFZ);
+    if(typeof p==='object'&&p){ if((p.top||0)<need)p.top=need; if((p.right||0)<needR)p.right=needR; }
+    else ch.options.layout={padding:{top:need,right:needR}}; },
   afterDatasetsDraw(ch,a,op){
     if(!op||!op.display)return;
     const x=ch.ctx, m=ch.getDatasetMeta(1); if(!m||m.hidden)return;
     const ds=ch.data.datasets[1];
-    x.save(); x.font='bold '+cf(19)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
+    x.font='bold '+cf(19)+'px "Baloo 2"'; x.textBaseline='bottom';
     const step=Math.round(22*CFZ);
+    const lastIdx=m.data.length-1;
     let placed=[];   /* กันป้ายทับกัน — จุดพยากรณ์ชิดกันตอนดูรายวัน เลยไล่ซ้อนขึ้นเป็นชั้นแทนวางระดับเดียวกันหมด */
     m.data.forEach((pt,i)=>{
       if(i<op.nH)return;
@@ -2805,10 +2808,13 @@ const fcPtLbl={id:'fcPtLbl',
       let level=0;
       while(placed.some(b=>b.level===level&&Math.abs(b.x-pt.x)<(b.w+w)/2+6))level++;
       placed.push({x:pt.x,w,level});
+      x.save();
+      /* จุดสุดท้าย (ริมขวาสุดของกราฟ) วางป้ายชิดขวาแทนกึ่งกลาง กันครึ่งขวาของตัวเลขทะลุขอบ */
+      x.textAlign=(i===lastIdx)?'right':'center';
       x.fillStyle='#B45309';
-      x.fillText(t,pt.x,pt.y-10-level*step);
+      x.fillText(t,i===lastIdx?pt.x+w/2:pt.x,pt.y-10-level*step);
+      x.restore();
     });
-    x.restore();
   }};
 if(window.Chart&&!Chart.registry.plugins.get('fcPtLbl'))Chart.register(fcPtLbl);
 
