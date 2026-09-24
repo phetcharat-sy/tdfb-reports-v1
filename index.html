@@ -451,6 +451,13 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .stfres{flex:1 1 100%;font-size:27px;line-height:1.6;color:var(--ink);
   border-top:1px dashed var(--line);padding-top:12px;min-height:6px}
 #vKPI .stfres:empty{border:0;padding:0;min-height:0}
+#vKPI .clkbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 16px;
+  background:#FFF7E6;border:2px solid #F0C36B;border-radius:14px;padding:12px 16px}
+#vKPI .clkbar .cb-l{font-size:26px;font-weight:bold;color:#8a5a00;margin-right:6px}
+#vKPI .clkbar button{font-family:inherit;font-size:26px;font-weight:bold;cursor:pointer;
+  background:var(--plum);color:#fff;border:0;border-radius:30px;padding:7px 18px}
+#vKPI .clkbar button b{margin-left:6px;opacity:.85}
+#vKPI .clkbar button.all{background:transparent;color:var(--plum-d);border:2px solid var(--plum)}
 #shotMenu{position:fixed;z-index:9999;background:#fff;border-radius:16px;padding:14px;width:520px;
   box-shadow:0 18px 44px rgba(15,10,40,.35);border:2px solid var(--plum);font-family:inherit}
 #shotMenu .sm-h{font-size:24px;font-weight:bold;color:var(--plum-d);padding:4px 10px 10px}
@@ -1581,7 +1588,9 @@ function chipBar(key,label,items,cur){
 }
 /* ชิปแบบเลือกได้หลายอัน — ค่าเก็บเป็นข้อความคั่นด้วย | ใน SUBF
    items = [[value,label], ...] · sel = อาเรย์ของค่าที่เลือกอยู่ */
-function chipMulti(key,label,items,sel){
+function chipMulti(key,label,items,sel,unit){
+  /* v-fdd: ตัวเลือกเยอะ (≥5) ไม่เรียงเป็นแถวยาว — เป็นปุ่มเดียว กดแล้วค่อยเลือก */
+  if(items.length>=5)return chipDropdown(key,label,items,sel,unit||'รายการ');
   const on=new Set(sel||[]);
   const box=c=>`<i class="ck${c?' on':''}">${c?'✓':''}</i>`;
   return `<div class="fbar"><span class="fl">${label}</span>`
@@ -1606,7 +1615,7 @@ function chipDropdown(key,label,items,sel,unit){
       <button type="button" class="btn ghost ddbtn" data-dd="${key}" data-on="${on.size?'1':'0'}"
         aria-haspopup="listbox" aria-expanded="${open?'true':'false'}">${esc(btnLabel)} ▾</button>
       <div class="wsel-p" role="listbox" ${open?'':'hidden'}>
-        <div class="wsel-h"><span>ติ๊กได้หลายคน</span></div>
+        <div class="wsel-h"><span>ติ๊กได้หลายอัน</span></div>
         <button type="button" data-sf="${key}" data-multi="1" data-v=""
           class="${on.size?'':'on'}">${box(!on.size)}ทั้งหมด</button>
         ${items.map(([v,t])=>`<button type="button" data-sf="${key}" data-multi="1" data-v="${esc(v)}"
@@ -1671,7 +1680,7 @@ function chip(raw){
 
 /* ================= On-Time Performance ================= */
 function secOnTime(){
-  const lines=filteredRows();
+  const lines=catApply(filteredRows(),G_ONTIME);
   if(!lines.length)return '<div class="empty2">ไม่มีข้อมูลในช่วงที่เลือก</div>';
 
   const ord=toOrderLevel(lines);
@@ -1789,6 +1798,85 @@ function drawOnTime(){
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('+fmt(ce[c.dataIndex][1])+' orders)'}}}}});
 }
 
+
+/* ================= v-clk: คลิกกราฟ = กรองข้อมูล =================
+   ทุกกราฟ (ยกเว้น Return และ Forecast) คลิกแท่ง/จุด/ชิ้นวงกลม แล้วกรองทั้งหน้า · คลิกซ้ำ = ยกเลิก
+   - แกนเวลา (W12 · 2026-09-09 · ม.ค.) → ใช้ตัวกรอง WEEK / DAY / MONTH ด้านบนตัวเดิม
+   - หมวดหมู่ (Platform · ขนส่ง · สินค้า ฯลฯ) → เก็บใน CATF แยกตามหน้า มีแถบ "กรองจากกราฟ" ให้กดล้าง
+   - กราฟที่มีตัวกรองรายชื่อคนอยู่แล้ว (Picking/Packing) → ติ๊กคนนั้นในตัวกรองรายชื่อให้เลย */
+const CATF={};
+const catF=()=>CATF[SEC]||(CATF[SEC]={});
+function catApply(rows,G){
+  const f=catF(); let out=rows;
+  Object.keys(f).forEach(d=>{ if(G[d]) out=out.filter(r=>String(G[d](r))===String(f[d].v)); });
+  return out;
+}
+const CLK_NAME={ok:'แพ็คตรงเวลา',plat:'ประเภท',urg:'Shipping',snd:'แบรนด์',prod:'สินค้า',
+  ch:'ช่องทาง',st:'สถานะ',car:'ขนส่ง',phr:'ชั่วโมง',khr:'ชั่วโมง',rmk:'Remark'};
+/* คีย์กราฟ (CH.xxx) → มิติที่ใช้กรอง */
+const CLK_DIM={pack:'ok',plat:'plat',ship:'urg',chan:'snd',top5:'prod',
+  shCh:'ch',shSt:'st',shCar:'car',pkHour:'phr',pkhr:'khr',remark:'rmk',
+  pkShare:{sub:'pk2_who'},pkrate:{sub:'pk_who'},pkbat:{sub:'pk_who'}};
+function catBar(){
+  const f=catF(), ks=Object.keys(f);
+  const t=(fWeekLabel()||DAYSEL||fMonth())?'':'';
+  if(!ks.length)return '';
+  return `<div class="clkbar"><span class="cb-l">🔎 กรองจากกราฟ</span>`
+    +ks.map(k=>`<button type="button" data-clk-x="${k}">${esc(f[k].t)} <b>✕</b></button>`).join('')
+    +(ks.length>1?`<button type="button" class="all" data-clk-x="*">ล้างทั้งหมด</button>`:'')+`</div>`;
+}
+function clkHandle(ch,key,i){
+  const vals=ch.data._cfv, raw=vals?vals[i]:ch.data.labels[i];
+  const lbl=String(Array.isArray(raw)?raw.join(' '):(raw??'')).trim();
+  if(!lbl||lbl==='อื่นๆ')return;
+  const spec=CLK_DIM[key];
+  if(spec&&spec.sub){
+    const cur=String(sf(spec.sub,''));
+    SUBF[spec.sub]=cur===lbl?'':lbl; renderKPI(); return;
+  }
+  if(typeof spec==='string'){
+    const f=catF(), shown=String(ch.data.labels[i]);
+    if(f[spec]&&String(f[spec].v)===lbl)delete f[spec];
+    else f[spec]={v:lbl,t:(CLK_NAME[spec]||'')+': '+shown};
+    renderKPI(); return;
+  }
+  /* แกนเวลา */
+  let m;
+  if((m=lbl.match(/^W(\d+)$/))){
+    const w=String(parseInt(m[1]));
+    WKSEL=(WKSEL.length===1&&WKSEL[0]===w)?[]:[w]; DAYSEL=''; calYM=null;
+  }else if(/^\d{4}-\d{2}-\d{2}$/.test(lbl)){
+    DAYSEL=DAYSEL===lbl?'':lbl; calYM=null;
+  }else{
+    const mi=MON_S.findIndex(x=>lbl.startsWith(x)); if(mi<0)return;
+    const yy=lbl.match(/\s(\d{2})$/);
+    if(yy&&el('kY').value!=='20'+yy[1]){ el('kY').value='20'+yy[1]; fillFiltersKPI(); }
+    const name=MONTH_ORDER[mi], kM=el('kM');
+    const next=kM.value===name?'':name;
+    kM.value=next; WKSEL=[]; DAYSEL=''; calYM=null;
+  }
+  if(typeof buildWeekPop==='function')buildWeekPop();
+  fillFiltersKPI(); renderKPI();
+}
+const clickF={id:'clickF',
+  afterEvent(ch,args){
+    const e=args.event; if(!e||(e.type!=='click'&&e.type!=='mousemove'))return;
+    if(SEC==='ret'||SEC==='fc'||SEC==='sop'||!document.getElementById('vKPI')||ch.options.onClick)return;
+    if(ch.canvas&&!ch.canvas.closest('#vKPI'))return;
+    const line=ch.config.type==='line';
+    let els=[];
+    try{ els=ch.getElementsAtEventForMode(e.native||e,line?'index':'nearest',{intersect:!line},false); }catch(x){}
+    if(e.type==='mousemove'){ ch.canvas.style.cursor=els.length?'pointer':''; return; }
+    if(!els.length)return;
+    const key=Object.keys(CH).find(k=>CH[k]===ch);
+    if(!key)return;
+    clkHandle(ch,key,els[0].index);
+  }};
+if(window.Chart&&!Chart.registry.plugins.get('clickF'))Chart.register(clickF);
+const G_ONTIME={ok:r=>classify(r.wh)==='late'?'No':'Yes',
+  plat:r=>isPlatform(r.source)?'Platform':'Walk-in',
+  urg:r=>r.urgent||'ไม่ระบุ', snd:r=>r.sender||'ไม่ระบุ'};
+
 /* ================= Out of Stock ================= */
 let OOS_CTX=null;
 function secOOS(){
@@ -1799,7 +1887,8 @@ function secOOS(){
   const stSel=String(sf('oos_st','')).split('|').filter(Boolean);
   const bars=chipMulti('oos_st','สถานะการส่งของ',
     [['ontime','On time'],['early','Early'],['late','Late']],stSel);
-  const rows=stSel.length?all0.filter(r=>stSel.includes(classify(r.wh))):all0;
+  const rows=catApply(stSel.length?all0.filter(r=>stSel.includes(classify(r.wh))):all0,
+                      {prod:r=>(r.product||'').trim()});
   if(!rows.length)return bars+'<div class="empty2">ไม่มีข้อมูลที่ตรงกับตัวกรองนี้</div>';
 
   let tq=0,on=0,ea=0,la=0;
@@ -1857,6 +1946,7 @@ function drawOOS(){
     data:{labels:top.map(e=>e[0].length>26?e[0].slice(0,24)+'…':e[0]),
       datasets:[{data:top.map(e=>e[1]),backgroundColor:C.teal,borderRadius:6,maxBarThickness:70}]},
     options:ot});
+  CH.top5.data._cfv=top.map(e=>e[0]);   /* ชื่อเต็ม ใช้ตอนคลิกกรอง (ป้ายบนกราฟถูกย่อ) */
 
   const t=on+ea+la||1;
   destroy('oos');
@@ -3519,11 +3609,14 @@ function secShip(){
   const sends=[...new Set(all0.map(r=>r.send))].filter(c=>c!=='ไม่ระบุ').sort();
   const chSel=String(sf('sh_ch','')).split('|').filter(Boolean);
   const sdSel=String(sf('sh_send','')).split('|').filter(Boolean);
-  const bar=(chs.length>1?chipMulti('sh_ch','ช่องทางขาย',chs.map(c=>[c,c]),chSel):'')
-          +(sends.length>1?chipMulti('sh_send','แบรนด์',sends.map(c=>[c,c]),sdSel):'');
+  /* ตัวกรอง 2 อันวางบรรทัดเดียวกัน เป็นปุ่มกดแล้วค่อยเลือก */
+  const bar='<div style="display:flex;gap:10px 40px;flex-wrap:wrap;align-items:center">'
+          +(chs.length>1?chipMulti('sh_ch','ช่องทางขาย',chs.map(c=>[c,c]),chSel,'ช่องทาง'):'')
+          +(sends.length>1?chipDropdown('sh_send','แบรนด์',sends.map(c=>[c,c]),sdSel,'แบรนด์'):'')+'</div>';
   let list=all0;
   if(chSel.length)list=list.filter(r=>chSel.includes(r.ch));
   if(sdSel.length)list=list.filter(r=>sdSel.includes(r.send));
+  list=catApply(list,{ch:r=>r.ch,st:r=>r.pending?'ค้างส่ง':'จัดส่งสำเร็จ',car:r=>r.carrier});
   if(!list.length)return bar+'<div class="empty2">ไม่มีข้อมูลตามตัวกรองนี้</div>';
 
   const S=shipStats(list);
@@ -3802,7 +3895,7 @@ function secPack(){
   const people=[...new Set(all0.map(r=>r.p))].sort();
   const sel=String(sf('pk2_who','')).split('|').filter(Boolean);
   const bar=people.length>1?chipDropdown('pk2_who','พนักงานแพ็ค',people.map(p=>[p,p]),sel):'';
-  const list=sel.length?all0.filter(r=>sel.includes(r.p)):all0;
+  const list=catApply(sel.length?all0.filter(r=>sel.includes(r.p)):all0,{phr:r=>r.hr});
   if(!list.length)return bar+'<div class="empty2">ไม่มีข้อมูลตามตัวกรองนี้</div>';
 
   const S=packStats(list);
@@ -3976,6 +4069,7 @@ function drawPack(){
           backgroundColor:cats.map(c=>c.sp?'rgba(0,0,0,0)':c.c),
           borderRadius:2,maxBarThickness:90}]},
       options:oWk});
+    CH.pkWk.data._cfv=cats.map(c=>c.sp?'':c.m);   /* คลิกแท่ง = กรองเดือน/สัปดาห์นั้น */
   }
 
   /* สัดส่วนรายคน — plot เป็น % เพื่อให้ pieLbl เขียนตัวเลขลงบนวงได้ */
@@ -4050,7 +4144,7 @@ function secPick(){
   /* เลือกได้หลายคนพร้อมกัน */
   const who=String(sf('pk_who','')).split('|').filter(Boolean);
   const bar=people.length>1?chipDropdown('pk_who','พนักงาน',people.map(p=>[p,p]),who):'';
-  const list=who.length?all0.filter(r=>who.includes(r.who)):all0;
+  const list=catApply(who.length?all0.filter(r=>who.includes(r.who)):all0,{khr:r=>r.hour});
   if(!list.length)return bar+'<div class="empty2">ไม่มีข้อมูลตามตัวกรองนี้</div>';
 
   const totQty=list.reduce((s,r)=>s+r.qty,0);
@@ -4193,6 +4287,7 @@ function drawPick(){
           borderColor:cols[i],backgroundColor:cols[i],borderWidth:3,
           tension:.35,pointRadius:3,pointBackgroundColor:cols[i],
           spanGaps:true,fill:false}))},options:o});
+    CH.pkday.data._cfv=days;
   }
 
   /* ช่วงเวลาที่หยิบหนาแน่น — เส้นโค้งมีพื้นที่ใต้กราฟ แยกตามคน */
@@ -4214,6 +4309,7 @@ function drawPick(){
           borderColor:cols[i],backgroundColor:rgba(cols[i],.18),
           borderWidth:3,tension:.45,pointRadius:4,
           pointBackgroundColor:cols[i],fill:true}))},options:o});
+    CH.pkhr.data._cfv=hrs;
   }
 }
 
@@ -4718,8 +4814,9 @@ async function loadRepl(){
 let REPL_CTX=null;
 function secRepl(){
   if(!REPL)return `<div class="empty2">${REPL_ERR?'อ่านชีตไม่ได้ — '+REPL_ERR:'กำลังโหลดข้อมูล…'}</div>`;
-  const need=REPL.filter(isNeed);
-  const nonNeed=REPL.filter(r=>r.need.includes('ไม่ต้อง'));
+  const RP=catApply(REPL,{rmk:r=>(r.remark||'').trim()||'ไม่มี Remark'});
+  const need=RP.filter(isNeed);
+  const nonNeed=RP.filter(r=>r.need.includes('ไม่ต้อง'));
   const act=need.filter(r=>!isBlocked(r));
   const blk=need.filter(isBlocked);
   const totalQty=act.reduce((s,r)=>s+(r.qty>0?r.qty:0),0);
@@ -4732,13 +4829,13 @@ function secRepl(){
     if(ar!==br)return br-ar;
     return b.qty-a.qty;
   });
-  const all=[...REPL].sort((a,b)=>{
+  const all=[...RP].sort((a,b)=>{
     const an=isNeed(a)?1:0,bn=isNeed(b)?1:0;
     if(an!==bn)return bn-an;
     return b.score-a.score;
   });
 
-  return `<div class="sgrid">${card('สินค้าทั้งหมด',REPL.length)}
+  return `<div class="sgrid">${card('สินค้าทั้งหมด',RP.length)}
       ${card('ต้องเติม Stock',act.length,'rose')}
       ${card('ติดโควต้า / Raw Material',blk.length,'amber')}
       ${card('ไม่ต้องเติม',nonNeed.length,'teal')}
@@ -4823,6 +4920,12 @@ el('detail').addEventListener('change',e=>{
 });
 
 /* กดชิปตัวกรองย่อย หรือคลิกแถวใน legend ของกราฟวงกลม */
+el('detail').addEventListener('click',e=>{
+  const x=e.target.closest('[data-clk-x]'); if(!x)return;
+  e.stopPropagation();
+  if(x.dataset.clkX==='*')CATF[SEC]={}; else delete catF()[x.dataset.clkX];
+  renderKPI();
+});
 el('detail').addEventListener('click',async e=>{
   const dd=e.target.closest('[data-dd]');   /* ปุ่มเปิด/ปิดดรอปดาวน์รายชื่อคน */
   if(dd){ e.stopPropagation(); OPEN_DD=OPEN_DD===dd.dataset.dd?'':dd.dataset.dd; renderKPI(); return; }
@@ -4881,7 +4984,8 @@ function renderKPI(){
   el('kSub').textContent=tt[1];
   document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='ret');
   if(!isOv){
-    el('detail').innerHTML = SEC==='ontime'?secOnTime() : SEC==='oos'?secOOS()
+    el('detail').innerHTML = ((SEC==='ret'||SEC==='sop'||SEC==='fc')?'':catBar())
+                           + (SEC==='ontime'?secOnTime() : SEC==='oos'?secOOS()
                            : SEC==='diff'?secDiff() : SEC==='dock'?secDock()
                            : SEC==='fc'?secForecast()
                            : SEC==='pick'?secPick()
@@ -4889,7 +4993,7 @@ function renderKPI(){
                            : SEC==='pack'?secPack()
                            : SEC==='ship'?secShip()
                            : SEC==='sop'?secSOP()
-                           : SEC==='ret'?secRetEmbed() : secRepl();
+                           : SEC==='ret'?secRetEmbed() : secRepl());
     fitScrolls();
     /* กราฟต้องวาดหลัง canvas เข้า DOM แล้ว */
     requestAnimationFrame(()=>{
@@ -5237,6 +5341,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')openCal(false);});
   DAYSEL='';calYM=null;fillFiltersKPI();renderKPI();
 }));
 el('kClear').addEventListener('click',()=>{
+  Object.keys(CATF).forEach(k=>delete CATF[k]);   /* ล้างตัวกรองจากกราฟด้วย */
   el('kY').value='';el('kM').value='';WKSEL=[];DAYSEL='';calYM=null;fillFiltersKPI();renderKPI();
 });
 
