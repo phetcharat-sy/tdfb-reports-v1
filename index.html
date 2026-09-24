@@ -716,6 +716,11 @@ body.present #vKPI .ring .cap{font-size:40px;max-width:none;flex:1;min-width:0;
 body.present #vKPI .ring .cap>span{white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;max-width:100%}
 body.present #vKPI .ring .cap .tag{margin-bottom:2px}
+/* v-pres2: โหมดพรีเซนต์ — วงแหวน + คำอธิบาย อยู่กึ่งกลางกรอบ (ทับค่าวางชิดซ้ายด้านบน) */
+body.present #vKPI .ring{flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;gap:22px;padding:44px 56px}
+body.present #vKPI .ring .cap{flex:0 1 auto;align-items:center;text-align:center;max-width:100%}
+body.present #vKPI .ring .cap>span{white-space:normal}
 body.present #vKPI .cbox{height:600px}
 body.present #vKPI .cbox.xl{height:min(700px,78vh)}
 body.present #vKPI .subsec{font-size:36.5px}
