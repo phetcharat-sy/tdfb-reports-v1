@@ -458,6 +458,18 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
   background:var(--plum);color:#fff;border:0;border-radius:30px;padding:7px 18px}
 #vKPI .clkbar button b{margin-left:6px;opacity:.85}
 #vKPI .clkbar button.all{background:transparent;color:var(--plum-d);border:2px solid var(--plum)}
+#clkPop{position:fixed;z-index:9998;background:#fff;border:2px solid var(--plum);border-radius:16px;
+  padding:16px 20px 16px;min-width:340px;max-width:560px;box-shadow:0 16px 40px rgba(15,10,40,.35);
+  font-family:'Baloo 2','Mitr',sans-serif;color:var(--ink)}
+#clkPop .cp-x{position:absolute;top:8px;right:10px;border:0;background:none;font-size:22px;color:var(--mute);cursor:pointer}
+#clkPop .cp-s{font-size:20px;color:var(--mute);margin-right:26px}
+#clkPop .cp-t{font-size:32px;font-weight:bold;color:var(--plum-d);margin:0 26px 8px 0;line-height:1.3}
+#clkPop .cp-r{display:flex;justify-content:space-between;gap:24px;font-size:25px;padding:5px 0;border-top:1px solid #EEE9F7}
+#clkPop .cp-r b{font-size:27px}
+#clkPop .cp-r em{font-style:normal;color:var(--teal);margin-left:8px;font-size:23px}
+#clkPop .cp-r.dim{color:var(--mute)} #clkPop .cp-r.dim b{font-size:23px;font-weight:600}
+#clkPop .cp-f{margin-top:12px;width:100%;border:0;border-radius:10px;background:var(--teal);color:#fff;
+  font-family:inherit;font-size:23px;font-weight:bold;padding:9px 12px;cursor:pointer}
 #shotMenu{position:fixed;z-index:9999;background:#fff;border-radius:16px;padding:14px;width:520px;
   box-shadow:0 18px 44px rgba(15,10,40,.35);border:2px solid var(--plum);font-family:inherit}
 #shotMenu .sm-h{font-size:24px;font-weight:bold;color:var(--plum-d);padding:4px 10px 10px}
@@ -1745,6 +1757,7 @@ function drawOnTime(){
     data:{labels:wk.map(w=>'W'+w),datasets:[{label:'Orders',data:wk.map(w=>byW[w]),
       borderColor:C.teal,backgroundColor:'rgba(13,148,136,.13)',tension:.3,fill:true,
       borderWidth:2,pointRadius:wk.length===1?9:3,pointBackgroundColor:C.teal}]},options:o1});
+  CH.weekly.data._unit='ออเดอร์';
 
   /* Packing On-Time */
   const tot=onT+late||1;
@@ -1755,6 +1768,7 @@ function drawOnTime(){
   CH.pack=new Chart(document.getElementById('c_pack'),{type:'bar',
     data:{labels:['Yes','No'],datasets:[{data:pk.data,
       backgroundColor:[C.teal,C.rose],borderRadius:6,maxBarThickness:96}]},options:oPack});
+  Object.assign(CH.pack.data,{_cnt:[onT,late],_unit:'ออเดอร์'});
 
   /* Platform vs Walk-in */
   const t2=plat+walk||1;
@@ -1763,6 +1777,7 @@ function drawOnTime(){
   CH.plat=new Chart(document.getElementById('c_plat'),{type:'bar',
     data:{labels:['Platform','Walk-in'],datasets:[{data:[Math.round(plat/t2*1000)/10,Math.round(walk/t2*1000)/10],
       backgroundColor:[C.tealD,C.amber],borderRadius:6,maxBarThickness:96}]},options:oPlat});
+  Object.assign(CH.plat.data,{_cnt:[plat,walk],_unit:'ออเดอร์'});
 
   /* Shipping method */
   const su={}; ord.forEach(r=>{const u=r.urgent||'ไม่ระบุ';su[u]=(su[u]||0)+1;});
@@ -1775,6 +1790,7 @@ function drawOnTime(){
     data:{labels:se.map(e=>e[0]),datasets:[{data:se.map(e=>Math.round(e[1]/t3*1000)/10),
       backgroundColor:[C.teal,C.rose,C.tealD,C.amber,C.mute].slice(0,se.length),
       borderRadius:6,maxBarThickness:74}]},options:pctOpts()});
+  Object.assign(CH.ship.data,{_cnt:se.map(e=>e[1]),_tot:t3,_unit:'ออเดอร์'});
 
   /* Sales channel share */
   const sc={}; ord.forEach(r=>{const s=r.sender||'ไม่ระบุ';sc[s]=(sc[s]||0)+1;});
@@ -1796,6 +1812,7 @@ function drawOnTime(){
       plugins:{legend:{display:false},pieLbl:{display:true,minPercent:5},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('+fmt(ce[c.dataIndex][1])+' orders)'}}}}});
+  Object.assign(CH.chan.data,{_cnt:ce.map(e=>e[1]),_unit:'ออเดอร์'});
 }
 
 
@@ -1863,15 +1880,76 @@ const clickF={id:'clickF',
     const e=args.event; if(!e||(e.type!=='click'&&e.type!=='mousemove'))return;
     if(SEC==='ret'||SEC==='fc'||SEC==='sop'||!document.getElementById('vKPI')||ch.options.onClick)return;
     if(ch.canvas&&!ch.canvas.closest('#vKPI'))return;
-    const line=ch.config.type==='line';
+    /* v-clk2: แท่ง/เส้น = คลิกตรงคอลัมน์ไหนก็ได้ (แท่งเตี้ยๆ อย่าง 0.05% ก็กดได้) · วงกลม = ต้องโดนชิ้น */
+    const round=/pie|doughnut/.test(ch.config.type);
     let els=[];
-    try{ els=ch.getElementsAtEventForMode(e.native||e,line?'index':'nearest',{intersect:!line},false); }catch(x){}
+    try{ els=ch.getElementsAtEventForMode(e.native||e,round?'nearest':'index',{intersect:round},false); }catch(x){}
     if(e.type==='mousemove'){ ch.canvas.style.cursor=els.length?'pointer':''; return; }
     if(!els.length)return;
-    const key=Object.keys(CH).find(k=>CH[k]===ch);
-    if(!key)return;
-    clkHandle(ch,key,els[0].index);
+    const key=Object.keys(CH).find(k=>CH[k]===ch)||'';
+    if(e.native&&e.native.stopPropagation)e.native.stopPropagation();
+    clkPop(ch,key,els[0].index,e.native);
   }};
+/* v-clk2: คลิกกราฟ = โชว์กล่องรายละเอียด (จำนวน · % ของทั้งหมด) — ไม่กรองข้อมูลเอง
+   ตัวกรองหลักใช้แถบ ปี/เดือน/สัปดาห์/วัน ด้านบน · กราฟตามเวลามีปุ่ม "กรองเฉพาะช่วงนี้" ให้กดได้ถ้าต้องการ */
+function clkPop(ch,key,i,ev){
+  let pop=document.getElementById('clkPop'); if(pop)pop.remove();
+  const D=ch.data, lblRaw=D.labels?D.labels[i]:'';
+  const lbl=String(Array.isArray(lblRaw)?lblRaw.join(' '):(lblRaw??'')).trim();
+  const unit=D._unit||'';
+  const panel=ch.canvas.closest('.cpanel,.fcacc-panel');
+  const secH=(()=>{let n=panel; while(n&&n.previousElementSibling==null)n=n.parentElement;
+    let h=panel&&panel.previousElementSibling; if(h&&h.matches('h2'))return h.childNodes[0].textContent.trim();
+    const p=panel&&panel.parentElement&&panel.parentElement.querySelector('h2'); return p?p.childNodes[0].textContent.trim():'';})();
+  const isPct=!D._cnt&&(D._pct||(ch.options.scales&&ch.options.scales.y&&ch.options.scales.y.max<=100.5&&!(ch.options.plugins.barPct&&ch.options.plugins.barPct.raw))||/pie|doughnut/.test(ch.config.type));
+  const f=v=>typeof v==='number'?fmt(Math.round(v*100)/100):v;
+  const pc=v=>(Math.round(v*10)/10)+'%';
+  let rows='';
+  const dsList=D.datasets.filter(ds=>ds.data&&ds.data[i]!=null&&!(ds.hidden));
+  if(dsList.length>1){
+    /* หลายเส้น/หลายคน — เรียงมาก → น้อย */
+    const it=dsList.map(ds=>[ds.label||'',+ds.data[i]||0]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+    const tot=it.reduce((t,x)=>t+x[1],0)||1;
+    rows=`<div class="cp-r"><span>รวม</span><b>${fmt(Math.round(tot))} ${esc(unit)}</b></div>`
+      +it.slice(0,12).map(x=>`<div class="cp-r"><span>${esc(x[0])}</span><b>${f(x[1])} <em>${pc(x[1]/tot*100)}</em></b></div>`).join('');
+  }else{
+    const ds=dsList[0]||D.datasets[0], v=+ds.data[i];
+    if(D._cnt){
+      const cnt=D._cnt[i], tot=D._tot||D._cnt.reduce((t,x)=>t+(+x||0),0)||1;
+      rows=`<div class="cp-r"><span>จำนวน</span><b>${fmt(cnt)} ${esc(unit)}</b></div>
+        <div class="cp-r"><span>สัดส่วน</span><b>${pc(cnt/tot*100)}</b></div>
+        <div class="cp-r dim"><span>จากทั้งหมด</span><b>${fmt(tot)} ${esc(unit)}</b></div>`;
+    }else if(isPct){
+      rows=`<div class="cp-r"><span>ค่า</span><b>${pc(v)}</b></div>`;
+    }else{
+      const vals=ds.data.map(x=>+x||0), tot=D._tot||vals.reduce((t,x)=>t+x,0)||1;
+      rows=`<div class="cp-r"><span>จำนวน</span><b>${f(v)} ${esc(unit)}</b></div>`
+        +(D._noPct?'':`<div class="cp-r"><span>สัดส่วน</span><b>${pc(v/tot*100)}</b></div>
+        <div class="cp-r dim"><span>จากทั้งหมด</span><b>${fmt(Math.round(tot))} ${esc(unit)}</b></div>`);
+    }
+  }
+  /* ปุ่มกรองตามเวลา (ถ้าเป็นกราฟแกนเวลา) */
+  const tv=String((D._cfv?D._cfv[i]:lbl)||'');
+  const isTime=/^W\d+$/.test(tv)||/^\d{4}-\d{2}-\d{2}$/.test(tv)||MON_S.some(x=>tv.startsWith(x));
+  pop=document.createElement('div'); pop.id='clkPop';
+  pop.innerHTML=`<button type="button" class="cp-x" aria-label="ปิด">✕</button>
+    ${secH?`<div class="cp-s">${esc(secH)}</div>`:''}
+    <div class="cp-t">${esc(lbl)}</div>${rows}
+    ${isTime?`<button type="button" class="cp-f">🔎 กรองทั้งหน้าเฉพาะ ${esc(tv)}</button>`:''}`;
+  document.body.appendChild(pop);
+  const z=parseFloat(getComputedStyle(document.body).zoom)||1;
+  const W=pop.offsetWidth, H=pop.offsetHeight, vw=innerWidth/z, vh=innerHeight/z;
+  let x=(ev?ev.clientX/z:vw/2)+16, y=(ev?ev.clientY/z:vh/2)+16;
+  if(x+W>vw-10)x=Math.max(10,x-W-32); if(y+H>vh-10)y=Math.max(10,vh-H-10);
+  pop.style.left=x+'px'; pop.style.top=y+'px';
+  const close=()=>{pop.remove();document.removeEventListener('mousedown',out,true);document.removeEventListener('keydown',esc2);};
+  const out=e=>{if(!pop.contains(e.target))close();};
+  const esc2=e=>{if(e.key==='Escape')close();};
+  setTimeout(()=>{document.addEventListener('mousedown',out,true);document.addEventListener('keydown',esc2);},0);
+  pop.querySelector('.cp-x').onclick=close;
+  const fb=pop.querySelector('.cp-f');
+  if(fb)fb.onclick=()=>{close(); clkHandle({data:{labels:D.labels,_cfv:D._cfv}},'__time',i);};
+}
 if(window.Chart&&!Chart.registry.plugins.get('clickF'))Chart.register(clickF);
 const G_ONTIME={ok:r=>classify(r.wh)==='late'?'No':'Yes',
   plat:r=>isPlatform(r.source)?'Platform':'Walk-in',
@@ -1936,6 +2014,7 @@ function drawOOS(){
     data:{labels:wk.map(w=>'W'+w),datasets:[{label:'ชิ้น',data:wk.map(w=>byW[w]),
       borderColor:C.tealD,backgroundColor:'rgba(15,118,110,.13)',tension:.3,fill:true,
       borderWidth:2,pointRadius:wk.length===1?9:3,pointBackgroundColor:C.tealD}]},options:o});
+  CH.wk2.data._unit='ชิ้น';
 
   const cnt={}; rows.forEach(r=>{const p=(r.product||'').trim();if(p)cnt[p]=(cnt[p]||0)+r.qty;});
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -1946,7 +2025,7 @@ function drawOOS(){
     data:{labels:top.map(e=>e[0].length>26?e[0].slice(0,24)+'…':e[0]),
       datasets:[{data:top.map(e=>e[1]),backgroundColor:C.teal,borderRadius:6,maxBarThickness:70}]},
     options:ot});
-  CH.top5.data._cfv=top.map(e=>e[0]);   /* ชื่อเต็ม ใช้ตอนคลิกกรอง (ป้ายบนกราฟถูกย่อ) */
+  CH.top5.data._cfv=top.map(e=>e[0]); CH.top5.data._unit='ชิ้น';   /* ชื่อเต็ม ใช้ตอนคลิกกรอง (ป้ายบนกราฟถูกย่อ) */
 
   const t=on+ea+la||1;
   destroy('oos');
@@ -3668,6 +3747,7 @@ function drawShip(){
       plugins:Object.assign({},baseOpts(false).plugins,{
         legend:{display:false},
         barPct:{display:true,raw:true,size:18}})})});
+  CH.shDay.data._unit='ออเดอร์';
 
   /* โดนัทช่องทางขาย Top 5 — plot เป็น % ให้ pieLbl เขียนตัวเลขบนวงได้
      ที่เหลือรวมเป็น "อื่นๆ" กันชิ้นบางเรียงกันเป็นเสี้ยนรอบวง */
@@ -3686,6 +3766,7 @@ function drawShip(){
         pieLbl:{display:true,minPercent:4,size:24,fit:true},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('+fmt(chVal[c.dataIndex])+' ออเดอร์)'}}}}});
+  Object.assign(CH.shCh.data,{_cnt:chVal,_unit:'ออเดอร์'});
 
   /* โดนัทสถานะพัสดุ — สำเร็จ vs ค้างส่ง พร้อม % ตรงกลางวง */
   const done=Math.max(0,S.orders-S.pending);
@@ -3702,6 +3783,7 @@ function drawShip(){
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('
             +fmt(c.dataIndex===0?done:S.pending)+' ออเดอร์)'}}}}});
+  Object.assign(CH.shSt.data,{_cnt:[done,S.pending],_unit:'ออเดอร์'});
 
   /* Top 10 ขนส่ง — แท่งตั้ง มีตัวเลขกำกับบนหัวแท่ง (barPct โหมด raw) */
   const car=S.carrierE.slice(0,10);
@@ -3713,6 +3795,7 @@ function drawShip(){
       plugins:Object.assign({},baseOpts(false).plugins,{
         legend:{display:false},
         barPct:{display:true,raw:true}})})});
+  Object.assign(CH.shCar.data,{_unit:'รายการ',_tot:S.rows});
 }
 
 /* ================= Delivery · Packing =================
@@ -4032,7 +4115,7 @@ function drawPack(){
     const dsets=S.pArr.map((n,i)=>({n,i,d:keys.map(k=>src[k][n]||0)}))
       .filter(x=>x.d.some(v=>v>0));
     CH.pkWk=new Chart(document.getElementById('c_pkWk'),{type:'bar',
-      data:{labels:keys.map(lab),datasets:dsets.map(x=>({label:x.n,
+      data:{_unit:'กล่อง',labels:keys.map(lab),datasets:dsets.map(x=>({label:x.n,
         data:x.d,backgroundColor:col(x.i),maxBarThickness:140}))},
       options:oWk});
   }else{
@@ -4069,7 +4152,7 @@ function drawPack(){
           backgroundColor:cats.map(c=>c.sp?'rgba(0,0,0,0)':c.c),
           borderRadius:2,maxBarThickness:90}]},
       options:oWk});
-    CH.pkWk.data._cfv=cats.map(c=>c.sp?'':c.m);   /* คลิกแท่ง = กรองเดือน/สัปดาห์นั้น */
+    CH.pkWk.data._cfv=cats.map(c=>c.sp?'':c.m); CH.pkWk.data._unit='กล่อง';   /* คลิกแท่ง = กรองเดือน/สัปดาห์นั้น */
   }
 
   /* สัดส่วนรายคน — plot เป็น % เพื่อให้ pieLbl เขียนตัวเลขลงบนวงได้ */
@@ -4085,6 +4168,7 @@ function drawPack(){
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('
             +fmt(shareVal[c.dataIndex])+' กล่อง)'}}}}});
+  Object.assign(CH.pkShare.data,{_cnt:shareVal,_unit:'กล่อง'});
   /* บังคับคำนวณขนาด canvas ใหม่ทันที — พอดันความสูงกล่องขึ้นจาก 520 เป็น 640px
      Chart.js บางทีจับตำแหน่งเมาส์ยังอิงขนาดเก่าก่อน resize จริง ทำให้ tooltip ขึ้นผิดจุด */
   requestAnimationFrame(()=>{ if(CH.pkShare)CH.pkShare.resize(); });
@@ -4104,6 +4188,7 @@ function drawPack(){
       data:hArr.map(h=>S.per[n].hr[h]||0),borderColor:col(i),
       backgroundColor:col(i)+'22',fill:true,tension:.4,pointRadius:3,pointHoverRadius:6}))},
     options:oHour});
+  CH.pkHour.data._unit='ใบ';
 }
 
 function secPick(){
@@ -4287,7 +4372,7 @@ function drawPick(){
           borderColor:cols[i],backgroundColor:cols[i],borderWidth:3,
           tension:.35,pointRadius:3,pointBackgroundColor:cols[i],
           spanGaps:true,fill:false}))},options:o});
-    CH.pkday.data._cfv=days;
+    CH.pkday.data._cfv=days; CH.pkday.data._unit='ชิ้น';
   }
 
   /* ช่วงเวลาที่หยิบหนาแน่น — เส้นโค้งมีพื้นที่ใต้กราฟ แยกตามคน */
@@ -4309,7 +4394,7 @@ function drawPick(){
           borderColor:cols[i],backgroundColor:rgba(cols[i],.18),
           borderWidth:3,tension:.45,pointRadius:4,
           pointBackgroundColor:cols[i],fill:true}))},options:o});
-    CH.pkhr.data._cfv=hrs;
+    CH.pkhr.data._cfv=hrs; CH.pkhr.data._unit='ชิ้น';
   }
 }
 
@@ -4907,6 +4992,7 @@ function drawRepl(){
   CH.remark=new Chart(document.getElementById('c_remark'),{type:'bar',
     data:{labels:e.map(x=>x[0]),datasets:[{data:e.map(x=>x[1]),
       backgroundColor:pal.slice(0,e.length),borderRadius:6,maxBarThickness:84}]},options:o});
+  CH.remark.data._unit='รายการ';
 }
 
 /* ช่องกรอกกำลังคน — อัปเดตแค่บรรทัดผลลัพธ์ ไม่ re-render ทั้งหน้า ช่องกรอกจึงไม่เสีย focus */
