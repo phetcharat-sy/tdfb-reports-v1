@@ -1998,24 +1998,29 @@ function secDiff(){
    (กราฟรายสัปดาห์มีได้ถึง 30+ จุด เบียดกันแน่นกว่ากราฟพยากรณ์มาก) */
 const diffLineLbl={id:'diffLineLbl',
   beforeLayout(ch,a,op){ if(!op||!op.display)return;
-    const need=Math.round(150*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
+    /* v-diff2: ป้ายเล็กลง + แกน Y ซูมเข้า (ดู drawDiff) จึงเผื่อหัวกราฟแค่พอดี */
+    const need=Math.round(48*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
     if(typeof p==='object'&&p){ if((p.top||0)<need)p.top=need; }
     else ch.options.layout={padding:{top:need}}; },
   afterDatasetsDraw(ch,a,op){
     if(!op||!op.display)return;
-    const x=ch.ctx, m=ch.getDatasetMeta(0); if(!m||m.hidden)return;
+    const x=ch.ctx, m=ch.getDatasetMeta(0), ar=ch.chartArea; if(!m||m.hidden)return;
     const ds=ch.data.datasets[0];
-    x.save(); x.font='bold '+cf(30)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
-    const step=Math.round(34*CFZ);
-    let placed=[];
+    const fs=cf(21), topLim=ar.top-Math.round(44*CFZ);
+    x.save(); x.font='bold '+fs+'px "Baloo 2", Mitr, sans-serif'; x.textAlign='center'; x.textBaseline='bottom';
+    /* ป้ายชนกัน → สลับไปไว้ใต้จุด แทนการซ้อนขึ้นไปเรื่อยๆ จนสูงเกิน */
+    const boxes=[];
+    const hit=b=>boxes.some(o=>!(b.x2<o.x1||b.x1>o.x2||b.y2<o.y1||b.y1>o.y2));
     m.data.forEach((pt,i)=>{
       const v=ds.data[i]; if(v==null)return;
       const t=v.toFixed(1)+'%', w=x.measureText(t).width;
-      let level=0;
-      while(placed.some(b=>b.level===level&&Math.abs(b.x-pt.x)<(b.w+w)/2+4))level++;
-      placed.push({x:pt.x,w,level});
+      const cands=[pt.y-10, pt.y+12+fs, pt.y-14-fs, pt.y+16+fs*2];
+      const y=cands.find(yy=>yy-fs>=topLim&&yy<=ar.bottom&&!hit({x1:pt.x-w/2-3,x2:pt.x+w/2+3,y1:yy-fs,y2:yy}));
+      if(y==null)return;      /* ไม่มีที่ว่างจริงๆ ข้ามป้ายนั้น (ดูค่าได้จาก tooltip/ตารางด้านล่าง) */
+      boxes.push({x1:pt.x-w/2-3,x2:pt.x+w/2+3,y1:y-fs,y2:y});
+      x.lineJoin='round'; x.lineWidth=4; x.strokeStyle='rgba(255,255,255,.95)'; x.strokeText(t,pt.x,y);
       x.fillStyle=v>=(op.target||98)?'#0F766E':'#DC2626';
-      x.fillText(t,pt.x,pt.y-8-level*step);
+      x.fillText(t,pt.x,y);
     });
     x.restore();
   }};
@@ -2059,6 +2064,11 @@ function drawDiff(){
       label:c=>[`นับตรง ${(+c.raw).toFixed(2)}%  (Stock Variance ${(100-c.raw).toFixed(2)}%)`,
                 `นับทั้งหมด ${fmt(meta[c.dataIndex].n)} · ไม่ตรง ${fmt(meta[c.dataIndex].bad)} รายการ`]};
     if(t==='line'){
+      /* v-diff2: กราฟเส้นซูมแกน Y เฉพาะช่วงที่มีข้อมูล (เช่น 92–100%) เส้นจะไม่แบนติดขอบบน */
+      o.scales.y.beginAtZero=false;
+      o.scales.y.min=Math.max(0,Math.floor((Math.min(...vals)-1)/2)*2);
+      o.scales.y.max=100;
+      o.scales.y.ticks.stepSize=Math.max(1,Math.ceil((100-o.scales.y.min)/5));
       /* เอาป้ายตัวเลข % กลับมาใส่ตามที่ขอ — ขยายใหญ่กว่ารอบก่อน และตัดข้อความ "ต้องผ่านเกณฑ์" ออก
          (เหลือแค่เส้นประเฉยๆ กันไปทับตัวเลขจุดแรกๆ) */
       o.plugins.diffLineLbl={display:true,target:98};
