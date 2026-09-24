@@ -772,7 +772,6 @@ body.present #vKPI .tscroll{max-height:none}
       <button data-view="kpi" data-sec="overview" class="on">KPI ทุกแผนก</button>
 
       <div class="grp">Warehouse</div>
-      <button data-view="kpi" data-sec="ontime">KPI On-Time Performance</button>
       <button data-view="kpi" data-sec="oos">KPI Out Of Stock</button>
       <button data-view="kpi" data-sec="diff">KPI Stock Variance &lt;2%</button>
       <button data-view="kpi" data-sec="dock">KPI Dock Time To Stock</button>
@@ -785,6 +784,7 @@ body.present #vKPI .tscroll{max-height:none}
       <button data-view="kpi" data-sec="ret">Return</button>
 
       <div class="grp">Admin</div>
+      <button data-view="kpi" data-sec="ontime">KPI On-Time Performance</button>
       <button data-view="kpi" data-sec="ship">การจัดส่ง (Shipping)</button>
 
       <div class="grp">วิธีการปฏิบัติงาน</div>
@@ -5053,7 +5053,7 @@ function renderKPI(){
   el('ovBox').hidden=!isOv;
   el('detail').hidden=isOv;
   const TITLE={overview:['ภาพรวม KPI ทุกแผนก','Warehouse · Delivery · Admin — TDFB'],
-               ontime:['KPI On-Time Performance','Warehouse · แพ็คสินค้าเสร็จตามวันที่ต้องการ'],
+               ontime:['KPI On-Time Performance','Admin · แพ็คสินค้าเสร็จตามวันที่ต้องการ'],
                oos:['KPI Out Of Stock','Warehouse · WH ส่งของให้ Packing ตามกำหนด'],
                diff:['KPI Stock Variance <2%','Warehouse · ความแม่นยำสต็อก · รายการที่นับไม่ตรง'],
                dock:['KPI Dock Time To Stock','Warehouse · GR → Putaway · รับเข้าและจัดเก็บตามเกณฑ์'],
