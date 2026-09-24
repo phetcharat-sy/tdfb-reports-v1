@@ -3719,6 +3719,9 @@ function drawPack(){
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('
             +fmt(shareVal[c.dataIndex])+' กล่อง)'}}}}});
+  /* บังคับคำนวณขนาด canvas ใหม่ทันที — พอดันความสูงกล่องขึ้นจาก 520 เป็น 640px
+     Chart.js บางทีจับตำแหน่งเมาส์ยังอิงขนาดเก่าก่อน resize จริง ทำให้ tooltip ขึ้นผิดจุด */
+  requestAnimationFrame(()=>{ if(CH.pkShare)CH.pkShare.resize(); });
 
   /* ช่องทางขาย แยกคน — เอาออกแล้ว เพราะคอลัมน์ต้นทางไม่ตรง หาคอลัมน์จริงในชีตไม่เจอ */
 
