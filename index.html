@@ -5435,10 +5435,19 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     const groups=[];
     if(mode!=='slides'){
       let g=null;
+      /* v-shot7: ตัดเป็น "ทีละบรรทัด" — แถวที่มีหัวข้อของตัวเอง (เช่น กราฟ 3 ช่องที่มีชื่อกำกับ
+         แต่ละช่อง) = 1 ภาพทั้งแถว · แถวที่ไม่มีหัวข้อ (การ์ดตัวเลข/ตาราง) ต่อท้ายภาพก่อนหน้า
+         · หัวข้อใหญ่ (h2) ติดไปกับแถวถัดไปเสมอ */
+      const HSEL='h1,h2,h3,.kpi-head,.fcacc-h,.chname2,.chname,.sec';
       bands.forEach(b=>{
-        if(!g||(b.head&&g.some(x=>!x.head))){g=[];groups.push(g);}
+        const titled=!b.head&&b.items.some(it=>it.el.matches(HSEL)||it.el.querySelector(HSEL));
+        const hasContent=g&&g.some(x=>!x.head);
+        if(!g||((b.head||titled)&&hasContent)){g=[];groups.push(g);}
         g.push(b);
       });
+      /* v-shot8: ภาพไหนไม่มีหัวข้อเลย → รวมเข้ากับภาพก่อนหน้า (ห้ามมีภาพไม่มีหัวข้อ) */
+      const hasH=gp=>gp.some(b=>b.head||b.items.some(it=>it.el.matches(HSEL)||it.el.querySelector(HSEL+',#kTitle')));
+      for(let k=groups.length-1;k>0;k--) if(!hasH(groups[k])){groups[k-1].push(...groups[k]);groups.splice(k,1);}
       groups.forEach((gp,gi)=>gp.forEach(b=>b.items.forEach(it=>mark(it.el,'shotGp',String(gi)))));
     }
     for(let j=0;j<groups.length;j++){
@@ -5478,7 +5487,7 @@ function shotMenu(btn,onPick){
   let m=document.getElementById('shotMenu');
   if(m){m.remove();return;}
   m=document.createElement('div'); m.id='shotMenu';
-  m.innerHTML=`<div class="sm-h">บันทึกเป็นรูปแบบไหน?</div>
+  m.innerHTML=`<div class="sm-h">บันทึกเป็นรูปแบบไหน? <small style="font-weight:normal;color:var(--mute);font-size:18px">(ตัวบันทึก v8 · 24 ก.ย.)</small></div>
     <button data-m="slides"><b>🖼️ แบบรวม · สไลด์ 16:9</b><span>ทั้งหน้าแบ่งเป็นสไลด์ ขนาด Google Slides</span></button>
     <button data-m="charts"><b>🧩 แบบแยก · ทีละหัวข้อ</b><span>หัวข้อ + กราฟ/การ์ดใต้หัวข้อนั้น เป็น 1 ภาพ</span></button>
     <button data-m="both"><b>📦 ทั้ง 2 แบบ</b><span>ได้ทั้งสไลด์และภาพแยก ในไฟล์ zip เดียว</span></button>`;
