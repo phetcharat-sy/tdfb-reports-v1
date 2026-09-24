@@ -3161,7 +3161,21 @@ function drawRetEmbed(){
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
   doc=doc.replace('</head>',
-    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important;zoom:2.1}\n     .donuts svg{max-width:488px;margin:0 auto}</style></head>');
+    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important;zoom:2.1}\n     .donuts svg{max-width:488px;margin:0 auto}'
+    /* v-ret2: ขยายตัวหนังสือเล็กในหน้า Return (ตาราง · คำอธิบาย · แถบ Platform) — ทำฝั่งแดชบอร์ด
+       ไม่แก้ไฟล์ Return เอง เปลี่ยนไฟล์ Return ใหม่ภายหลังได้โดยขนาดยังเหมือนเดิม */
+    +'table{font-size:19px!important}th{font-size:17px!important}'
+    +'th,td{padding:10px 12px!important}'
+    +'td i[style*="width:10px"]{width:13px!important;height:13px!important}'
+    +'h2{font-size:21px!important}h3{font-size:18px!important}'
+    +'.note{font-size:16.5px!important}.hint{font-size:16px!important}'
+    +'.legend{font-size:16.5px!important;gap:18px!important}.legend i{width:13px!important;height:13px!important}'
+    +'#platwrap div[style*="font-size:13.5px"]{font-size:19px!important}'
+    +'#platwrap .bar{height:30px!important}.bar div{font-size:15.5px!important}'
+    +'.tag{font-size:14px!important;padding:2px 9px!important}'
+    +'.pbar{height:9px!important}'
+    +'.kpi span{font-size:16px!important}.kpi small{font-size:15px!important}'
+    +'</style></head>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800);
     try{
