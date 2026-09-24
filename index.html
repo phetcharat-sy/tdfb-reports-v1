@@ -376,6 +376,17 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .fcs-i.dd{background:#FBF1E8;border-color:#EBD9BF}
 #vKPI .fcs-i.dd b{color:#8a6a2f}
 #vKPI .fcs-u{font-size:28px;color:var(--mute)}
+/* v-fc4: สีวันพิเศษบนวันพยากรณ์ — แต่ละแบบคนละสี (แถบพยากรณ์ · จุดบนกราฟ · วันที่แกน X) */
+#vKPI .fcs-i{flex-wrap:wrap}
+#vKPI .fcs-t{flex-basis:100%;font-style:normal;font-size:22px;font-weight:bold;margin-top:-2px}
+#vKPI .fcs-i.ev-dd{background:#FDE7EC;border-color:#F3A3B6}   #vKPI .fcs-i.ev-dd b,#vKPI .ev-dd .fcs-t{color:#BE123C}
+#vKPI .fcs-i.ev-mid{background:#F1EAFE;border-color:#C9B3F5}  #vKPI .fcs-i.ev-mid b,#vKPI .ev-mid .fcs-t{color:#6D28D9}
+#vKPI .fcs-i.ev-pay{background:#E3F6F9;border-color:#9BD7E3}  #vKPI .fcs-i.ev-pay b,#vKPI .ev-pay .fcs-t{color:#0E7490}
+#vKPI .fcs-i.ev-pre{background:#EEF1F5;border-color:#C5CDD8}  #vKPI .fcs-i.ev-pre b,#vKPI .ev-pre .fcs-t{color:#475569}
+#vKPI .fcs-i.ev-post{background:#FFF0E3;border-color:#F8C08F} #vKPI .fcs-i.ev-post b,#vKPI .ev-post .fcs-t{color:#C2410C}
+#vKPI .fcs-leg{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:12px;font-size:24px;color:#475569}
+#vKPI .fcs-leg span{display:inline-flex;align-items:center;gap:8px}
+#vKPI .fcs-leg i{width:18px;height:18px;border-radius:50%;display:inline-block}
 #vKPI .fnote{background:var(--soft);border:1px solid var(--line);border-left:5px solid var(--plum);
   border-radius:14px;padding:0 26px;margin:0 0 18px;font-size:28px;line-height:1.65;color:var(--ink)}
 #vKPI .fnote>div{margin-top:6px;color:var(--ink)}
@@ -2367,71 +2378,162 @@ function fcWeekly(weekList,byWeek,range,dd){
           ddSamples:(dd&&dd.samples)||0,ddCount,weeksUsed:n};
 }
 
-/* พยากรณ์ 7 วัน ด้วย Holt's Exponential Smoothing
-   fit บนข้อมูลทุกวันจริง แต่กราฟโชว์ทุก 5 วัน กันแกน x รก */
-function fcDaily(byDate){
-  const keys=Object.keys(byDate).sort();
+/* ================= พยากรณ์รายวัน v3 — ยอดฐาน × ตัวคูณวันในสัปดาห์ × ตัวคูณวันพิเศษ =================
+   ต่อยอดจากสูตร dashboard v2 (SES + วันในสัปดาห์ + Double Day · MAPE ~27%) แล้วเพิ่ม
+   1) วันพิเศษ 4 แบบ — Double Day, หลัง Double Day, Mid-month (15), Payday (25)
+      แต่ละแบบเรียนรู้เองว่า "ยอดเพิ่มกี่เท่า" เทียบกับยอดฐานของช่วงนั้น
+   2) ยอดฐานคิดจากยอดที่ "ถอดตัวคูณออกแล้ว" — วันพิเศษจึงไม่ดันยอดฐานให้สูงค้าง
+      (สาเหตุหลักที่สูตรเดิมทายสูงเกินจริงต่อเนื่องหลังวันเซล · Bias +20%)
+   3) ตัดยอดที่สูง/ต่ำผิดปกติไม่ให้กระชากยอดฐาน (จำกัดผลต่อยอดฐานไว้ ×0.4 – ×2.5)
+   4) ปรับจูนตัวเองอัตโนมัติ — ลองน้ำหนักวันใหม่ (α) และแนวโน้มหลายค่า แล้วเลือกชุดที่
+      ทายย้อนหลังแม่นที่สุด (ใช้เฉพาะข้อมูลก่อนช่วงที่ใช้วัดผล ตัวเลขความแม่นจึงไม่โกง)
+   5) ไม่นับวันนี้ (ยอดยังไม่ครบวัน) ทั้งตอนเรียนรู้และตอนวัดผล */
+const FC_EV_LBL={dd:'Double Day',pre:'ก่อน Double Day 1 วัน',post:'หลัง Double Day 1 วัน',
+                 mid:'Mid-month (วันที่ 15)',pay:'Payday (วันที่ 25)'};
+const FC_EV_SHORT={dd:'Double Day',pre:'ก่อน DD',post:'หลัง DD',mid:'Mid-month',pay:'Payday'};
+const FC_EV_ORDER=['dd','post','mid','pay'];
+function fcEvent(d){
+  const day=d.getDate(), m=d.getMonth()+1;
+  if(m>=2&&day===m)return 'dd';          /* 2.2 … 12.12 (ไม่นับ 1.1 วันปีใหม่) */
+  if(day===15)return 'mid';
+  if(day===25)return 'pay';
+  /* v-fc5: ไม่แยก 'ก่อน Double Day' แล้ว — นับเป็นวันปกติ */
+  if(m>=2&&day===m+1)return 'post';      /* เช่น 9.10 · 10.11 */
+  return '';
+}
+const fcMed=a=>{const s=[...a].sort((x,y)=>x-y),n=s.length;return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):1;};
+const fcClamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const FC_PHI=0.85;
+
+/* เดินสูตรยอดฐานผ่านข้อมูล index 0..T-1 — base[i] = ยอดฐานที่ทายไว้ก่อนเห็นยอดวัน i */
+function fcRun(S,T,cfg,fD,fE){
+  const base=new Array(T).fill(null); let L=null,B=0;
+  for(let i=0;i<T;i++){
+    const v=S.y[i];
+    if(L!=null){ base[i]=Math.max(0,L+B*FC_PHI); }
+    if(v==null||v<=0){ if(L!=null){L=L+B*FC_PHI;B*=FC_PHI;} continue; }
+    const f=fD[S.dow[i]]*(fE[S.ev[i]]||1);
+    let a=v/f;
+    if(L==null){L=a;continue;}
+    const pred=L+B*FC_PHI;
+    if(pred>0)a=fcClamp(a,pred*0.4,pred*2.5);
+    const Lp=L;
+    L=cfg.a*a+(1-cfg.a)*pred;
+    B=cfg.b?cfg.b*(L-Lp)+(1-cfg.b)*B*FC_PHI:0;
+  }
+  return {base,L,B};
+}
+/* เรียนรู้ตัวคูณวันในสัปดาห์ + วันพิเศษ จากข้อมูลก่อน index T (วนปรับ 3 รอบให้ค่านิ่ง) */
+function fcFit(S,T,cfg){
+  let fD=[1,1,1,1,1,1,1], fE={}, nE={}, r=null;
+  for(let it=0;it<3;it++){
+    r=fcRun(S,T,cfg,fD,fE);
+    const byD=[[],[],[],[],[],[],[]], byE={};
+    for(let i=14;i<T;i++){
+      const v=S.y[i], b=r.base[i]; if(v==null||v<=0||!(b>0))continue;
+      const q=v/b;
+      if(S.ev[i])(byE[S.ev[i]]=byE[S.ev[i]]||[]).push(q/fD[S.dow[i]]);
+      else byD[S.dow[i]].push(q);
+    }
+    if(cfg.dow){
+      const m=byD.map(a=>a.length>=3?fcMed(a):1), g=m.reduce((s,v)=>s+v,0)/7;
+      fD=m.map(v=>fcClamp(v/g,0.5,2));
+    }
+    fE={}; nE={};
+    Object.entries(byE).forEach(([e,a])=>{
+      const n=a.length; nE[e]=n;
+      /* ตัวอย่างน้อย → ดึงเข้าหา ×1 (กันเชื่อข้อมูลครั้งเดียวมากเกินไป) */
+      fE[e]=fcClamp(1+(fcMed(a)-1)*n/(n+1),0.4,4);
+    });
+  }
+  return {...r,fD,fE,nE,T};
+}
+function fcPred(S,fit,i){
+  const h=i-fit.T+1; let bs=fit.L, p=FC_PHI;
+  for(let k=1;k<=h;k++){bs+=fit.B*p;p*=FC_PHI;}
+  return Math.max(0,bs)*fit.fD[S.dow[i]]*(fit.fE[S.ev[i]]||1);
+}
+/* ตารางวันต่อเนื่อง (วันที่ไม่มีข้อมูล = null ไม่ใช่ 0) · ต่อท้าย 14 วันอนาคตไว้คำนวณตัวคูณ */
+function fcSeries(byDate){
+  let keys=Object.keys(byDate).sort();
+  const today=dkey(new Date());
+  if(keys.length&&keys[keys.length-1]>=today)keys=keys.filter(k=>k<today);  /* วันนี้ยอดยังไม่ครบ */
   if(!keys.length)return null;
-  const startKey=keys[0], lastKey=keys[keys.length-1];
-  const start=new Date(startKey+'T00:00:00'), last=new Date(lastKey+'T00:00:00');
-  const total=Math.round((last-start)/86400000)+1;
-  if(total<7)return null;
-  const allKeys=[],allVals=[];
-  for(let i=0;i<total;i++){
+  const start=new Date(keys[0]+'T00:00:00'), last=new Date(keys[keys.length-1]+'T00:00:00');
+  const n=Math.round((last-start)/86400000)+1, H=14;
+  const S={y:[],dow:[],ev:[],date:[],key:[],n};
+  for(let i=0;i<n+H;i++){
     const d=new Date(start); d.setDate(start.getDate()+i);
-    const k=dkey(d); allKeys.push(k); allVals.push(byDate[k]||0);
+    const k=dkey(d);
+    S.date.push(d); S.key.push(k); S.dow.push(d.getDay()); S.ev.push(fcEvent(d));
+    S.y.push(i<n&&byDate[k]!=null?byDate[k]:null);
   }
-  const A=0.3,B=0.15;
-  let level=allVals[0], trend=allVals.length>1?allVals[1]-allVals[0]:0;
-  for(let i=1;i<allVals.length;i++){
-    const prev=level;
-    level=A*allVals[i]+(1-A)*(level+trend);
-    trend=B*(level-prev)+(1-B)*trend;
+  return S;
+}
+const FC_CFGS=(()=>{const o=[];[0.1,0.15,0.2,0.3,0.4].forEach(a=>[0,0.05].forEach(b=>[true,false].forEach(dow=>o.push({a,b,dow}))));return o;})();
+function fcScore(S,cfg,from,to){
+  let e=0,c=0;
+  for(let i=from;i<to;i++){
+    const v=S.y[i]; if(v==null||v<=0)continue;
+    const f=fcFit(S,i,cfg); e+=Math.abs(fcPred(S,f,i)-v)/v; c++;
   }
-  const dd=learnDD(byDate), boost=dd.multiplier||1;
-  /* โชว์แค่ 14 วันล่าสุดของประวัติ (ไม่ใช่สุ่มทุก 5 วันตลอดทั้งปีแบบเดิม) — คำนวณ level/trend
-     ยังใช้ข้อมูลทั้งหมดด้านบนเหมือนเดิม กระทบแค่ส่วนที่เอามาแสดงผลบนกราฟ */
-  const HISTN=Math.min(14,allKeys.length);
-  const idx=[]; for(let i=allKeys.length-HISTN;i<allKeys.length;i++)idx.push(i);
-  const hist=idx.map(i=>allVals[i]);
-  const histLbl=idx.map(i=>shortTH(new Date(allKeys[i]+'T00:00:00')));
-  const fc=[],fcLbl=[],fcDates=[],fcDD=[];
-  for(let i=1;i<=14;i++){
-    const d=new Date(last); d.setDate(last.getDate()+i);
-    let v=Math.max(0,level+trend*i);
-    const flag=isDD(d); fcDD.push(flag);
-    if(flag&&boost>1)v*=boost;
-    fc.push(Math.max(0,Math.round(v)));
-    fcLbl.push(shortTH(d)+'*'); fcDates.push(d);
+  return c?e/c:Infinity;
+}
+/* เลือกชุดค่าที่ทายย้อนหลังแม่นสุดในช่วง [end-45, end) */
+function fcTune(S,end){
+  const from=Math.max(28,end-45);
+  if(end-from<10)return {a:0.3,b:0,dow:true};
+  let best=null,bs=Infinity;
+  FC_CFGS.forEach(c=>{const s=fcScore(S,c,from,end);if(s<bs){bs=s;best=c;}});
+  return best;
+}
+
+function fcDaily(byDate){
+  const S=fcSeries(byDate);
+  if(!S||S.n<7)return null;
+  const cfg=fcTune(S,S.n), fit=fcFit(S,S.n,cfg);
+  const HISTN=Math.min(14,S.n);
+  const hist=[],histLbl=[];
+  for(let i=S.n-HISTN;i<S.n;i++){hist.push(S.y[i]||0);histLbl.push(shortTH(S.date[i]));}
+  const fc=[],fcLbl=[],fcDates=[],fcDD=[],fcEv=[];
+  for(let i=S.n;i<S.n+14;i++){
+    fc.push(Math.round(fcPred(S,fit,i)));
+    fcLbl.push(shortTH(S.date[i])+'*'); fcDates.push(S.date[i]);
+    fcEv.push(S.ev[i]); fcDD.push(!!S.ev[i]&&(fit.fE[S.ev[i]]||1)>=1.05);
   }
-  return {labels:[...histLbl,...fcLbl],hist,fc,fcDates,fcDD,
-          level,trend,boost,ddSamples:dd.samples,days:total};
+  return {labels:[...histLbl,...fcLbl],hist,fc,fcDates,fcDD,fcEv,
+          level:fit.L,trend:fit.B,cfg,fD:fit.fD,fE:fit.fE,nE:fit.nE,
+          boost:fit.fE.dd||1,ddSamples:fit.nE.dd||0,days:S.n};
 }
 
 /* ---------- ย้อนหลังดูว่าพยากรณ์แม่นแค่ไหน (backtest) ----------
-   ไล่ทีละวันจากวันล่าสุดถอยหลังไป `days` วัน · แต่ละวันใช้ fcDaily()
-   คำนวณจากข้อมูล "ก่อนวันนั้น" เท่านั้น (เหมือนไม่รู้อนาคต) แล้วเทียบพยากรณ์ 1 วันข้างหน้ากับของจริง */
+   ทุกวันในช่วงวัดผล ใช้ข้อมูล "ก่อนวันนั้น" เท่านั้น ทั้งตัวคูณและยอดฐาน
+   ส่วนชุดค่า α/แนวโน้ม เลือกจากช่วงก่อนหน้าช่วงวัดผล — ไม่แอบเห็นคำตอบ */
 function backtestDaily(byDate,days){
   days=days||30;
-  const keys=Object.keys(byDate).sort();
-  const minHist=14;
-  const out=[];
-  for(let i=keys.length-1;i>=minHist&&out.length<days;i--){
-    const k=keys[i];
-    const priorMap={}; keys.slice(0,i).forEach(pk=>priorMap[pk]=byDate[pk]);
-    const fc=fcDaily(priorMap);
-    if(!fc)continue;
-    const pred=fc.fc[0], actual=byDate[k]||0, diff=pred-actual;
-    out.push({date:k,pred,actual,diff,pct:actual!==0?(diff/actual*100):null});
-  }
-  out.reverse();
-  if(!out.length)return null;
-  const wp=out.filter(r=>r.pct!=null);
-  const mape=wp.length?wp.reduce((s,r)=>s+Math.abs(r.pct),0)/wp.length:null;
-  const bias=wp.length?wp.reduce((s,r)=>s+r.pct,0)/wp.length:null;
-  const within10=wp.filter(r=>Math.abs(r.pct)<=10).length;
-  return {rows:out,mape,bias,within10,total:wp.length,
-          accuracy:mape!=null?Math.max(0,100-mape):null};
+  const S=fcSeries(byDate); if(!S)return null;
+  const idx=[];
+  for(let i=S.n-1;i>=28&&idx.length<days;i--)if(S.y[i]!=null&&S.y[i]>0)idx.unshift(i);
+  if(!idx.length)return null;
+  const cfg=fcTune(S,idx[0]);
+  const out=idx.map(i=>{
+    const pred=Math.round(fcPred(S,fcFit(S,i,cfg),i)), actual=S.y[i], diff=pred-actual;
+    return {date:S.key[i],pred,actual,diff,pct:diff/actual*100,ev:S.ev[i]};
+  });
+  const mape=out.reduce((s,r)=>s+Math.abs(r.pct),0)/out.length;
+  const bias=out.reduce((s,r)=>s+r.pct,0)/out.length;
+  const within10=out.filter(r=>Math.abs(r.pct)<=10).length;
+  return {rows:out,mape,bias,within10,total:out.length,cfg,
+          accuracy:Math.max(0,100-mape)};
+}
+
+/* จำผลไว้ ข้อมูลชุดเดิมไม่ต้องจูนซ้ำ (การจูน+ย้อนหลัง ใช้เวลาราว 0.5 วินาที/ชุด) */
+const FC_CACHE=new Map();
+function fcMemo(tag,fn,byDate,arg){
+  const ks=Object.keys(byDate).sort();
+  const sig=tag+'|'+dkey(new Date())+'|'+ks.length+'|'+ks[0]+'|'+ks[ks.length-1]+'|'+ks.reduce((t,k)=>t+(+byDate[k]||0)*((t%97)+1),0);
+  if(!FC_CACHE.has(sig)){ if(FC_CACHE.size>20)FC_CACHE.clear(); FC_CACHE.set(sig,fn(byDate,arg)); }
+  return FC_CACHE.get(sig);
 }
 
 /* เกณฑ์กำลังคน — ยกมาจาก dashboard v2 ตรงๆ */
@@ -2546,8 +2648,8 @@ function secForecast(){
 
   const wOrd=fcWeekly(weekList,ordCntWeek,range,learnDD(ordCntDate));
   const wQty=fcWeekly(weekList,qtyByWeek,range,learnDD(qtyByDate));
-  const dOrd=fcDaily(ordCntDate);
-  const dQty=fcDaily(qtyByDate);
+  const dOrd=fcMemo('dO',fcDaily,ordCntDate);
+  const dQty=fcMemo('dQ',fcDaily,qtyByDate);
 
   /* Stock depletion — จับคู่ชื่อสินค้าระหว่างชีตยอดขายกับชีต Replenishment */
   const avgDemand={};
@@ -2575,14 +2677,14 @@ function secForecast(){
       const q=dQty.fc[i]||0;
       const pk=Math.max(1,Math.ceil(o/STAFF.ordPerPerson));
       const wh=Math.max(1,Math.ceil(q/(STAFF.whPerHour*STAFF.whHours)));
-      staff.push({d:dOrd.fcDates[i],lbl:shortTH(dOrd.fcDates[i]),dd:dOrd.fcDD[i],
+      staff.push({d:dOrd.fcDates[i],lbl:shortTH(dOrd.fcDates[i]),dd:dOrd.fcDD[i],ev:dOrd.fcEv[i],
                   ord:o,qty:q,pack:pk,total:pk+STAFF.endOfLine,
                   wh,over:wh>STAFF.whHandhelds});
     });
   }
 
   const items1=depItems(dep,1), items4=depItems(dep,4);
-  const btOrd=backtestDaily(ordCntDate,30), btQty=backtestDaily(qtyByDate,30);
+  const btOrd=fcMemo('bO',backtestDaily,ordCntDate,30), btQty=fcMemo('bQ',backtestDaily,qtyByDate,30);
   FC_CTX={wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty};
   STAFF_ROWS=staff;
   if(Number(STAFF_IN.pIdx)>=staff.length)STAFF_IN.pIdx=0;
@@ -2619,15 +2721,15 @@ function secForecast(){
 
     <h2 class="sec">พยากรณ์รายวัน <em>ยอดจริง + ประมาณการ 14 วันข้างหน้า</em><span></span></h2>
     ${dOrd?`<details class="fnote">
-      <summary>วิธีคิด — Holt's Exponential Smoothing ให้น้ำหนักวันใกล้มากกว่าวันไกล</summary>
+      <summary>วิธีคิด — ยอดฐาน × ตัวคูณวันในสัปดาห์ × ตัวคูณวันพิเศษ (จูนตัวเองอัตโนมัติ)</summary>
       <div class="fbody">
-      <div>1. <b>ยอดฐาน</b> วันใหม่ 30% + ยอดฐานเดิม 70% · ตอนนี้ Level = <b>${fmt(Math.round(dOrd.level))}</b> ออเดอร์/วัน</div>
-      <div>2. <b>แนวโน้ม</b> Trend = <b>${dOrd.trend>=0?'+':''}${dOrd.trend.toFixed(2)}</b> ออเดอร์/วัน</div>
-      <div>3. <b>Double Day</b> คูณเพิ่มตามที่เคยเกิด (สูงสุด 3 เท่า ต้องเคยเกิด ≥ 2 ครั้ง)</div>
-      <code>Level(t) = 0.3 × จริง(t) + 0.7 × (Level(t-1) + Trend(t-1))<br>
-            Trend(t) = 0.15 × (Level(t) − Level(t-1)) + 0.85 × Trend(t-1)<br>
-            พยากรณ์ (h วันข้างหน้า) = Level + Trend × h</code>
-      <div class="fwarn">กราฟโชว์ประวัติย้อนหลัง 14 วันล่าสุด แต่คำนวณเทรนด์จากข้อมูลทุกวันจริงทั้งหมด (${fmt(dOrd.days)} วัน)</div>
+      <div>1. <b>ยอดฐาน</b> ให้น้ำหนักวันใหม่ <b>${Math.round(dOrd.cfg.a*100)}%</b> + ยอดฐานเดิม ${100-Math.round(dOrd.cfg.a*100)}% ${dOrd.cfg.b?'+ แนวโน้มแบบค่อยๆ อ่อนลง':'(ไม่ใส่แนวโน้ม)'} · คิดจากยอดที่ <b>ถอดตัวคูณวันพิเศษออกแล้ว</b> วันเซลจึงไม่ดันยอดฐานค้างสูง · ตอนนี้ยอดฐาน = <b>${fmt(Math.round(dOrd.level))}</b> ออเดอร์/วัน</div>
+      <div>2. <b>วันในสัปดาห์</b> ${dOrd.cfg.dow?'เรียนรู้ว่าแต่ละวันยอดต่างกันกี่เท่า (ตารางด้านล่าง)':'ข้อมูลช่วงนี้ไม่ต่างกันพอ ระบบเลือกไม่ใช้'}</div>
+      <div>3. <b>วันพิเศษ</b> Double Day · หลัง Double Day 1 วัน · Mid-month (15) · Payday (25) — เรียนรู้จากอดีตว่ายอดเพิ่มกี่เท่า ตัวอย่างน้อยจะถูกดึงเข้าหา ×1 กันเชื่อข้อมูลครั้งเดียวมากไป</div>
+      <div>4. <b>จูนตัวเอง</b> ลองชุดค่า ${FC_CFGS.length} แบบ แล้วเลือกชุดที่ทายย้อนหลัง 45 วันแม่นที่สุด · ยอดที่พุ่ง/ตกผิดปกติจะกระทบยอดฐานไม่เกิน ×0.4–×2.5</div>
+      <code>พยากรณ์(วัน D) = ยอดฐาน × ตัวคูณวันในสัปดาห์(D) × ตัวคูณวันพิเศษ(D)<br>
+            ยอดฐาน(t) = α × [ยอดจริง(t) ÷ ตัวคูณของวัน t] + (1 − α) × ยอดฐาน(t−1)</code>
+      <div class="fwarn">กราฟโชว์ประวัติ 14 วันล่าสุด แต่เรียนรู้จากข้อมูลทุกวันทั้งหมด (${fmt(dOrd.days)} วัน) · ไม่นับวันนี้เพราะยอดยังไม่ครบวัน</div>
       </div>
     </details>
     <div class="fcacc-grid">
@@ -2639,10 +2741,12 @@ function secForecast(){
         ${fcStrip(dQty,'ชิ้น')}</div>
     </div>`:'<div class="empty2">ข้อมูลรายวันไม่พอสำหรับพยากรณ์ (ต้องมีอย่างน้อย 7 วัน)</div>'}
 
+    ${dOrd&&dQty?fcMultTable(dOrd,dQty):''}
+
     <h2 class="sec">ความแม่นยำของพยากรณ์ย้อนหลัง <em>Forecast Accuracy · เทียบพยากรณ์ล่วงหน้า 1 วัน กับยอดจริง · 30 วันล่าสุด</em><span></span></h2>
     <details class="fnote">
       <summary>วิธีคิด — ทำไมไม่ต้องเก็บไฟล์พยากรณ์เก่าไว้</summary>
-      <div class="fbody">ย้อนเวลากลับไปพยากรณ์ทีละวันด้วยข้อมูลเท่าที่ "มีอยู่จริงในวันนั้น" เท่านั้น (ตัดข้อมูลหลังจากนั้นทิ้งชั่วคราว แล้วรันสูตร Holt's Exponential Smoothing เดียวกับด้านบน) ได้พยากรณ์ล่วงหน้า 1 วัน แล้วเทียบกับยอดจริงที่เกิดขึ้นจริงในวันนั้น ทำแบบนี้ย้อนหลังไป 30 วัน เพื่อดูว่าที่ผ่านมาพยากรณ์แม่นแค่ไหน</div>
+      <div class="fbody">ย้อนเวลากลับไปพยากรณ์ทีละวันด้วยข้อมูลเท่าที่ "มีอยู่จริงในวันนั้น" เท่านั้น (ตัดข้อมูลหลังจากนั้นทิ้งชั่วคราว แล้วเรียนรู้ตัวคูณและยอดฐานใหม่ด้วยสูตรเดียวกับด้านบน) ได้พยากรณ์ล่วงหน้า 1 วัน แล้วเทียบกับยอดจริงในวันนั้น ทำแบบนี้ย้อนหลัง 30 วัน · ชุดค่าที่ใช้เลือกจากช่วงก่อนหน้า 30 วันนี้ ตัวเลขความแม่นจึงไม่ได้แอบเห็นคำตอบ · <b>เป้าหมาย MAPE ≤ 25%</b> · ไม่นับวันนี้ (ยอดยังไม่ครบ) และวันที่ยอด = 0</div>
     </details>
     <div class="fcacc">
       ${fcAccCards(btOrd)}
@@ -2658,7 +2762,7 @@ function secForecast(){
       </div>
     </div>
 
-    ${staff.length?`<h2 class="sec">พยากรณ์อัตรากำลังคน <em>7 วันข้างหน้า · แถวไฮไลท์ = Double Day</em><span></span></h2>
+    ${staff.length?`<h2 class="sec">พยากรณ์อัตรากำลังคน <em>7 วันข้างหน้า · แถวไฮไลท์ = วันพิเศษที่ยอดเพิ่ม (Double Day · Mid-month · Payday)</em><span></span></h2>
     <details class="fnote">
       <summary>วิธีคิด — เกณฑ์กำลังคน Packing / WH</summary>
       <div class="fbody">
@@ -2684,7 +2788,7 @@ function secForecast(){
           <th class="num">Packing</th><th class="num">ท้ายไลน์</th><th class="num">รวมทีม</th>
         </tr></thead><tbody>`
         +staff.map(s=>`<tr${s.dd?' class="ddrow"':''}>
-          <td style="white-space:nowrap"><b>${esc(s.lbl)}</b>${s.dd?' <span class="ddtag">Double Day</span>':''}</td>
+          <td style="white-space:nowrap"><b>${esc(s.lbl)}</b>${s.ev?` <span class="ddtag">${esc(FC_EV_SHORT[s.ev])}</span>`:''}</td>
           <td class="num">${fmt(s.ord)}</td><td class="num">${s.pack}</td>
           <td class="num">${STAFF.endOfLine}</td><td class="num"><b>${s.total}</b></td></tr>`).join('')
         +`</tbody></table></div>
@@ -2703,7 +2807,7 @@ function secForecast(){
           <th class="num">WH หยิบของ (คน)</th>
         </tr></thead><tbody>`
         +staff.map(s=>`<tr${s.dd?' class="ddrow"':''}>
-          <td style="white-space:nowrap"><b>${esc(s.lbl)}</b>${s.dd?' <span class="ddtag">Double Day</span>':''}</td>
+          <td style="white-space:nowrap"><b>${esc(s.lbl)}</b>${s.ev?` <span class="ddtag">${esc(FC_EV_SHORT[s.ev])}</span>`:''}</td>
           <td class="num">${fmt(s.qty)}</td>
           <td class="num ${s.over?'bad':''}">${s.wh}${s.over?` <span class="ddtag">เกิน ${STAFF.whHandhelds} เครื่อง</span>`:''}</td></tr>`).join('')
         +`</tbody></table></div>
@@ -2742,17 +2846,24 @@ function secForecast(){
 }
 
 /* แถบค่าพยากรณ์ใต้กราฟ — อ่านง่ายกว่าเบียดกันบนเส้น และครบทุกค่าเสมอ */
+const FC_EV_COL={dd:'#E11D48',mid:'#7C3AED',pay:'#0891B2',pre:'#64748B',post:'#EA580C'};
+/* ประเภทวันพิเศษของจุดพยากรณ์ที่ j — รายวันดูจาก fcEv · รายสัปดาห์ดูว่ามี Double Day ในสัปดาห์ไหม */
+const fcEvAt=(s,j)=>(s.fcEv&&s.fcEv[j])||((s.ddCount&&s.ddCount[j]>0)?'dd':'');
 function fcStrip(s,unit){
   if(!s||!s.fc||!s.fc.length)return '';
-  const nH=s.hist.length;
+  const nH=s.hist.length, seen=new Set();
+  const mult=e=>s.fE&&s.fE[e]?' ×'+s.fE[e].toFixed(2):'';
   return `<div class="fcstrip"><span class="fcs-l">พยากรณ์</span>`
     +s.fc.map((v,i)=>{
       const lbl=String(s.labels[nH+i]||'').replace(/\*$/,'');
-      const dd=(s.fcDD&&s.fcDD[i])||(s.ddCount&&s.ddCount[i]>0);
+      const ev=fcEvAt(s,i); if(ev)seen.add(ev);
       const rg=s.ranges&&s.ranges[nH+i]?String(s.ranges[nH+i]).replace(' (คาด)',''):'';
-      return `<span class="fcs-i${dd?' dd':''}"${rg?` title="${esc(rg)}"`:''}>
-        <b>${esc(lbl)}</b><i>${fmt(v)}</i></span>`;}).join('')
-    +`<span class="fcs-u">${esc(unit)}</span></div>`;
+      const tip=[rg,ev?FC_EV_LBL[ev]+mult(ev):''].filter(Boolean).join(' · ');
+      return `<span class="fcs-i${ev?' ev-'+ev:''}"${tip?` title="${esc(tip)}"`:''}>
+        <b>${esc(lbl)}</b><i>${fmt(v)}</i>${ev?`<em class="fcs-t">${esc(FC_EV_SHORT[ev]+(s.fcEv?mult(ev):' (มีในสัปดาห์)'))}</em>`:''}</span>`;}).join('')
+    +`<span class="fcs-u">${esc(unit)}</span></div>`
+    +(seen.size?`<div class="fcs-leg">${FC_EV_ORDER.filter(e=>seen.has(e)).map(e=>
+        `<span><i style="background:${FC_EV_COL[e]}"></i>${esc(FC_EV_LBL[e])}</span>`).join('')}</div>`:'');
 }
 function depItems(dep,weeks){
   return dep.filter(r=>r.demand>0).map(r=>{
@@ -2762,6 +2873,35 @@ function depItems(dep,weeks){
 }
 
 /* ---------- การ์ดสรุป + ตารางของ Forecast Accuracy — สไตล์การ์ดสว่าง อ่านง่าย ----------*/
+const FC_TARGET=25;
+/* ตารางตัวคูณ — ตอบคำถาม "วันพิเศษแต่ละแบบ ยอดเพิ่มกี่เท่า" */
+function fcMultTable(o,q){
+  const x=v=>'×'+(v||1).toFixed(2);
+  const cls=v=>(v||1)>=1.05?'up':(v||1)<=0.95?'down':'';
+  const nextOf=e=>{ const t=new Date(); t.setHours(0,0,0,0);
+    for(let i=0;i<400;i++){const d=new Date(t);d.setDate(t.getDate()+i);if(fcEvent(d)===e)return shortTH(d);} return '—'; };
+  const ex={dd:'2.2 · 9.9 · 11.11 · 12.12',pre:'9.8 · 10.9 · 11.10',post:'9.10 · 10.11 · 11.12',mid:'ทุกวันที่ 15',pay:'ทุกวันที่ 25'};
+  const DOW=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสฯ','ศุกร์','เสาร์'];
+  return `<h2 class="sec">ตัวคูณวันพิเศษ <em>ยอดเพิ่มกี่เท่าเทียบกับวันปกติ · เรียนรู้จากข้อมูลจริงทั้งหมด</em><span></span></h2>
+    <div class="fcacc-grid">
+      <div class="fcacc-panel"><div class="fcacc-h">วันพิเศษ</div>
+        <div class="fcacc-tblwrap" style="max-height:none"><table class="fcacc-tbl"><thead><tr>
+          <th>ประเภท</th><th>ตัวอย่างวัน</th><th class="num">ออเดอร์</th><th class="num">ชิ้น</th>
+          <th class="num">เคยเกิด</th><th class="num">ครั้งถัดไป</th></tr></thead><tbody>
+          <tr><td><b>วันปกติ</b></td><td class="dim">—</td><td class="num">×1.00</td><td class="num">×1.00</td><td class="num">—</td><td class="num">—</td></tr>
+          ${FC_EV_ORDER.map(e=>`<tr><td><b>${esc(FC_EV_LBL[e])}</b></td><td class="dim">${ex[e]}</td>
+            <td class="num ${cls(o.fE[e])}"><b>${x(o.fE[e])}</b></td><td class="num ${cls(q.fE[e])}"><b>${x(q.fE[e])}</b></td>
+            <td class="num">${o.nE[e]||0} ครั้ง</td><td class="num">${nextOf(e)}</td></tr>`).join('')}
+        </tbody></table></div></div>
+      <div class="fcacc-panel"><div class="fcacc-h">วันในสัปดาห์ <em>${o.cfg.dow?'':'ออเดอร์: ระบบเลือกไม่ใช้ (ต่างกันน้อย)'}</em></div>
+        <div class="fcacc-tblwrap" style="max-height:none"><table class="fcacc-tbl"><thead><tr>
+          <th>วัน</th><th class="num">ออเดอร์</th><th class="num">ชิ้น</th></tr></thead><tbody>
+          ${[1,2,3,4,5,6,0].map(k=>`<tr><td><b>${DOW[k]}</b></td>
+            <td class="num ${cls(o.fD[k])}">${x(o.fD[k])}</td><td class="num ${cls(q.fD[k])}">${x(q.fD[k])}</td></tr>`).join('')}
+        </tbody></table></div></div>
+    </div>
+    <div class="fwarn" style="margin:10px 0 0">ตัวคูณ = ยอดจริงวันนั้น ÷ ยอดฐานที่ทายไว้ก่อนวันนั้น (ค่ากลาง) · วันพิเศษที่เคยเกิดน้อยครั้งจะถูกดึงเข้าหา ×1 · จำกัดช่วง ×0.4 ถึง ×4</div>`;
+}
 function fcAccCards(bt){
   if(!bt)return '<div class="empty2">ข้อมูลไม่พอสำหรับย้อนหลังดูความแม่นยำ (ต้องมีอย่างน้อย ~44 วัน)</div>';
   const biasTxt=bt.bias==null?'—':(bt.bias>=0?'+':'')+bt.bias.toFixed(1)+'%';
@@ -2770,7 +2910,8 @@ function fcAccCards(bt){
     <div class="fcacc-card"><i>◎</i><b>ความแม่น (ออเดอร์)</b>
       <span>${bt.accuracy==null?'—':bt.accuracy.toFixed(1)+'%'}</span></div>
     <div class="fcacc-card"><i>∿</i><b>MAPE คลาดเฉลี่ย</b>
-      <span>${bt.mape==null?'—':bt.mape.toFixed(1)+'%'}</span></div>
+      <span class="${bt.mape!=null&&bt.mape<=FC_TARGET?'down':'up'}">${bt.mape==null?'—':bt.mape.toFixed(1)+'%'}</span>
+      <small>${bt.mape==null?'':bt.mape<=FC_TARGET?'ผ่านเป้า ≤ '+FC_TARGET+'%':'ยังเกินเป้า ≤ '+FC_TARGET+'%'}</small></div>
     <div class="fcacc-card"><i>${bt.bias>=0?'▲':'▼'}</i><b>BIAS สูง/ต่ำกว่าจริง</b>
       <span class="${bt.bias>0?'up':bt.bias<0?'down':''}">${biasTxt}</span>
       <small>${esc(biasNote)}</small></div>
@@ -2784,7 +2925,7 @@ function fcAccTable(bt,unit){
   return `<div class="fcacc-tblwrap"><table class="fcacc-tbl"><thead><tr>
     <th>วันที่</th><th class="num">พยากรณ์</th><th class="num">จริง</th>
     <th class="num">ต่าง</th><th class="num">%คลาด</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr><td>${showD(r.date)}</td>
+    ${rows.map(r=>`<tr><td>${showD(r.date)}${r.ev?` <span class="ddtag">${esc(FC_EV_SHORT[r.ev])}</span>`:''}</td>
       <td class="num">${fmt(r.pred)}</td><td class="num">${fmt(r.actual)}</td>
       <td class="num ${r.diff>0?'up':r.diff<0?'down':''}">${r.diff>0?'+':''}${fmt(r.diff)}</td>
       <td class="num ${r.pct==null?'':(r.pct>0?'up':r.pct<0?'down':'')}">${r.pct==null?'—':(r.pct>0?'+':'')+r.pct.toFixed(1)+'%'}</td>
@@ -2828,7 +2969,7 @@ const fcPtLbl={id:'fcPtLbl',
       x.fillStyle='rgba(255,255,255,.92)';
       x.fillRect(cx-4,ty-fh-2,w+8,fh+4);
       x.textAlign=(i===lastIdx)?'right':'center';
-      x.fillStyle='#B45309';
+      x.fillStyle=(op.col&&op.col[i])||'#B45309';
       x.fillText(t,i===lastIdx?pt.x+w/2:pt.x,ty);
       x.restore();
     });
@@ -2871,20 +3012,22 @@ function fcLineChart(id,key,s0,unit,maxHist){
             return s.labels[i]+(s.ranges&&s.ranges[i]?'  ·  '+s.ranges[i]:'');},
           label:c=>c.raw==null?null:`${c.dataset.label}: ${fmt(c.raw)} ${unit}`}},
       fcPtLbl:{display:true,nH}},
-    scales:{x:{ticks:{color:'#475569',font:{size:cf(26)},maxRotation:0,autoSkip:true},
+    scales:{x:{ticks:{maxRotation:0,autoSkip:true,
+                  color:c=>{const e=c.index>=nH?fcEvAt(s,c.index-nH):'';return e?FC_EV_COL[e]:'#475569';},
+                  font:c=>({size:cf(26),weight:(c.index>=nH&&fcEvAt(s,c.index-nH))?'bold':'normal'})},
                 grid:{display:false}},
       y:{ticks:{color:'#475569',font:{size:cf(26)},callback:v=>fmt(v),stepSize:ny.step},
           max:ny.max,grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
+  o.plugins.fcPtLbl.col=s.labels.map((_,i)=>{const e=i>=nH?fcEvAt(s,i-nH):'';return e?FC_EV_COL[e]:null;});
   CH[key]=new Chart(el2,{type:'line',
     data:{labels:s.labels,datasets:[
       {label:'ยอดจริง',data:histData,borderColor:'#0D9488',backgroundColor:'rgba(13,148,136,.12)',
        borderWidth:3,tension:.32,fill:true,pointRadius:3,pointBackgroundColor:'#0D9488',spanGaps:false},
       {label:'พยากรณ์',data:fcData,borderColor:'#B45309',borderDash:[8,5],
-       borderWidth:3,tension:.32,fill:false,pointRadius:s.labels.map((_,i)=>i<nH-1?0:6),
+       borderWidth:3,tension:.32,fill:false,pointRadius:s.labels.map((_,i)=>i<nH-1?0:(i>=nH&&fcEvAt(s,i-nH)?11:6)),
        pointHoverRadius:8,pointBorderColor:'#fff',pointBorderWidth:2.5,
-       pointBackgroundColor:s.labels.map((_,i)=>{
-         const j=i-nH;
-         return (j>=0&&s.fcDD&&s.fcDD[j])||(j>=0&&s.ddCount&&s.ddCount[j]>0)?'#D97706':'#B45309';}),
+       pointBackgroundColor:s.labels.map((_,i)=>{const e=i>=nH?fcEvAt(s,i-nH):'';return e?FC_EV_COL[e]:'#B45309';}),
+       pointStyle:s.labels.map((_,i)=>i>=nH&&fcEvAt(s,i-nH)?'rectRot':'circle'),
        spanGaps:false}]},
     options:o});
   /* บังคับคำนวณตำแหน่งกราฟใหม่ — กราฟอยู่ในกล่องเลื่อนแนวนอน (cscroll) เมาส์ชี้แล้ว tooltip
