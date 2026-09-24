@@ -2384,7 +2384,7 @@ function fcDaily(byDate){
   const hist=idx.map(i=>allVals[i]);
   const histLbl=idx.map(i=>shortTH(new Date(allKeys[i]+'T00:00:00')));
   const fc=[],fcLbl=[],fcDates=[],fcDD=[];
-  for(let i=1;i<=7;i++){
+  for(let i=1;i<=14;i++){
     const d=new Date(last); d.setDate(last.getDate()+i);
     let v=Math.max(0,level+trend*i);
     const flag=isDD(d); fcDD.push(flag);
@@ -2555,10 +2555,11 @@ function secForecast(){
   const warn=dep.filter(r=>r.weeksLeft!=null&&r.weeksLeft>=2&&r.weeksLeft<4).length;
   const okc=dep.filter(r=>r.weeksLeft==null||r.weeksLeft>=4).length;
 
-  /* กำลังคน 7 วันข้างหน้า */
+  /* กำลังคน 7 วันข้างหน้า — คงไว้ 7 วันเหมือนเดิม แม้พยากรณ์รายวันด้านบนขยายเป็น 14 วันแล้ว
+     (จำกัดด้วย .slice(0,7) เพราะ dOrd.fc ตอนนี้มี 14 ค่า) */
   const staff=[];
   if(dOrd&&dQty){
-    dOrd.fc.forEach((o,i)=>{
+    dOrd.fc.slice(0,7).forEach((o,i)=>{
       const q=dQty.fc[i]||0;
       const pk=Math.max(1,Math.ceil(o/STAFF.ordPerPerson));
       const wh=Math.max(1,Math.ceil(q/(STAFF.whPerHour*STAFF.whHours)));
@@ -2604,7 +2605,7 @@ function secForecast(){
         ${fcStrip(wQty,'ชิ้น')}</div>
     </div>
 
-    <h2 class="sec">พยากรณ์รายวัน <em>ยอดจริง + ประมาณการ 7 วันข้างหน้า</em><span></span></h2>
+    <h2 class="sec">พยากรณ์รายวัน <em>ยอดจริง + ประมาณการ 14 วันข้างหน้า</em><span></span></h2>
     ${dOrd?`<details class="fnote">
       <summary>วิธีคิด — Holt's Exponential Smoothing ให้น้ำหนักวันใกล้มากกว่าวันไกล</summary>
       <div class="fbody">
