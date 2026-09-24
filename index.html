@@ -2811,13 +2811,17 @@ const fcPtLbl={id:'fcPtLbl',
       const v=ds.data[i]; if(v==null)return;
       const t=fmt(v), w=x.measureText(t).width;
       let level=0;
-      while(placed.some(b=>b.level===level&&Math.abs(b.x-pt.x)<(b.w+w)/2+6))level++;
+      while(placed.some(b=>b.level===level&&Math.abs(b.x-pt.x)<(b.w+w)/2+16))level++;
       placed.push({x:pt.x,w,level});
       x.save();
       /* จุดสุดท้าย (ริมขวาสุดของกราฟ) วางป้ายชิดขวาแทนกึ่งกลาง กันครึ่งขวาของตัวเลขทะลุขอบ */
+      const ty=pt.y-12-level*step, cx=pt.x-w/2, fh=cf(24);
+      /* พื้นขาวรองตัวเลข ไม่ให้เส้นกราฟพาดทับจนอ่านไม่ออก */
+      x.fillStyle='rgba(255,255,255,.92)';
+      x.fillRect(cx-4,ty-fh-2,w+8,fh+4);
       x.textAlign=(i===lastIdx)?'right':'center';
       x.fillStyle='#B45309';
-      x.fillText(t,i===lastIdx?pt.x+w/2:pt.x,pt.y-10-level*step);
+      x.fillText(t,i===lastIdx?pt.x+w/2:pt.x,ty);
       x.restore();
     });
   }};
@@ -2833,9 +2837,17 @@ function fcNiceY(vals){
   /* เผื่อหัวกราฟ ~12% ให้ป้ายตัวเลขจุดพยากรณ์ไม่ชนขอบบน */
   return {step,max:Math.ceil(mx*1.12/step)*step};
 }
-function fcLineChart(id,key,s,unit){
-  const el2=document.getElementById(id); if(!el2||!s)return;
+function fcLineChart(id,key,s0,unit,maxHist){
+  const el2=document.getElementById(id); if(!el2||!s0)return;
   destroy(key);
+  /* v-fc3: ตัดประวัติให้เหลือแค่ช่วงล่าสุด (กราฟรายสัปดาห์เดิมโชว์ W1–W39 จุดเบียดจน
+     ตัวเลขพยากรณ์ซ้อนกัน) — ตัดเฉพาะที่แสดงบนกราฟ ค่าพยากรณ์ยังคำนวณจากข้อมูลทั้งหมดเหมือนเดิม */
+  let s=s0;
+  if(maxHist&&s0.hist.length>maxHist){
+    const cut=s0.hist.length-maxHist;
+    s={...s0,hist:s0.hist.slice(cut),labels:s0.labels.slice(cut),
+       ranges:s0.ranges?s0.ranges.slice(cut):s0.ranges};
+  }
   const nH=s.hist.length;
   const histData=[...s.hist,...s.fc.map(()=>null)];
   /* ต่อเส้นให้เนียน — จุดสุดท้ายของเส้นจริงเป็นจุดเริ่มของเส้นพยากรณ์ */
@@ -2938,8 +2950,8 @@ function fcStackChart(id,key,items,weeks){
 function drawForecast(){
   if(!FC_CTX)return;
   const {wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty}=FC_CTX;
-  fcLineChart('c_fcwo','fcwo',wOrd,'ออเดอร์');
-  fcLineChart('c_fcwq','fcwq',wQty,'ชิ้น');
+  fcLineChart('c_fcwo','fcwo',wOrd,'ออเดอร์',12);   /* รายสัปดาห์ โชว์ย้อนหลัง 12 สัปดาห์ */
+  fcLineChart('c_fcwq','fcwq',wQty,'ชิ้น',12);
   fcLineChart('c_fcdo','fcdo',dOrd,'ออเดอร์');
   fcLineChart('c_fcdq','fcdq',dQty,'ชิ้น');
   fcAccChart('c_btord','btord',btOrd,'ออเดอร์');
