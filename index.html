@@ -357,17 +357,17 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 /* แถบค่าพยากรณ์ใต้กราฟ */
 #vKPI .fcstrip{display:flex;flex-wrap:wrap;gap:10px;align-items:center;
   margin-top:16px;padding-top:16px;border-top:1px dashed var(--line)}
-#vKPI .fcs-l{font-size:24px;color:var(--plum-d);font-weight:bold;
+#vKPI .fcs-l{font-size:28px;color:var(--plum-d);font-weight:bold;
   letter-spacing:.08em;text-transform:uppercase;margin-right:2px}
 #vKPI .fcs-i{display:inline-flex;align-items:baseline;gap:9px;
   background:#F3EFFA;border:1px solid #DDD5EE;border-radius:10px;padding:7px 15px;
   font-style:normal;white-space:nowrap}
-#vKPI .fcs-i b{font-size:23px;color:var(--plum-d);font-weight:bold}
-#vKPI .fcs-i i{font-size:30px;color:#1E1B33;font-weight:bold;font-style:normal;
+#vKPI .fcs-i b{font-size:27px;color:var(--plum-d);font-weight:bold}
+#vKPI .fcs-i i{font-size:36px;color:#1E1B33;font-weight:bold;font-style:normal;
   font-variant-numeric:tabular-nums}
 #vKPI .fcs-i.dd{background:#FBF1E8;border-color:#EBD9BF}
 #vKPI .fcs-i.dd b{color:#8a6a2f}
-#vKPI .fcs-u{font-size:24px;color:var(--mute)}
+#vKPI .fcs-u{font-size:28px;color:var(--mute)}
 #vKPI .fnote{background:var(--soft);border:1px solid var(--line);border-left:5px solid var(--plum);
   border-radius:14px;padding:0 26px;margin:0 0 18px;font-size:28px;line-height:1.65;color:var(--ink)}
 #vKPI .fnote>div{margin-top:6px;color:var(--ink)}
@@ -391,11 +391,11 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .fcacc-card{background:#fff;border:1px solid #E2E8F0;border-radius:14px;
   padding:20px 18px;text-align:center;display:flex;flex-direction:column;
   align-items:center;gap:6px}
-#vKPI .fcacc-card i{font-style:normal;font-size:26px;color:#0D9488}
-#vKPI .fcacc-card b{font-size:20px;font-weight:600;color:#475569}
-#vKPI .fcacc-card span{font-size:38px;font-weight:800;color:#0F172A;letter-spacing:-.5px}
+#vKPI .fcacc-card i{font-style:normal;font-size:30px;color:#0D9488}
+#vKPI .fcacc-card b{font-size:24px;font-weight:600;color:#475569}
+#vKPI .fcacc-card span{font-size:46px;font-weight:800;color:#0F172A;letter-spacing:-.5px}
 #vKPI .fcacc-card span.up{color:#B45309}#vKPI .fcacc-card span.down{color:#0F766E}
-#vKPI .fcacc-card small{font-size:16px;color:#64748B}
+#vKPI .fcacc-card small{font-size:19px;color:#64748B}
 #vKPI .fcacc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:1300px){#vKPI .fcacc-grid{grid-template-columns:1fr}}
 #vKPI .fcacc-panel{background:#fff;border:1px solid #E2E8F0;border-radius:16px;
@@ -2820,17 +2820,17 @@ function fcLineChart(id,key,s,unit){
   const fcData=[...s.hist.map((v,i)=>i===nH-1?v:null),...s.fc];
   const o={responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
-    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(20)},usePointStyle:true}},
+    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(25)},usePointStyle:true}},
       tooltip:{backgroundColor:'#1E293B',padding:10,cornerRadius:6,
-        titleFont:{size:cf(20)},bodyFont:{size:cf(19)},
+        titleFont:{size:cf(25)},bodyFont:{size:cf(23)},
         callbacks:{
           title:c=>{const i=c[0].dataIndex;
             return s.labels[i]+(s.ranges&&s.ranges[i]?'  ·  '+s.ranges[i]:'');},
           label:c=>c.raw==null?null:`${c.dataset.label}: ${fmt(c.raw)} ${unit}`}},
       fcPtLbl:{display:true,nH}},
-    scales:{x:{ticks:{color:'#64748B',font:{size:cf(18)},maxRotation:0,autoSkip:true},
+    scales:{x:{ticks:{color:'#64748B',font:{size:cf(22)},maxRotation:0,autoSkip:true},
                 grid:{display:false}},
-      y:{ticks:{color:'#64748B',font:{size:cf(18)},callback:v=>fmt(v)},
+      y:{ticks:{color:'#64748B',font:{size:cf(22)},callback:v=>fmt(v)},
           grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
   CH[key]=new Chart(el2,{type:'line',
     data:{labels:s.labels,datasets:[
@@ -2844,6 +2844,9 @@ function fcLineChart(id,key,s,unit){
          return (j>=0&&s.fcDD&&s.fcDD[j])||(j>=0&&s.ddCount&&s.ddCount[j]>0)?'#D97706':'#B45309';}),
        spanGaps:false}]},
     options:o});
+  /* บังคับคำนวณตำแหน่งกราฟใหม่ — กราฟอยู่ในกล่องเลื่อนแนวนอน (cscroll) เมาส์ชี้แล้ว tooltip
+     บางทีขึ้นคลาดเคลื่อนจากจุดจริง เพราะวัดขนาด/ตำแหน่งกล่องก่อน layout เสร็จสมบูรณ์ */
+  requestAnimationFrame(()=>{ if(CH[key])CH[key].resize(); });
 }
 
 /* กราฟย้อนหลัง Forecast Accuracy — สไตล์สว่างแยกจากธีมมืดหลัก (อ่านง่ายตามที่ขอ) */
@@ -2853,12 +2856,12 @@ function fcAccChart(id,key,bt,unit){
   const rows=bt.rows;
   const o={responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
-    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(20)},usePointStyle:true}},
+    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(25)},usePointStyle:true}},
       tooltip:{backgroundColor:'#1E293B',padding:10,cornerRadius:6,
-        titleFont:{size:cf(20)},bodyFont:{size:cf(19)}}},
-    scales:{x:{ticks:{color:'#64748B',font:{size:cf(18)},maxRotation:0,autoSkip:true},
+        titleFont:{size:cf(25)},bodyFont:{size:cf(23)}}},
+    scales:{x:{ticks:{color:'#64748B',font:{size:cf(22)},maxRotation:0,autoSkip:true},
                 grid:{display:false}},
-      y:{ticks:{color:'#64748B',font:{size:cf(18)},callback:v=>fmt(v)},
+      y:{ticks:{color:'#64748B',font:{size:cf(22)},callback:v=>fmt(v)},
           grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
   CH[key]=new Chart(el2,{type:'line',
     data:{labels:rows.map(r=>showD(r.date)),
@@ -2869,6 +2872,7 @@ function fcAccChart(id,key,bt,unit){
          borderDash:[7,4],borderWidth:2.5,tension:.3,fill:false,pointRadius:2,pointBackgroundColor:'#B45309'}
       ]},
     options:o});
+  requestAnimationFrame(()=>{ if(CH[key])CH[key].resize(); });
 }
 
 function fcStackChart(id,key,items,weeks){
@@ -3102,7 +3106,7 @@ function drawRetEmbed(){
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
   doc=doc.replace('</head>',
-    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important;zoom:1.35}\n     .donuts svg{max-width:420px;margin:0 auto}</style></head>');
+    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important;zoom:1.6}\n     .donuts svg{max-width:480px;margin:0 auto}</style></head>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800);
     try{
