@@ -2377,9 +2377,10 @@ function fcDaily(byDate){
     trend=B*(level-prev)+(1-B)*trend;
   }
   const dd=learnDD(byDate), boost=dd.multiplier||1;
-  const STEP=5, idx=[];
-  for(let i=0;i<allKeys.length;i+=STEP)idx.push(i);
-  if(idx[idx.length-1]!==allKeys.length-1)idx.push(allKeys.length-1);
+  /* โชว์แค่ 14 วันล่าสุดของประวัติ (ไม่ใช่สุ่มทุก 5 วันตลอดทั้งปีแบบเดิม) — คำนวณ level/trend
+     ยังใช้ข้อมูลทั้งหมดด้านบนเหมือนเดิม กระทบแค่ส่วนที่เอามาแสดงผลบนกราฟ */
+  const HISTN=Math.min(14,allKeys.length);
+  const idx=[]; for(let i=allKeys.length-HISTN;i<allKeys.length;i++)idx.push(i);
   const hist=idx.map(i=>allVals[i]);
   const histLbl=idx.map(i=>shortTH(new Date(allKeys[i]+'T00:00:00')));
   const fc=[],fcLbl=[],fcDates=[],fcDD=[];
@@ -2613,7 +2614,7 @@ function secForecast(){
       <code>Level(t) = 0.3 × จริง(t) + 0.7 × (Level(t-1) + Trend(t-1))<br>
             Trend(t) = 0.15 × (Level(t) − Level(t-1)) + 0.85 × Trend(t-1)<br>
             พยากรณ์ (h วันข้างหน้า) = Level + Trend × h</code>
-      <div class="fwarn">กราฟโชว์จุดทุก 5 วันเพื่อไม่ให้รก แต่คำนวณจากข้อมูลทุกวันจริง (${fmt(dOrd.days)} วัน)</div>
+      <div class="fwarn">กราฟโชว์ประวัติย้อนหลัง 14 วันล่าสุด แต่คำนวณเทรนด์จากข้อมูลทุกวันจริงทั้งหมด (${fmt(dOrd.days)} วัน)</div>
       </div>
     </details>
     <div class="fcacc-grid">
@@ -2705,7 +2706,7 @@ function secForecast(){
     </div>`:''}
 
     ${dep.length?`<h2 class="sec">Stock Depletion Forecast <em>${fmt(dep.length)} สินค้า · เรียงจากวิกฤตที่สุด</em><span></span></h2>
-    <div class="tscroll"><table class="dt"><thead><tr>
+    <div class="tscroll" style="max-height:none;overflow:visible"><table class="dt"><thead><tr>
       <th>Product</th><th class="num">Demand เฉลี่ย/สัปดาห์</th>
       <th class="num">Stock WH300</th><th class="num">เหลือ (สัปดาห์)</th>
       <th class="num">สถานะ</th><th>สาเหตุที่ยังไม่เติม</th>
@@ -2849,27 +2850,36 @@ function fcLineChart(id,key,s,unit){
   requestAnimationFrame(()=>{ if(CH[key])CH[key].resize(); });
 }
 
-/* กราฟย้อนหลัง Forecast Accuracy — สไตล์สว่างแยกจากธีมมืดหลัก (อ่านง่ายตามที่ขอ) */
+/* กราฟย้อนหลัง Forecast Accuracy — สไตล์สว่างแยกจากธีมมืดหลัก (อ่านง่ายตามที่ขอ)
+   รวมเป็นรายสัปดาห์แทนรายวัน (30 จุดเบียดกันจนตัวหนังสือเล็กเกิน) — ตารางรายละเอียดด้านล่าง
+   ยังคงเป็นรายวันเหมือนเดิม กระทบแค่กราฟเส้นเท่านั้น */
 function fcAccChart(id,key,bt,unit){
   const el2=document.getElementById(id); if(!el2||!bt)return;
   destroy(key);
   const rows=bt.rows;
+  const wk=[];
+  for(let i=0;i<rows.length;i+=7){
+    const chunk=rows.slice(i,i+7);
+    wk.push({label:showD(chunk[0].date)+' – '+showD(chunk[chunk.length-1].date),
+      actual:chunk.reduce((s,r)=>s+r.actual,0),
+      pred:chunk.reduce((s,r)=>s+r.pred,0)});
+  }
   const o={responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(25)},usePointStyle:true}},
       tooltip:{backgroundColor:'#1E293B',padding:10,cornerRadius:6,
         titleFont:{size:cf(25)},bodyFont:{size:cf(23)}}},
-    scales:{x:{ticks:{color:'#64748B',font:{size:cf(22)},maxRotation:0,autoSkip:true},
+    scales:{x:{ticks:{color:'#64748B',font:{size:cf(24)},maxRotation:0,autoSkip:true},
                 grid:{display:false}},
-      y:{ticks:{color:'#64748B',font:{size:cf(22)},callback:v=>fmt(v)},
+      y:{ticks:{color:'#64748B',font:{size:cf(24)},callback:v=>fmt(v)},
           grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
   CH[key]=new Chart(el2,{type:'line',
-    data:{labels:rows.map(r=>showD(r.date)),
+    data:{labels:wk.map(w=>w.label),
       datasets:[
-        {label:'ยอดจริง',data:rows.map(r=>r.actual),borderColor:'#0D9488',
-         backgroundColor:'rgba(13,148,136,.14)',borderWidth:3,tension:.3,fill:true,pointRadius:2},
-        {label:'พยากรณ์ (ล่วงหน้า 1 วัน)',data:rows.map(r=>r.pred),borderColor:'#B45309',
-         borderDash:[7,4],borderWidth:2.5,tension:.3,fill:false,pointRadius:2,pointBackgroundColor:'#B45309'}
+        {label:'ยอดจริง',data:wk.map(w=>w.actual),borderColor:'#0D9488',
+         backgroundColor:'rgba(13,148,136,.14)',borderWidth:3,tension:.3,fill:true,pointRadius:4},
+        {label:'พยากรณ์ (ล่วงหน้า 1 วัน)',data:wk.map(w=>w.pred),borderColor:'#B45309',
+         borderDash:[7,4],borderWidth:2.5,tension:.3,fill:false,pointRadius:4,pointBackgroundColor:'#B45309'}
       ]},
     options:o});
   requestAnimationFrame(()=>{ if(CH[key])CH[key].resize(); });
@@ -3106,7 +3116,7 @@ function drawRetEmbed(){
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
   doc=doc.replace('</head>',
-    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important;zoom:1.6}\n     .donuts svg{max-width:480px;margin:0 auto}</style></head>');
+    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important;zoom:1.9}\n     .donuts svg{max-width:540px;margin:0 auto}</style></head>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800);
     try{
