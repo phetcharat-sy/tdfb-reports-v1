@@ -2997,6 +2997,15 @@ function fcLineChart(id,key,s0,unit,maxHist){
     s={...s0,hist:s0.hist.slice(cut),labels:s0.labels.slice(cut),
        ranges:s0.ranges?s0.ranges.slice(cut):s0.ranges};
   }
+  /* v-fc6: ป้ายแกน X รายวัน — ห้ามข้ามวันพยากรณ์ (เดิม autoSkip ทำให้บางวันหายไป)
+     ย่อเป็นเลขวันที่ 2 บรรทัด [วัน, เดือน] ใส่ชื่อเดือนเฉพาะวันแรก/วันที่ขึ้นเดือนใหม่ จะได้พอดีช่อง */
+  let tickLbl=null;
+  if(s.fcDates){
+    const nh=s.hist.length, dates=[];
+    for(let i=0;i<nh;i++){const d=new Date(s.fcDates[0]);d.setDate(d.getDate()-(nh-i));dates.push(d);}
+    dates.push(...s.fcDates);
+    tickLbl=dates.map((d,i)=>[String(d.getDate()),(i===0||d.getDate()===1)?MON_S[d.getMonth()]:'']);
+  }
   const nH=s.hist.length;
   const histData=[...s.hist,...s.fc.map(()=>null)];
   /* ต่อเส้นให้เนียน — จุดสุดท้ายของเส้นจริงเป็นจุดเริ่มของเส้นพยากรณ์ */
@@ -3012,7 +3021,8 @@ function fcLineChart(id,key,s0,unit,maxHist){
             return s.labels[i]+(s.ranges&&s.ranges[i]?'  ·  '+s.ranges[i]:'');},
           label:c=>c.raw==null?null:`${c.dataset.label}: ${fmt(c.raw)} ${unit}`}},
       fcPtLbl:{display:true,nH}},
-    scales:{x:{ticks:{maxRotation:0,autoSkip:true,
+    scales:{x:{ticks:{maxRotation:0,autoSkip:!tickLbl,
+                  callback:function(v,i){return tickLbl?tickLbl[i]:this.getLabelForValue(v);},
                   color:c=>{const e=c.index>=nH?fcEvAt(s,c.index-nH):'';return e?FC_EV_COL[e]:'#475569';},
                   font:c=>({size:cf(26),weight:(c.index>=nH&&fcEvAt(s,c.index-nH))?'bold':'normal'})},
                 grid:{display:false}},
@@ -3103,8 +3113,8 @@ function drawForecast(){
   const {wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty}=FC_CTX;
   fcLineChart('c_fcwo','fcwo',wOrd,'ออเดอร์',12);   /* รายสัปดาห์ โชว์ย้อนหลัง 12 สัปดาห์ */
   fcLineChart('c_fcwq','fcwq',wQty,'ชิ้น',12);
-  fcLineChart('c_fcdo','fcdo',dOrd,'ออเดอร์');
-  fcLineChart('c_fcdq','fcdq',dQty,'ชิ้น');
+  fcLineChart('c_fcdo','fcdo',dOrd,'ออเดอร์',7);   /* รายวัน: ประวัติ 7 วัน · วันพยากรณ์โชว์ครบทุกวัน */
+  fcLineChart('c_fcdq','fcdq',dQty,'ชิ้น',7);
   fcAccChart('c_btord','btord',btOrd,'ออเดอร์');
   fcAccChart('c_btqty','btqty',btQty,'ชิ้น');
   fcStackChart('c_fc1w','fc1w',items1,1);
@@ -5268,13 +5278,49 @@ function shotPages(bands,pageH){
   return pages.map(p=>({top:p[0].top,bot:p[p.length-1].bot}));
 }
 
+/* v-shot3: ถ่ายแบบ "แยกเฉพาะส่วน" ในสำเนาของหน้า — แก้ภาพเอียง/ตัดผิดตำแหน่ง
+   เดิมใช้พิกัด x/y ของหน้าจอจริงไปตัดในสำเนา ซึ่งตำแหน่งในสำเนาไม่ตรงกับจอ (padding %, แถบข้าง,
+   การเลื่อนหน้า) ภาพจึงเลื่อน/เอียง/ตัดผิดที่ → ตอนนี้ในสำเนาจะซ่อนทุกอย่างที่ไม่ใช่ส่วนที่ต้องการ
+   แล้ววางส่วนนั้นไว้มุมซ้ายบนพอดี (0,0) ก่อนถ่าย ภาพจึงตรงเป๊ะทุกครั้ง */
+function shotIsolate(doc,el,width){
+  const imp=(e,k,v)=>e.style.setProperty(k,v,'important');
+  let cur=el;
+  while(cur&&cur.parentElement){
+    const par=cur.parentElement;
+    [...par.children].forEach(c=>{ if(c!==cur&&c.dataset.shotKeep!=='1'&&!/^(STYLE|SCRIPT|LINK|HEAD)$/.test(c.tagName))imp(c,'display','none'); });
+    if(par.tagName!=='HTML'){
+      ['margin','padding','min-height','transform'].forEach(k=>imp(par,k,k==='transform'?'none':'0'));
+      imp(par,'display','block'); imp(par,'width',width+'px'); imp(par,'max-width','none');
+      imp(par,'position','static'); imp(par,'zoom','1'); imp(par,'height','auto'); imp(par,'overflow','visible');
+    }
+    cur=par;
+  }
+  imp(doc.documentElement,'zoom','1');
+  imp(el,'width',width+'px'); imp(el,'max-width','none'); imp(el,'margin','0'); imp(el,'zoom','1');
+}
+/* ตัดขอบล่างที่ว่างเปล่า (สีพื้นหลัง) ออก */
+function shotTrim(c,bg){
+  const x=c.getContext('2d'), w=c.width, h=c.height;
+  const t=document.createElement('canvas').getContext('2d'); t.fillStyle=bg; t.fillRect(0,0,1,1);
+  const [br,bgc,bb]=t.getImageData(0,0,1,1).data;
+  let last=h-1;
+  const data=x.getImageData(0,0,w,h).data;
+  outer: for(;last>0;last-=2){
+    for(let px=0;px<w;px+=6){const o=(last*w+px)*4;
+      if(Math.abs(data[o]-br)+Math.abs(data[o+1]-bgc)+Math.abs(data[o+2]-bb)>24)break outer;}
+  }
+  const H=Math.min(h,last+Math.round(28*(w/1500)));
+  if(H>=h-2)return c;
+  const o=document.createElement('canvas'); o.width=w; o.height=H;
+  o.getContext('2d').drawImage(c,0,0); return o;
+}
+
 async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE'}){
-  const doc=root.ownerDocument, win=doc.defaultView;
+  const doc=root.ownerDocument;
   const label=btn?btn.textContent:'';
   const say=t=>{if(btn)btn.textContent=t;};
   if(btn)btn.disabled=true;
   say('กำลังเตรียมภาพ…');
-  /* ปิด zoom ชั่วคราว แต่ล็อกความกว้างไว้ layout จะได้เหมือนบนจอทุกอย่าง */
   const w0=root.offsetWidth;
   const saved=zoomEls.map(e=>[e,e.style.zoom]);
   const rw=[root.style.width,root.style.maxWidth];
@@ -5284,85 +5330,109 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE'})
   const charts=doc===document?Object.values(CH):[];
   charts.forEach(c=>{try{c.options.devicePixelRatio=S;c.resize();}catch(e){}});
   await shotFrame(); await shotWait(250);
+  const marked=[];
+  const mark=(e,k,v)=>{e.dataset[k]=v;marked.push([e,k]);};
   try{
     const JSZip=await shotLoadZip(), zip=new JSZip();
     const R=root.getBoundingClientRect();
     const pageH=w0*SHOT_SLIDE_H/SHOT_SLIDE_W;
-    const pages=shotPages(shotBands(root,pageH),pageH);
-    const PAD=14;
-    const render=async(top,bot,sc)=>{
-      const t=Math.max(0,top-PAD), b=Math.min(R.height,bot+PAD);
-      const s=Math.min(sc,Math.sqrt(1.2e8/(w0*(b-t))));
-      const c=await html2canvas(root,{scale:s,backgroundColor:bg,useCORS:true,logging:false,
-        x:R.left+win.scrollX,y:R.top+win.scrollY+t,width:w0,height:b-t,
-        windowWidth:doc.documentElement.clientWidth,windowHeight:doc.documentElement.clientHeight});
-      return {c,t,s};
-    };
-    /* ---- การ์ด/กราฟทีละช่อง (แบบที่ 2) — เตรียมรายการก่อน ครอปจากภาพของหน้านั้นๆ ---- */
-    let items=[...root.querySelectorAll(SHOT_PANEL_SEL)]
-      .filter(e=>{const r=e.getBoundingClientRect();return r.width>40&&r.height>40;});
-    items=items.filter(e=>!items.some(o=>o!==e&&o.contains(e)));
-    const regions=items.map(e=>{
-      let r=e.getBoundingClientRect(), top=r.top, bot=r.bottom, left=r.left, right=r.right;
-      /* การ์ด KPI — เอาหัวข้อ (ชื่อ KPI + Target) ติดไปด้วย */
-      const hd=e.previousElementSibling;
-      if(e.classList.contains('kpi')&&hd&&hd.classList.contains('kpi-head')){
-        const h=hd.getBoundingClientRect(); top=Math.min(top,h.top); left=Math.min(left,h.left);}
-      const nameEl=e.querySelector('.fcacc-h,.chname2,.l,h2,h3')||(hd&&hd.classList.contains('kpi-head')?hd.querySelector('b'):null);
-      const nm=nameEl?(nameEl.childNodes[0]&&nameEl.childNodes[0].textContent||nameEl.textContent):'';
-      return {top:top-R.top,bot:bot-R.top,left:left-R.left,right:right-R.left,name:shotSafe(nm)};
+    /* ---- แบ่งหน้า: หาบล็อกย่อย แล้วจัดเป็นแถบ/หน้า เหมือนเดิม แต่จำว่าบล็อกไหนอยู่หน้าไหน ---- */
+    const blocks=[];
+    const walk=el=>{ for(const c of el.children){
+      if(/^(SCRIPT|STYLE|TEMPLATE)$/.test(c.tagName))continue;
+      const r=c.getBoundingClientRect(); if(r.height<2||r.width<2)continue;
+      if(r.height>pageH*0.95&&c.children.length&&!/^(CANVAS|SVG|IMG|IFRAME|TR)$/i.test(c.tagName)){walk(c);continue;}
+      blocks.push({el:c,top:r.top-R.top,bot:r.bottom-R.top,
+        head:c.matches('h1,h2,h3,.sec,.kpi-head,details,header,.fcacc-h,.chname2')&&r.height<pageH*0.2});
+    }};
+    walk(root);
+    blocks.sort((a,b)=>a.top-b.top);
+    const bands=[];
+    blocks.forEach(b=>{const L=bands[bands.length-1];
+      if(L&&b.top<L.bot-1){L.bot=Math.max(L.bot,b.bot);L.head=L.head&&b.head;L.items.push(b);}
+      else bands.push({top:b.top,bot:b.bot,head:b.head,items:[b]});});
+    const pages=[]; let cur=[];
+    bands.forEach(b=>{
+      if(cur.length&&(b.bot-cur[0].top)>pageH){
+        const carry=[]; while(cur.length>1&&cur[cur.length-1].head)carry.unshift(cur.pop());
+        pages.push(cur); cur=carry;
+        if(cur.length&&(b.bot-cur[0].top)>pageH){pages.push(cur);cur=[];}
+      }
+      cur.push(b);
     });
-    const done=new Set();
-    const cropTo=(src,rg,i)=>{
-      const P=16*src.s, sx=Math.max(0,rg.left*src.s-P), sy=Math.max(0,(rg.top-src.t)*src.s-P);
-      const sw=Math.min(src.c.width-sx,(rg.right-rg.left)*src.s+P*2), sh=Math.min(src.c.height-sy,(rg.bot-rg.top)*src.s+P*2);
-      const o=document.createElement('canvas'); o.width=Math.round(sw); o.height=Math.round(sh);
-      const x=o.getContext('2d'); x.fillStyle=bg; x.fillRect(0,0,o.width,o.height);
-      x.drawImage(src.c,sx,sy,sw,sh,0,0,sw,sh);
-      return o;
+    if(cur.length)pages.push(cur);
+    pages.forEach((pg,i)=>pg.forEach(b=>b.items.forEach(it=>mark(it.el,'shotPg',String(i)))));
+    mark(root,'shotRoot','1');
+
+    const shoot=async(w,h,sc,prep)=>{
+      const s=Math.min(sc,Math.sqrt(1.2e8/(w*h)));
+      return html2canvas(root,{scale:s,backgroundColor:bg,useCORS:true,logging:false,
+        x:0,y:0,width:w,height:h,scrollX:0,scrollY:0,windowWidth:w,windowHeight:h,
+        onclone:d=>prep(d)});
     };
     const pad2=n=>String(n).padStart(2,'0');
-    /* ---- สไลด์ 16:9 (แบบที่ 1) ---- */
+    /* ---- แบบที่ 1: สไลด์ 16:9 ---- */
     for(let i=0;i<pages.length;i++){
       say(`กำลังสร้างสไลด์ ${i+1}/${pages.length}…`);
-      const p=pages[i], src=await render(p.top,p.bot,S);
+      const pg=pages[i], hh=pg[pg.length-1].bot-pg[0].top;
+      let c=await shoot(w0,Math.ceil(hh+260),S,d=>{
+        const rc=d.querySelector('[data-shot-root="1"]'); if(!rc)return;
+        shotIsolate(d,rc,w0);
+        d.querySelectorAll('[data-shot-pg]').forEach(e=>{if(e.dataset.shotPg!==String(i))e.style.setProperty('display','none','important');});
+      });
+      c=shotTrim(c,bg);
       const sl=document.createElement('canvas'); sl.width=SHOT_SLIDE_W; sl.height=SHOT_SLIDE_H;
       const x=sl.getContext('2d'); x.fillStyle=bg; x.fillRect(0,0,sl.width,sl.height);
-      const FOOT=90, M=70;
-      const bw=sl.width-M*2, bh=sl.height-M-FOOT;
-      const k=Math.min(bw/src.c.width,bh/src.c.height);
-      const dw=src.c.width*k, dh=src.c.height*k;
+      const FOOT=90, M=70, bw=sl.width-M*2, bh=sl.height-M-FOOT;
+      const k=Math.min(bw/c.width,bh/c.height), dw=c.width*k, dh=c.height*k;
       x.imageSmoothingQuality='high';
-      x.drawImage(src.c,(sl.width-dw)/2,M+(bh-dh)/2*(dh<bh*0.6?0.4:1),dw,dh);
+      x.drawImage(c,(sl.width-dw)/2,M+Math.max(0,(bh-dh)/2)*(dh<bh*0.6?0.4:1),dw,dh);
       x.fillStyle=fg; x.font='500 34px "Baloo 2","Mitr",sans-serif'; x.textBaseline='middle';
       x.textAlign='left'; x.fillText('TDFB Operations · '+(title||''),M,sl.height-FOOT/2);
       x.textAlign='right'; x.fillText(`${i+1} / ${pages.length}`,sl.width-M,sl.height-FOOT/2);
       zip.file(`1-สไลด์ 16x9/slide-${pad2(i+1)}.png`,await shotBlob(sl));
-      regions.forEach((rg,j)=>{ if(done.has(j))return;
-        if(rg.top>=p.top-PAD+1&&rg.bot<=p.bot+PAD-1){
-          const o=cropTo(src,rg,j); done.add(j);
-          rg.blob=shotBlob(o);
-        }});
-      src.c.width=src.c.height=0;
+      c.width=c.height=0;
     }
-    /* การ์ดที่ถูกตัดข้ามหน้า (สูงกว่าหนึ่งสไลด์) — ถ่ายแยกเฉพาะตัว */
-    for(let j=0;j<regions.length;j++){ if(done.has(j))continue;
-      say(`กำลังสร้างภาพกราฟ ${j+1}/${regions.length}…`);
-      const rg=regions[j], src=await render(rg.top,rg.bot,S);
-      rg.blob=shotBlob(cropTo(src,rg,j)); src.c.width=src.c.height=0; }
-    for(let j=0;j<regions.length;j++)
-      zip.file(`2-แยกทีละกราฟ/${pad2(j+1)}-${regions[j].name}.png`,await regions[j].blob);
+    /* ---- แบบที่ 2: ทีละกราฟ/การ์ด — ถ่ายแยกเฉพาะช่องนั้น ขนาดตามช่องบนแดชบอร์ด ---- */
+    let items=[...root.querySelectorAll(SHOT_PANEL_SEL)]
+      .filter(e=>{const r=e.getBoundingClientRect();return r.width>40&&r.height>40;});
+    items=items.filter(e=>!items.some(o=>o!==e&&o.contains(e)));
+    for(let j=0;j<items.length;j++){
+      say(`กำลังสร้างภาพกราฟ ${j+1}/${items.length}…`);
+      const e=items[j], r=e.getBoundingClientRect();
+      const hd=e.previousElementSibling;
+      const withHead=e.classList.contains('kpi')&&hd&&hd.classList.contains('kpi-head');
+      const hh=withHead?hd.getBoundingClientRect().height+14:0;
+      const P=18;
+      mark(e,'shotT','1'); if(withHead)mark(hd,'shotKeep','1');
+      let c=await shoot(Math.ceil(r.width+P*2),Math.ceil(r.height+hh+P*2+40),S,d=>{
+        const t=d.querySelector('[data-shot-t="1"]'); if(!t)return;
+        shotIsolate(d,t,Math.ceil(r.width));
+        const par=t.parentElement;
+        par.style.setProperty('padding',P+'px','important');
+        par.style.setProperty('width',(Math.ceil(r.width)+P*2)+'px','important');
+        if(withHead){const h=t.previousElementSibling; if(h){h.style.setProperty('margin','0 0 14px','important');h.style.removeProperty('display');}}
+      });
+      delete e.dataset.shotT; if(withHead)delete hd.dataset.shotKeep;
+      c=shotTrim(c,bg);
+      const nameEl=e.querySelector('.fcacc-h,.chname2,.l,h2,h3')||(withHead?hd.querySelector('b'):null);
+      const nm=nameEl?((nameEl.childNodes[0]&&nameEl.childNodes[0].textContent)||nameEl.textContent):'';
+      zip.file(`2-แยกทีละกราฟ/${pad2(j+1)}-${shotSafe(nm)}.png`,await shotBlob(c));
+      c.width=c.height=0;
+    }
     say('กำลังรวมไฟล์…');
     const blob=await zip.generateAsync({type:'blob'});
     const a=document.createElement('a'); a.download=name+'.zip'; a.href=URL.createObjectURL(blob);
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   }catch(e){ alert('บันทึกรูปไม่สำเร็จ: '+e.message); }
+  marked.forEach(([e,k])=>{delete e.dataset[k];});
   saved.forEach(([e,z])=>e.style.zoom=z);
   root.style.width=rw[0]; root.style.maxWidth=rw[1];
   charts.forEach(c=>{try{delete c.options.devicePixelRatio;c.resize();}catch(e){}});
   if(btn){btn.disabled=false;btn.textContent=label;}
 }
+
 el('kSave').addEventListener('click',()=>{
   const tag=[fYear(), fMonth()&&MONTH_EN[MONTH_ORDER.indexOf(fMonth())],
              WKSEL.length&&('W'+WKSEL.join('_')), DAYSEL].filter(Boolean).join('-')||'all';
