@@ -14,7 +14,7 @@
 :root{--teal:#0D9488;--teal-d:#0F766E;--plum:#7C3AED;--plum-d:#6D28D9;
       --amber:#D97706;--rose:#DC2626;--good:#059669;--bad:#DC2626;
       --page:#100D26;--card:#FFFCF6;--soft:#F3EEE4;--line:#E7E0D2;--ink:#1E1B33;--mute:#6B6485;--ink-faint:#48415F;
-      --page-ink:#F3EFFB;--page-mute:#B7AEDE;--page-line:rgba(255,255,255,.14)}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);
+      --page-ink:#F3EFFB;--page-mute:#B7AEDE;--page-line:rgba(255,255,255,.14)}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;color:var(--ink);overflow-x:hidden;
   background:var(--page);
   background-image:radial-gradient(900px 500px at 6% -6%,rgba(13,148,136,.05),transparent 62%),
                    radial-gradient(700px 460px at 100% 4%,rgba(124,58,237,.05),transparent 58%);
@@ -400,15 +400,15 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 @media(max-width:1300px){#vKPI .fcacc-grid{grid-template-columns:1fr}}
 #vKPI .fcacc-panel{background:#fff;border:1px solid #E2E8F0;border-radius:16px;
   padding:20px 22px 4px;margin-bottom:22px}
-#vKPI .fcacc-h{font-size:24px;font-weight:700;color:#0F172A;margin-bottom:10px}
+#vKPI .fcacc-h{font-size:28px;font-weight:700;color:#0F172A;margin-bottom:10px}
 #vKPI .fcacc-h em{display:block;font-style:normal;font-weight:normal;
-  font-size:18px;color:#64748B;margin-top:2px}
+  font-size:22px;color:#64748B;margin-top:2px}
 #vKPI .fcacc-chartbox{position:relative;height:320px;margin-bottom:14px}
 #vKPI .fcacc-tblwrap{max-height:320px;overflow:auto;border-top:1px solid #E2E8F0}
-#vKPI .fcacc-tbl{width:100%;border-collapse:collapse;font-size:19px}
+#vKPI .fcacc-tbl{width:100%;border-collapse:collapse;font-size:26px}
 #vKPI .fcacc-tbl th{position:sticky;top:0;background:#F1F5F9;text-align:left;
-  color:#64748B;font-weight:600;padding:9px 10px;font-size:17px}
-#vKPI .fcacc-tbl td{padding:8px 10px;border-top:1px solid #EEF1F5;color:#0F172A}
+  color:#64748B;font-weight:600;padding:10px 12px;font-size:23px}
+#vKPI .fcacc-tbl td{padding:10px 12px;border-top:1px solid #EEF1F5;color:#0F172A}
 #vKPI .fcacc-tbl .num{text-align:right;font-variant-numeric:tabular-nums}
 #vKPI .fcacc-tbl .up{color:#B45309;font-weight:600}
 #vKPI .fcacc-tbl .down{color:#0F766E;font-weight:600}
@@ -2860,7 +2860,8 @@ function fcAccChart(id,key,bt,unit){
   const wk=[];
   for(let i=0;i<rows.length;i+=7){
     const chunk=rows.slice(i,i+7);
-    wk.push({label:showD(chunk[0].date)+' – '+showD(chunk[chunk.length-1].date),
+    wk.push({label:'W'+isoWeek(chunk[0].date),
+      range:showD(chunk[0].date)+' – '+showD(chunk[chunk.length-1].date),
       actual:chunk.reduce((s,r)=>s+r.actual,0),
       pred:chunk.reduce((s,r)=>s+r.pred,0)});
   }
@@ -2868,8 +2869,9 @@ function fcAccChart(id,key,bt,unit){
     interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(25)},usePointStyle:true}},
       tooltip:{backgroundColor:'#1E293B',padding:10,cornerRadius:6,
-        titleFont:{size:cf(25)},bodyFont:{size:cf(23)}}},
-    scales:{x:{ticks:{color:'#64748B',font:{size:cf(24)},maxRotation:0,autoSkip:true},
+        titleFont:{size:cf(25)},bodyFont:{size:cf(23)},
+        callbacks:{title:c=>wk[c[0].dataIndex].range}}},
+    scales:{x:{ticks:{color:'#64748B',font:{size:cf(26)},maxRotation:0,autoSkip:true},
                 grid:{display:false}},
       y:{ticks:{color:'#64748B',font:{size:cf(24)},callback:v=>fmt(v)},
           grid:{color:'rgba(15,23,42,.08)'},beginAtZero:true}}};
@@ -3116,7 +3118,7 @@ function drawRetEmbed(){
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
   doc=doc.replace('</head>',
-    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important;zoom:1.9}\n     .donuts svg{max-width:540px;margin:0 auto}</style></head>');
+    '<style>.wrap{max-width:none!important;padding-left:4%!important;padding-right:4%!important;zoom:2.1}\n     .donuts svg{max-width:488px;margin:0 auto}</style></head>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800);
     try{
