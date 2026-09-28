@@ -4994,9 +4994,10 @@ function secRepl(){
                   ['planPd','Plan PD'],['fac16','FAC16'],['owh','OWH'],['quarantine','Quarantine']]
         .filter(([k,,keep])=>keep||byQty.some(r=>hasNum(r[k])));
       return `<div class="tscroll"><table class="dt"><thead><tr>
-       <th>Product</th>${cols.map(([,h])=>`<th class="num">${h}</th>`).join('')}
+       <th>Product</th><th class="num">คะแนนขายดี</th>${cols.map(([,h])=>`<th class="num">${h}</th>`).join('')}
        <th class="num">จำนวนที่ต้องเติม</th><th>Remark</th></tr></thead><tbody>`
       +byQty.map(r=>`<tr><td><b>${esc(r.product)}</b></td>
+        <td class="num">${r.score?fmt(r.score):'—'}</td>
         ${cols.map(([k])=>`<td class="num">${esc(r[k]||'—')}</td>`).join('')}
         <td class="num"><span class="qty">${fmt(r.qty)}</span></td>
         <td>${esc(r.remark||'—')}</td></tr>`).join('')+'</tbody></table></div>';})():''}
