@@ -4882,12 +4882,13 @@ async function loadRepl(){
       +((raw&&raw[0])?raw[0].slice(0,6).join(' / '):'ว่าง'));
     const c={no:t.col('No'),p:t.col('Product'),s:t.col('คะแนนขายดี'),n:t.col('รายการเติมสินค้า'),
              w:t.col('WH300'),q:t.col('QUOTA'),pd:t.col('PlanPD'),f:t.col('FAC16'),
-             o:t.col('OWH'),qa:t.col('Quarantine'),y:t.col('จำนวนที่ต้องเติม'),r:t.col('Remark')};
+             o:t.col('OWH'),qa:t.col('Quarantine'),y:t.col('จำนวนที่ต้องเติม'),r:t.col('Remark'),
+             ss:t.col('SafetyStock','Safetystock','SAFETYSTOCK','Safety','SAFETY','safety')};
     const g=(row,i)=>i>=0?String(row[i]||'').trim():'';
     REPL=t.rows.map(r=>({
       no:g(r,c.no), product:g(r,c.p), score:parseQty(g(r,c.s)),
       need:g(r,c.n), wh300:g(r,c.w), quota:g(r,c.q), planPd:g(r,c.pd),
-      fac16:g(r,c.f), owh:g(r,c.o), quarantine:g(r,c.qa),
+      fac16:g(r,c.f), owh:g(r,c.o), quarantine:g(r,c.qa), safety:g(r,c.ss),
       qty:parseQty(g(r,c.y)), remark:g(r,c.r)
     })).filter(r=>r.product&&!isExcludedProduct(r.product));
     if(c.p<0)throw new Error('หาคอลัมน์ Product ไม่เจอ · หัวตาราง: '+t.H.slice(0,8).join(' / '));
@@ -4932,28 +4933,32 @@ function secRepl(){
     <h2 class="sec">รายการที่ต้องเติม Stock <em>เรียงตามคะแนนขายดี · ไม่รวมที่ติดปัญหา</em><span></span></h2>
     ${bySale.length?`<div class="tscroll"><table class="dt"><thead><tr>
        <th>Product</th><th class="num">คะแนนขายดี</th><th>ต้องเติมสินค้า</th>
-       <th class="num">Quota</th><th class="num">จำนวนที่ต้องเติม</th><th>Remark</th></tr></thead><tbody>`
+       <th class="num">Quota</th><th class="num">Safety Stock</th><th class="num">จำนวนที่ต้องเติม</th><th>Remark</th></tr></thead><tbody>`
       +bySale.map(r=>`<tr><td><b>${esc(r.product)}</b></td>
         <td class="num">${r.score?fmt(r.score):'—'}</td>
         <td>${esc(r.need||'—')}</td>
         <td class="num">${esc(r.quota||'—')}</td>
+        <td class="num">${esc(r.safety||'—')}</td>
         <td class="num"><span class="qty">${fmt(r.qty)}</span></td>
         <td>${esc(r.remark||'—')}</td></tr>`).join('')
       +'</tbody></table></div>':'<div class="empty2">ไม่มีสินค้าที่ต้องเติม</div>'}
 
     <h2 class="sec">สาเหตุที่ยังไม่ได้เติม <em>Products blocked, by reason</em><span></span></h2>
     <div class="cpanel"><div class="cbox"><canvas id="c_remark"></canvas></div></div>
-    ${byQty.length?`<div class="tscroll"><table class="dt"><thead><tr>
-       <th>Product</th><th class="num">QUOTA</th><th class="num">Plan PD</th>
-       <th class="num">FAC16</th><th class="num">Quarantine</th>
+    ${byQty.length?(()=>{
+      /* WH300 แสดงเสมอ · คอลัมน์อื่นแสดงเฉพาะรอบที่มีตัวเลขอย่างน้อย 1 แถว
+         (ว่าง / 0 / - ถือว่าไม่มีเลข) */
+      const hasNum=v=>!!v&&!/^[\s\-—–0.,]*$/.test(v);
+      const cols=[['wh300','WH300',true],['quota','QUOTA'],['planPd','Plan PD'],
+                  ['fac16','FAC16'],['owh','OWH'],['quarantine','Quarantine']]
+        .filter(([k,,keep])=>keep||byQty.some(r=>hasNum(r[k])));
+      return `<div class="tscroll"><table class="dt"><thead><tr>
+       <th>Product</th>${cols.map(([,h])=>`<th class="num">${h}</th>`).join('')}
        <th class="num">จำนวนที่ต้องเติม</th><th>Remark</th></tr></thead><tbody>`
       +byQty.map(r=>`<tr><td><b>${esc(r.product)}</b></td>
-        <td class="num">${esc(r.quota||'—')}</td>
-        <td class="num">${esc(r.planPd||'—')}</td>
-        <td class="num">${esc(r.fac16||'—')}</td>
-        <td class="num">${esc(r.quarantine||'—')}</td>
+        ${cols.map(([k])=>`<td class="num">${esc(r[k]||'—')}</td>`).join('')}
         <td class="num"><span class="qty">${fmt(r.qty)}</span></td>
-        <td>${esc(r.remark||'—')}</td></tr>`).join('')+'</tbody></table></div>':''}
+        <td>${esc(r.remark||'—')}</td></tr>`).join('')+'</tbody></table></div>';})():''}
 
     <h2 class="sec">รวมทั้งหมด <em>เรียง “ต้องเติม” ก่อน แล้วตามคะแนนขายดี</em><span></span></h2>
     <div class="tscroll" style="overflow-x:auto"><table class="dt" style="min-width:1000px"><thead><tr>
