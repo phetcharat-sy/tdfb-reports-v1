@@ -4933,12 +4933,12 @@ function secRepl(){
     <h2 class="sec">รายการที่ต้องเติม Stock <em>เรียงตามคะแนนขายดี · ไม่รวมที่ติดปัญหา</em><span></span></h2>
     ${bySale.length?`<div class="tscroll"><table class="dt"><thead><tr>
        <th>Product</th><th class="num">คะแนนขายดี</th><th>ต้องเติมสินค้า</th>
-       <th class="num">Quota</th><th class="num">Safety Stock</th><th class="num">จำนวนที่ต้องเติม</th><th>Remark</th></tr></thead><tbody>`
+       <th class="num">Safety Stock</th><th class="num">Quota</th><th class="num">จำนวนที่ต้องเติม</th><th>Remark</th></tr></thead><tbody>`
       +bySale.map(r=>`<tr><td><b>${esc(r.product)}</b></td>
         <td class="num">${r.score?fmt(r.score):'—'}</td>
         <td>${esc(r.need||'—')}</td>
-        <td class="num">${esc(r.quota||'—')}</td>
         <td class="num">${esc(r.safety||'—')}</td>
+        <td class="num">${esc(r.quota||'—')}</td>
         <td class="num"><span class="qty">${fmt(r.qty)}</span></td>
         <td>${esc(r.remark||'—')}</td></tr>`).join('')
       +'</tbody></table></div>':'<div class="empty2">ไม่มีสินค้าที่ต้องเติม</div>'}
@@ -4946,10 +4946,10 @@ function secRepl(){
     <h2 class="sec">สาเหตุที่ยังไม่ได้เติม <em>Products blocked, by reason</em><span></span></h2>
     <div class="cpanel"><div class="cbox"><canvas id="c_remark"></canvas></div></div>
     ${byQty.length?(()=>{
-      /* WH300 แสดงเสมอ · คอลัมน์อื่นแสดงเฉพาะรอบที่มีตัวเลขอย่างน้อย 1 แถว
+      /* Safety Stock + WH300 แสดงเสมอ · คอลัมน์อื่นแสดงเฉพาะรอบที่มีตัวเลขอย่างน้อย 1 แถว
          (ว่าง / 0 / - ถือว่าไม่มีเลข) */
       const hasNum=v=>!!v&&!/^[\s\-—–0.,]*$/.test(v);
-      const cols=[['wh300','WH300',true],['quota','QUOTA'],['planPd','Plan PD'],
+      const cols=[['safety','Safety Stock',true],['wh300','WH300',true],['quota','QUOTA'],['planPd','Plan PD'],
                   ['fac16','FAC16'],['owh','OWH'],['quarantine','Quarantine']]
         .filter(([k,,keep])=>keep||byQty.some(r=>hasNum(r[k])));
       return `<div class="tscroll"><table class="dt"><thead><tr>
