@@ -2573,13 +2573,13 @@ function fcWeekly(weekList,byWeek,range,dd){
   const lastRange=range[weekList[n-1]];
   const lastDate=lastRange?lastRange.max:new Date();
   const daily=avg4/7;
-  const fc=[],fcLbl=[],fcRange=[],ddCount=[];
+  const fc=[],fcLbl=[],fcRange=[],ddCount=[],fcS=[],fcE=[];
   for(let i=1;i<=4;i++){
     let v=Math.max(0,avg4+slope*i);
     const s=new Date(lastDate); s.setDate(lastDate.getDate()+7*(i-1)+1);
     const e=new Date(lastDate); e.setDate(lastDate.getDate()+7*i);
     const c=countDD(s,e);
-    ddCount.push(c);
+    ddCount.push(c); fcS.push(s); fcE.push(e);
     if(c>0&&boost>1)v+=daily*(boost-1)*c;
     fc.push(Math.max(0,Math.round(v)));
     fcLbl.push('W'+(lastW+i)+'*');
@@ -2588,7 +2588,7 @@ function fcWeekly(weekList,byWeek,range,dd){
   const histRange=weekList.map(w=>{const r=range[w];return r?shortTH(r.min)+' – '+shortTH(r.max):'';});
   return {labels:[...weekList.map(w=>'W'+w),...fcLbl],hist,fc,
           ranges:[...histRange,...fcRange],avg4,slope,boost,
-          ddSamples:(dd&&dd.samples)||0,ddCount,weeksUsed:n};
+          ddSamples:(dd&&dd.samples)||0,ddCount,weeksUsed:n,fcS,fcE};
 }
 
 /* ================= พยากรณ์รายวัน v3 — ยอดฐาน × ตัวคูณวันในสัปดาห์ × ตัวคูณวันพิเศษ =================
@@ -2828,9 +2828,26 @@ let FC_CTX=null;
 function secForecast(){
   if(!RAW.length)return '<div class="empty2">ยังไม่มีข้อมูลยอดขาย</div>';
 
-  /* ใช้ทั้งปี ไม่อิงตัวกรอง MONTH/WEEK/DAY เพราะการพยากรณ์ต้องเห็นประวัติต่อเนื่อง */
-  const rows=RAW.filter(r=>r.date&&(!fYear()||r.date.slice(0,4)===fYear()));
-  if(rows.length<20)return '<div class="empty2">ข้อมูลน้อยเกินไปสำหรับการพยากรณ์</div>';
+  /* ตัวกรอง MONTH/WEEK/DAY = "ดูย้อนหลัง ณ วันที่"
+     ไม่ได้ตัดข้อมูลเหลือแค่ช่วงที่เลือก (พยากรณ์ต้องเห็นประวัติต่อเนื่อง)
+     แต่ใช้ข้อมูลตั้งแต่ต้นปีจนถึง "วันสุดท้ายของช่วงที่เลือก" แล้วพยากรณ์ต่อจากวันนั้น
+     ถ้าช่วงหลังวันตัดมียอดจริงแล้ว จะวาดเส้นยอดจริงเทียบกับพยากรณ์ให้ด้วย */
+  const yrRows=RAW.filter(r=>r.date&&(!fYear()||r.date.slice(0,4)===fYear()));
+  const lastData=yrRows.reduce((m,r)=>r.date>m?r.date:m,'');
+  let asOf='';
+  if(DAYSEL)asOf=DAYSEL;
+  else if(WKSEL.length||fMonth()){
+    const mi=fMonth()?MONTH_ORDER.indexOf(fMonth()):-1;
+    yrRows.forEach(r=>{
+      if(WKSEL.length&&!weekOK(r.week))return;
+      if(mi>=0&&+r.date.slice(5,7)-1!==mi)return;
+      if(r.date>asOf)asOf=r.date;
+    });
+    if(!asOf)return '<div class="empty2">ไม่มียอดขายในช่วงที่เลือก</div>';
+  }
+  if(asOf&&asOf>=lastData)asOf='';          /* เลือกช่วงล่าสุด = ดูปัจจุบันตามปกติ */
+  const rows=asOf?yrRows.filter(r=>r.date<=asOf):yrRows;
+  if(rows.length<20)return '<div class="empty2">ข้อมูลก่อนวันที่เลือกน้อยเกินไปสำหรับการพยากรณ์</div>';
 
   const ordByDate={}, qtyByDate={}, ordByWeek={}, qtyByWeek={},
         datesByWeek={}, demandPW={};
@@ -2896,6 +2913,30 @@ function secForecast(){
     });
   }
 
+  /* ยอดจริงหลังวันตัด — ใช้เทียบกับพยากรณ์ตอนดูย้อนหลัง (ไม่นับวันนี้ที่ยอดยังไม่ครบ) */
+  let asOfNote='';
+  if(asOf){
+    const todayK=dkey(new Date());
+    const aOrd={}, aQty={};
+    RAW.forEach(r=>{ if(!r.date||r.date<=asOf||r.date>=todayK)return;
+      (aOrd[r.date]=aOrd[r.date]||new Set()).add(r.key);
+      aQty[r.date]=(aQty[r.date]||0)+r.qty; });
+    const lastA=Object.keys(aOrd).sort().pop()||'';
+    const dayAct=(obj,cnt)=>d=>{const k=dkey(d); if(k>lastA)return null;
+      const v=obj[k]; return v==null?0:(cnt?v.size:v);};
+    const wkAct=(obj,cnt)=>(sD,eD)=>{if(dkey(eD)>lastA)return null;   /* สัปดาห์ยังไม่ครบ ไม่โชว์ */
+      let t=0; for(const d=new Date(sD);d<=eD;d.setDate(d.getDate()+1)){
+        const v=obj[dkey(d)]; if(v!=null)t+=cnt?v.size:v;} return t;};
+    const fO=dayAct(aOrd,true), fQ=dayAct(aQty,false), gO=wkAct(aOrd,true), gQ=wkAct(aQty,false);
+    if(dOrd)dOrd.act=dOrd.fcDates.map(fO);
+    if(dQty)dQty.act=dQty.fcDates.map(fQ);
+    wOrd.act=wOrd.fcS.map((d,i)=>gO(d,wOrd.fcE[i]));
+    wQty.act=wQty.fcS.map((d,i)=>gQ(d,wQty.fcE[i]));
+    asOfNote=`<div class="chint"><b>กำลังดูย้อนหลัง</b> — พยากรณ์จากข้อมูลถึงวันที่ <b>${showD(asOf)}</b>
+      แล้วประมาณการต่อจากวันนั้น · เส้น <b style="color:#0D9488">ยอดจริง (หลังวันที่เลือก)</b> ไว้เทียบว่าพยากรณ์แม่นแค่ไหน
+      · กด <b>Clear filters</b> เพื่อกลับมาดูปัจจุบัน<br>
+      <span style="color:var(--mute)">Stock Depletion ใช้สต็อก WH300 ปัจจุบัน (ชีตไม่มีสต็อกย้อนหลัง) แต่ใช้ความต้องการเฉลี่ยถึงวันที่เลือก</span></div>`;
+  }
   const items1=depItems(dep,1), items4=depItems(dep,4);
   const btOrd=fcMemo('bO',backtestDaily,ordCntDate,30), btQty=fcMemo('bQ',backtestDaily,qtyByDate,30);
   FC_CTX={wOrd,wQty,dOrd,dQty,items1,items4,btOrd,btQty};
@@ -2907,7 +2948,7 @@ function secForecast(){
     ? `เรียนรู้ Double Day จาก ${wOrd.ddSamples} ครั้งในอดีต — ยอดพุ่งราว ${wOrd.boost.toFixed(2)} เท่า`
     : `ยังมีตัวอย่าง Double Day ในอดีตไม่ถึง ${DD_MIN_SAMPLES} ครั้ง จึงไม่บวกเพิ่ม`;
 
-  return `<div class="sgrid">
+  return asOfNote+`<div class="sgrid">
       ${card('วิกฤต < 2 สัปดาห์',crit,'rose')}
       ${card('เฝ้าระวัง 2–4 สัปดาห์',warn,'amber')}
       ${card('ปกติ ≥ 4 สัปดาห์',okc,'teal')}
@@ -3225,7 +3266,9 @@ function fcLineChart(id,key,s0,unit,maxHist){
   const histData=[...s.hist,...s.fc.map(()=>null)];
   /* ต่อเส้นให้เนียน — จุดสุดท้ายของเส้นจริงเป็นจุดเริ่มของเส้นพยากรณ์ */
   const fcData=[...s.hist.map((v,i)=>i===nH-1?v:null),...s.fc];
-  const ny=fcNiceY([...s.hist,...s.fc]);
+  const hasAct=!!(s.act&&s.act.some(v=>v!=null));
+  const actData=hasAct?[...s.hist.map((v,i)=>i===nH-1?v:null),...s.act]:null;
+  const ny=fcNiceY([...s.hist,...s.fc,...(hasAct?s.act.filter(v=>v!=null):[])]);
   const o={responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(25)},usePointStyle:true}},
@@ -3253,7 +3296,11 @@ function fcLineChart(id,key,s0,unit,maxHist){
        pointHoverRadius:8,pointBorderColor:'#fff',pointBorderWidth:2.5,
        pointBackgroundColor:s.labels.map((_,i)=>{const e=i>=nH?fcEvAt(s,i-nH):'';return e?FC_EV_COL[e]:'#B45309';}),
        pointStyle:s.labels.map((_,i)=>i>=nH&&fcEvAt(s,i-nH)?'rectRot':'circle'),
-       spanGaps:false}]},
+       spanGaps:false},
+      ...(hasAct?[{label:'ยอดจริง (หลังวันที่เลือก)',data:actData,borderColor:'#0D9488',
+       backgroundColor:'#0D9488',borderWidth:3,tension:.32,fill:false,
+       pointRadius:s.labels.map((_,i)=>i<nH?0:5),pointBackgroundColor:'#fff',
+       pointBorderColor:'#0D9488',pointBorderWidth:2.5,spanGaps:false}]:[])]},
     options:o});
   /* บังคับคำนวณตำแหน่งกราฟใหม่ — กราฟอยู่ในกล่องเลื่อนแนวนอน (cscroll) เมาส์ชี้แล้ว tooltip
      บางทีขึ้นคลาดเคลื่อนจากจุดจริง เพราะวัดขนาด/ตำแหน่งกล่องก่อน layout เสร็จสมบูรณ์ */
@@ -4882,12 +4929,13 @@ async function loadRepl(){
       +((raw&&raw[0])?raw[0].slice(0,6).join(' / '):'ว่าง'));
     const c={no:t.col('No'),p:t.col('Product'),s:t.col('คะแนนขายดี'),n:t.col('รายการเติมสินค้า'),
              w:t.col('WH300'),q:t.col('QUOTA'),pd:t.col('PlanPD'),f:t.col('FAC16'),
-             o:t.col('OWH'),qa:t.col('Quarantine'),y:t.col('จำนวนที่ต้องเติม'),r:t.col('Remark')};
+             o:t.col('OWH'),qa:t.col('Quarantine'),y:t.col('จำนวนที่ต้องเติม'),r:t.col('Remark'),
+             ss:t.col('SafetyStock','Safetystock','SAFETYSTOCK','Safety','SAFETY','safety')};
     const g=(row,i)=>i>=0?String(row[i]||'').trim():'';
     REPL=t.rows.map(r=>({
       no:g(r,c.no), product:g(r,c.p), score:parseQty(g(r,c.s)),
       need:g(r,c.n), wh300:g(r,c.w), quota:g(r,c.q), planPd:g(r,c.pd),
-      fac16:g(r,c.f), owh:g(r,c.o), quarantine:g(r,c.qa),
+      fac16:g(r,c.f), owh:g(r,c.o), quarantine:g(r,c.qa), safety:g(r,c.ss),
       qty:parseQty(g(r,c.y)), remark:g(r,c.r)
     })).filter(r=>r.product&&!isExcludedProduct(r.product));
     if(c.p<0)throw new Error('หาคอลัมน์ Product ไม่เจอ · หัวตาราง: '+t.H.slice(0,8).join(' / '));
@@ -4938,17 +4986,20 @@ function secRepl(){
 
     <h2 class="sec">สาเหตุที่ยังไม่ได้เติม <em>Products blocked, by reason</em><span></span></h2>
     <div class="cpanel"><div class="cbox"><canvas id="c_remark"></canvas></div></div>
-    ${byQty.length?`<div class="tscroll"><table class="dt"><thead><tr>
-       <th>Product</th><th class="num">QUOTA</th><th class="num">Plan PD</th>
-       <th class="num">FAC16</th><th class="num">Quarantine</th>
+    ${byQty.length?(()=>{
+      /* Safety Stock + WH300 แสดงเสมอ · คอลัมน์อื่นแสดงเฉพาะรอบที่มีตัวเลขอย่างน้อย 1 แถว
+         (ว่าง / 0 / - ถือว่าไม่มีเลข) */
+      const hasNum=v=>!!v&&!/^[\s\-—–0.,]*$/.test(v);
+      const cols=[['safety','Safety Stock',true],['wh300','WH300',true],['quota','QUOTA'],
+                  ['planPd','Plan PD'],['fac16','FAC16'],['owh','OWH'],['quarantine','Quarantine']]
+        .filter(([k,,keep])=>keep||byQty.some(r=>hasNum(r[k])));
+      return `<div class="tscroll"><table class="dt"><thead><tr>
+       <th>Product</th>${cols.map(([,h])=>`<th class="num">${h}</th>`).join('')}
        <th class="num">จำนวนที่ต้องเติม</th><th>Remark</th></tr></thead><tbody>`
       +byQty.map(r=>`<tr><td><b>${esc(r.product)}</b></td>
-        <td class="num">${esc(r.quota||'—')}</td>
-        <td class="num">${esc(r.planPd||'—')}</td>
-        <td class="num">${esc(r.fac16||'—')}</td>
-        <td class="num">${esc(r.quarantine||'—')}</td>
+        ${cols.map(([k])=>`<td class="num">${esc(r[k]||'—')}</td>`).join('')}
         <td class="num"><span class="qty">${fmt(r.qty)}</span></td>
-        <td>${esc(r.remark||'—')}</td></tr>`).join('')+'</tbody></table></div>':''}
+        <td>${esc(r.remark||'—')}</td></tr>`).join('')+'</tbody></table></div>';})():''}
 
     <h2 class="sec">รวมทั้งหมด <em>เรียง “ต้องเติม” ก่อน แล้วตามคะแนนขายดี</em><span></span></h2>
     <div class="tscroll" style="overflow-x:auto"><table class="dt" style="min-width:1000px"><thead><tr>
