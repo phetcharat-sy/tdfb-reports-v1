@@ -782,6 +782,7 @@ body.present #vKPI .tscroll{max-height:none}
       <div class="grp">Delivery</div>
       <button data-view="kpi" data-sec="pack">Packing</button>
       <button data-view="kpi" data-sec="ret">Return</button>
+      <button data-view="kpi" data-sec="can">Cancel</button>
 
       <div class="grp">Admin</div>
       <button data-view="kpi" data-sec="ontime">KPI On-Time Performance</button>
@@ -1878,7 +1879,7 @@ function clkHandle(ch,key,i){
 const clickF={id:'clickF',
   afterEvent(ch,args){
     const e=args.event; if(!e||(e.type!=='click'&&e.type!=='mousemove'))return;
-    if(SEC==='ret'||SEC==='fc'||SEC==='sop'||!document.getElementById('vKPI')||ch.options.onClick)return;
+    if(SEC==='ret'||SEC==='can'||SEC==='fc'||SEC==='sop'||!document.getElementById('vKPI')||ch.options.onClick)return;
     if(ch.canvas&&!ch.canvas.closest('#vKPI'))return;
     /* v-clk2: แท่ง/เส้น = คลิกตรงคอลัมน์ไหนก็ได้ (แท่งเตี้ยๆ อย่าง 0.05% ก็กดได้) · วงกลม = ต้องโดนชิ้น */
     const round=/pie|doughnut/.test(ch.config.type);
@@ -3563,8 +3564,13 @@ function drawSOP(){
 function secRetEmbed(){
   return '<div class="sopwrap"><iframe id="retFrame" class="sopframe" title="Return Dashboard"></iframe></div>';
 }
-function drawRetEmbed(){
-  const f=document.getElementById('retFrame'), t=document.getElementById('retDoc');
+/* Delivery · Cancel — ฝังหน้า Cancel Dashboard (ไฟล์แยก ดึง CSV เอง) แบบเดียวกับ Return
+   ใช้ drawRetEmbed ตัวเดียวกัน (ส่ง id ของ iframe/template) ให้ขนาดตัวอักษรเท่ากันทั้งสองหน้า */
+function secCanEmbed(){
+  return '<div class="sopwrap"><iframe id="canFrame" class="sopframe" title="Cancel Dashboard"></iframe></div>';
+}
+function drawRetEmbed(fid='retFrame',tid='retDoc'){
+  const f=document.getElementById(fid), t=document.getElementById(tid);
   if(!f||!t)return;
   /* ปรับความสูง iframe ให้พอดีกับเนื้อหาจริงเสมอ (ไม่ตัดครึ่งตอนกดโหมดพรีเซนต์
      ที่ CSS บังคับ .sopframe เป็น 100vh ไว้) — วัดใหม่ทุกครั้งที่เนื้อหาข้างในเปลี่ยน (เช่น
@@ -5111,13 +5117,14 @@ function renderKPI(){
                pack:['Packing','Delivery · ผลงานพนักงานแพ็ค สถานี และเวลาหนาแน่น'],
                sop:['เงื่อนไขการส่งสินค้าแต่ละ Platform','วิธีการปฏิบัติงาน · รอบตัดคำสั่งซื้อ Shopee · Lazada · TikTok'],
                ship:['การจัดส่ง (Shipping)','Admin · ปริมาณจัดส่ง ค้างส่ง ช่องทาง และขนส่ง'],
-               ret:['Return','Delivery · งานตีคืน ยกเลิก และเคสค้าง']};
+               ret:['Return','Delivery · งานตีคืน ยกเลิก และเคสค้าง'],
+               can:['Cancel','Delivery · ออเดอร์ยกเลิก']};
   const tt=TITLE[SEC]||TITLE.overview;
   el('kTitle').textContent=tt[0];
   el('kSub').textContent=tt[1];
-  document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='ret');
+  document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='ret'||SEC==='can');
   if(!isOv){
-    el('detail').innerHTML = ((SEC==='ret'||SEC==='sop'||SEC==='fc')?'':catBar())
+    el('detail').innerHTML = ((SEC==='ret'||SEC==='can'||SEC==='sop'||SEC==='fc')?'':catBar())
                            + (SEC==='ontime'?secOnTime() : SEC==='oos'?secOOS()
                            : SEC==='diff'?secDiff() : SEC==='dock'?secDock()
                            : SEC==='fc'?secForecast()
@@ -5126,7 +5133,8 @@ function renderKPI(){
                            : SEC==='pack'?secPack()
                            : SEC==='ship'?secShip()
                            : SEC==='sop'?secSOP()
-                           : SEC==='ret'?secRetEmbed() : secRepl());
+                           : SEC==='ret'?secRetEmbed()
+                           : SEC==='can'?secCanEmbed() : secRepl());
     fitScrolls();
     /* กราฟต้องวาดหลัง canvas เข้า DOM แล้ว */
     requestAnimationFrame(()=>{
@@ -5137,7 +5145,8 @@ function renderKPI(){
            else if(SEC==='pack')drawPack();
            else if(SEC==='ship')drawShip();
            else if(SEC==='sop')drawSOP();
-           else if(SEC==='ret')drawRetEmbed(); else drawRepl(); }
+           else if(SEC==='ret')drawRetEmbed();
+           else if(SEC==='can')drawRetEmbed('canFrame','canDoc'); else drawRepl(); }
       catch(e){ console.warn('chart',e); }
     });
   }
@@ -7188,6 +7197,417 @@ el(&#x27;save&#x27;).onclick=async function(){
     b.style.visibility=&#x27;visible&#x27;;
     alert(&#x27;บันทึกภาพไม่ได้ (&#x27;+e.message+&#x27;)\nถ้าไม่ได้ต่ออินเทอร์เน็ต ให้ใช้การจับภาพหน้าจอแทน&#x27;);
   }
+  b.disabled=false; b.textContent=old;
+};
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;</template>
+<template id="canDoc">&lt;!DOCTYPE html&gt;
+&lt;html lang="th"&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;
+&lt;meta name="viewport" content="width=device-width,initial-scale=1"&gt;
+&lt;title&gt;Cancel Dashboard — TDFB&lt;/title&gt;
+&lt;style&gt;
+:root{--paper:#F7F6F1;--ink:#1C2119;--matcha:#4F7A3F;--matcha-d:#3A5C2E;--clay:#B5603A;
+ --tint:#E7EDE0;--line:#D9D8CF;--muted:#6B7266;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+ font-family:"Segoe UI","Noto Sans Thai",system-ui,sans-serif;font-size:15px;line-height:1.55}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 70px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+h1{font-size:21px;font-weight:650;margin:0 0 2px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+.btn{font:inherit;font-size:13.5px;font-weight:550;border:1px solid var(--line);background:#fff;
+ color:var(--matcha-d);border-radius:9px;padding:9px 16px;cursor:pointer}
+.btn:hover{background:var(--tint);border-color:var(--matcha)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:16px}
+h2{font-size:15px;font-weight:600;margin:0 0 3px}
+h3{font-size:13.5px;font-weight:600;margin:0 0 8px;text-align:center}
+.note{color:var(--muted);font-size:12.5px;line-height:1.6;margin:3px 0 0}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.f label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+.f input,.f select{font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);
+ border-radius:8px;background:var(--paper);color:var(--ink)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.chip{font:inherit;font-size:12.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);
+ background:var(--paper);color:var(--muted);cursor:pointer}
+.chip.on{background:var(--matcha);border-color:var(--matcha);color:#fff;font-weight:550}
+.hint{font-size:12.5px;color:var(--muted);margin-top:9px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.kpi b{display:block;font-size:26px;font-weight:660;letter-spacing:-.02em;line-height:1.1}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+.legend{display:flex;flex-wrap:wrap;gap:13px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.bar{display:flex;height:26px;border-radius:7px;overflow:hidden;margin:10px 0 8px}
+.bar div{display:flex;align-items:center;justify-content:center;font-size:11.5px;color:#fff;font-weight:550}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:550;font-size:12.5px}
+td.hi{font-weight:650}
+.donuts{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.donuts svg{width:100%;height:auto;display:block;overflow:visible}
+@media(max-width:760px){.donuts{grid-template-columns:1fr}}
+.scroll{overflow-x:auto}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:5px;background:#F6E3DA;color:var(--clay);margin-left:6px}
+.empty{text-align:center;color:var(--muted);font-size:13.5px;padding:26px 0}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;div class="wrap"&gt;
+&lt;div class="head"&gt;
+  &lt;div&gt;&lt;h1&gt;ออเดอร์ยกเลิก&lt;/h1&gt;&lt;p class="sub"&gt;&lt;span id="meta"&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;
+  &lt;button id="save" class="btn"&gt;บันทึกภาพ&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div class="panel"&gt;
+  &lt;div class="filters"&gt;
+    &lt;div class="f"&gt;&lt;label for="from"&gt;ตั้งแต่วันที่&lt;/label&gt;&lt;input type="date" id="from"&gt;&lt;/div&gt;
+    &lt;div class="f"&gt;&lt;label for="to"&gt;ถึงวันที่&lt;/label&gt;&lt;input type="date" id="to"&gt;&lt;/div&gt;
+    &lt;div class="f"&gt;&lt;label for="mon"&gt;เดือน&lt;/label&gt;&lt;select id="mon"&gt;&lt;/select&gt;&lt;/div&gt;
+    &lt;div class="f"&gt;&lt;label for="wk"&gt;สัปดาห์&lt;/label&gt;&lt;select id="wk"&gt;&lt;/select&gt;&lt;/div&gt;
+    &lt;div class="f"&gt;&lt;label for="plat"&gt;ช่องทาง&lt;/label&gt;&lt;select id="plat"&gt;&lt;/select&gt;&lt;/div&gt;
+    &lt;div class="f"&gt;&lt;label for="cat"&gt;หมวด&lt;/label&gt;&lt;select id="cat"&gt;&lt;/select&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="chips" id="chips"&gt;&lt;/div&gt;
+  &lt;div class="hint" id="hint"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="kpis" id="kpis"&gt;&lt;/div&gt;
+
+&lt;div class="panel"&gt;
+  &lt;h2&gt;แยกตามหมวด&lt;/h2&gt;
+  &lt;svg id="d2" style="width:100%;max-width:420px;height:auto;display:block;margin:10px auto 4px"&gt;&lt;/svg&gt;
+  &lt;div class="scroll"&gt;
+  &lt;table id="cattbl"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;หมวด&lt;/th&gt;&lt;th&gt;ใบ&lt;/th&gt;&lt;th&gt;สัดส่วน&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="panel"&gt;
+  &lt;h2&gt;หมวดมาจากช่องทางไหน&lt;/h2&gt;
+  &lt;p class="note"&gt;อ่านตามแนวนอน — แต่ละหมวดกระจายไปแต่ละช่องทางกี่เปอร์เซ็นต์ · ช่องที่มากสุดของแต่ละแถวเป็นตัวหนา&lt;/p&gt;
+  &lt;div class="scroll"&gt;&lt;table id="matrix"&gt;&lt;/table&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="panel"&gt;
+  &lt;h2&gt;แยกตามช่องทาง&lt;/h2&gt;
+  &lt;p class="note"&gt;อ่านตามช่องทาง — แต่ละช่องทางยกเลิกที่ขั้นไหนบ้าง&lt;/p&gt;
+  &lt;div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 6px"&gt;
+    &lt;div class="legend" id="platleg"&gt;&lt;/div&gt;
+    &lt;div class="chips" style="margin:0"&gt;
+      &lt;button class="chip on" id="mCount"&gt;จำนวนใบ&lt;/button&gt;
+      &lt;button class="chip" id="mPct"&gt;สัดส่วน %&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;p class="note" id="platnote" style="margin-bottom:6px"&gt;&lt;/p&gt;
+  &lt;svg id="platchart" viewBox="0 0 900 260" style="width:100%;height:260px"&gt;&lt;/svg&gt;
+  &lt;div id="platwrap" style="margin-top:16px"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="panel"&gt;
+  &lt;h2&gt;แนวโน้มรายสัปดาห์&lt;/h2&gt;
+  &lt;p class="note" id="trendnote"&gt;&lt;/p&gt;
+  &lt;svg id="trend" viewBox="0 0 900 220" style="width:100%;height:220px"&gt;&lt;/svg&gt;
+  &lt;div class="legend" style="margin-top:8px" id="trendleg"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+const CATS=['ยกเลิกก่อนหยิบ','ยกเลิกก่อนแพ็ค','ยกเลิกหลังแพ็ค'];
+const COLORS={'ยกเลิกก่อนหยิบ':'#3F8E6E','ยกเลิกก่อนแพ็ค':'#D4A32C','ยกเลิกหลังแพ็ค':'#C2603C'};
+
+/* ============================================================
+   ใส่ลิงก์ CSV ของชีตที่เผยแพร่ตรงนี้ (ดูวิธีทำในคู่มือ)
+   ต้องลงท้ายด้วย output=csv และต้องเปิดหน้านี้ผ่าน https เท่านั้น
+   เปิดจากไฟล์ในเครื่องจะดึงข้อมูลสดไม่ได้ เบราว์เซอร์บล็อก
+   ============================================================ */
+const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vT91y2Hh3wgzuk5AvadFevKYMtzqWsGbgvXoDILmhIfEHDJQCh3c79v81SB-MjYmwjOg-PfkC6R7-sE/pub?gid=1213140401&amp;single=true&amp;output=csv';
+
+const SNAPSHOT=[{"d":"2026-09-01","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-01","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-01","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-02","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel → INT:cancel"},{"d":"2026-09-02","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel → INT:cancel"},{"d":"2026-09-04","w":"36","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-04","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-05","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-05","w":"36","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-05","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-06","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-07","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-07","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-08","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-08","w":"37","p":"Walk in","ch":"Line OA","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Lazada","ch":"Lazada","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-10","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-10","w":"37","p":"Walk in","ch":"Line OA","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-11","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-12","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-12","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-12","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-14","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-14","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-15","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-15","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-15","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-15","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-15","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-15","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-16","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-16","w":"38","p":"Walk in","ch":"Line OA","c":"ยกเลิกหลังแพ็ค","path":"RT"},{"d":"2026-09-17","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-17","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-17","w":"38","p":"Lazada","ch":"Lazada","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-18","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-18","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-18","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-19","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-19","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-19","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-20","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-20","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-21","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-21","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-21","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-21","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนหยิบ","path":"PICK:cancel"},{"d":"2026-09-22","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-22","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel → INT:cancel"},{"d":"2026-09-22","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-22","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-23","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-24","w":"39","p":"Lazada","ch":"Lazada","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-24","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-24","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกก่อนแพ็ค","path":"PACK:cancel"},{"d":"2026-09-01","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-02","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-02","w":"36","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-02","w":"36","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-02","w":"36","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-02","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-03","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-03","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-03","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-04","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-04","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-05","w":"36","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-06","w":"36","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-07","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-07","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-07","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-07","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-07","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-07","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-08","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-08","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-08","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-08","w":"37","p":"Lazada","ch":"Lazada","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-09","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-09","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-09","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-10","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-11","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-11","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-11","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-11","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-11","w":"37","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-12","w":"37","p":"Lazada","ch":"Lazada","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-13","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-13","w":"37","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-14","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-14","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-14","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-15","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-15","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-15","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-15","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-15","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-15","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-15","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-15","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-16","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-16","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-16","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-16","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-17","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-17","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-17","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-18","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-18","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-18","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-18","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-18","w":"38","p":"Lazada","ch":"Lazada","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-19","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-19","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-19","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-19","w":"38","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-20","w":"38","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-21","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-21","w":"39","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-21","w":"39","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-21","w":"39","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-22","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-22","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-22","w":"39","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-22","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-23","w":"39","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-23","w":"39","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-23","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-24","w":"39","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-24","w":"39","p":"TikTok Shop","ch":"TikTok Shop","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-24","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-24","w":"39","p":"Lazada","ch":"Lazada","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"},{"d":"2026-09-24","w":"39","p":"Shopee","ch":"Shopee","c":"ยกเลิกหลังแพ็ค","path":"OUT:done → RT"}];
+let ALL=SNAPSHOT, LIVE=false;
+
+/* ---------- อ่าน CSV (รองรับช่องที่มีจุลภาคอยู่ข้างใน) ---------- */
+function parseCSV(text){
+  const rows=[]; let row=[],f='',q=false;
+  for(let i=0;i&lt;text.length;i++){
+    const ch=text[i];
+    if(q){ if(ch==='"'){ if(text[i+1]==='"'){f+='"';i++;} else q=false; } else f+=ch; }
+    else if(ch==='"') q=true;
+    else if(ch===','){ row.push(f); f=''; }
+    else if(ch==='\n'){ row.push(f); rows.push(row); row=[]; f=''; }
+    else if(ch!=='\r') f+=ch;
+  }
+  if(f.length||row.length){ row.push(f); rows.push(row); }
+  return rows.filter(r=&gt;r.some(c=&gt;c.trim()));
+}
+function fromSheet(text){
+  const rows=parseCSV(text);
+  if(!rows.length) throw new Error('ไฟล์ว่าง');
+  const h=rows[0].map(x=&gt;x.trim());
+  const ix=n=&gt;h.indexOf(n);
+  const iD=ix('วันที่'), iW=ix('Week'), iG=ix('กลุ่มช่องทาง'),
+        iC=ix('ช่องทางการขาย'), iK=ix('หมวด'), iP=ix('เส้นทางเต็ม');
+  if(iD&lt;0||iK&lt;0) throw new Error('ไม่พบคอลัมน์ วันที่ หรือ หมวด');
+  return rows.slice(1).map(r=&gt;{
+    // ชีตอาจเก็บวันที่พร้อมเวลา ตัดให้เหลือ YYYY-MM-DD
+    let d=(r[iD]||'').trim().slice(0,10);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) d='';
+    return {d, w:(r[iW]||'').replace(/Week\s*/i,'').trim(),
+            p:(r[iG]||'').trim(), ch:(r[iC]||'').trim(),
+            c:(r[iK]||'').trim(), path:(r[iP]||'').trim()};
+  }).filter(r=&gt;r.d&amp;&amp;CATS.includes(r.c));
+}
+const shipped=r=&gt;r.c==='ยกเลิกหลังแพ็ค';
+const pct=(n,t)=&gt;t?(n/t*100):0;
+const el=id=&gt;document.getElementById(id);
+const uniq=k=&gt;[...new Set(ALL.map(r=&gt;r[k]).filter(Boolean))].sort();
+
+let MIN='',MAX='',MONS=[],WKS=[];
+function setup(){
+const ds=ALL.map(r=&gt;r.d).filter(Boolean).sort();
+  MIN=ds[0]||''; MAX=ds[ds.length-1]||'';
+el('from').value=MIN; el('to').value=MAX;
+el('from').min=MIN; el('from').max=MAX; el('to').min=MIN; el('to').max=MAX;
+el('plat').innerHTML='&lt;option value=""&gt;ทุกช่องทาง&lt;/option&gt;'+uniq('p').map(v=&gt;'&lt;option&gt;'+v+'&lt;/option&gt;').join('');
+
+const MTH=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+           'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const monKey=d=&gt;d.slice(0,7);
+const monName=k=&gt;MTH[+k.slice(5,7)-1]+' '+k.slice(0,4);
+MONS=[...new Set(ALL.map(r=&gt;monKey(r.d)))].sort();
+el('mon').innerHTML='&lt;option value=""&gt;ทุกเดือน&lt;/option&gt;'
+  +MONS.map(k=&gt;'&lt;option value="'+k+'"&gt;'+monName(k)+'&lt;/option&gt;').join('');
+// สัปดาห์: เก็บคู่กับช่วงวันที่จริง เรียงตามเวลาไม่ใช่เลขสัปดาห์
+WKS=[];
+ALL.forEach(r=&gt;{let o=WKS.find(x=&gt;x.w===r.w&amp;&amp;x.y===r.d.slice(0,4));
+  if(!o){o={w:r.w,y:r.d.slice(0,4),min:r.d,max:r.d};WKS.push(o);}
+  if(r.d&lt;o.min)o.min=r.d; if(r.d&gt;o.max)o.max=r.d;});
+WKS.sort((a,b)=&gt;a.min&lt;b.min?-1:1);
+el('wk').innerHTML='&lt;option value=""&gt;ทุกสัปดาห์&lt;/option&gt;'
+  +WKS.map((o,i)=&gt;'&lt;option value="'+i+'"&gt;สัปดาห์ '+o.w+' ('+o.min.slice(5)+' ถึง '+o.max.slice(5)+')&lt;/option&gt;').join('');
+
+
+
+el('cat').innerHTML='&lt;option value=""&gt;ทุกหมวด&lt;/option&gt;'+CATS.map(v=&gt;'&lt;option&gt;'+v+'&lt;/option&gt;').join('');
+
+const PRESETS=[['ทั้งหมด',null],['7 วันล่าสุด',7],['30 วันล่าสุด',30]];
+el('chips').innerHTML=PRESETS.map((p,i)=&gt;'&lt;button class="chip'+(i===0?' on':'')+'" data-i="'+i+'"&gt;'+p[0]+'&lt;/button&gt;').join('');
+
+
+
+
+
+  render();
+}
+
+const current=()=&gt;{const f=el('from').value,t=el('to').value,p=el('plat').value,c=el('cat').value;
+  return ALL.filter(r=&gt;(!f||r.d&gt;=f)&amp;&amp;(!t||r.d&lt;=t)&amp;&amp;(!p||r.p===p)&amp;&amp;(!c||r.c===c));};
+
+function donut(svgId,parts,total){
+  const show=parts.filter(p=&gt;p[1]&gt;0);
+  const W=300,cx=150,cy=108,R=88,IN=56, legendTop=cy+R+30, H=legendTop+show.length*19;
+  const svg=el(svgId); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  if(!total){svg.innerHTML='&lt;text x="150" y="110" text-anchor="middle" font-size="13" fill="#6B7266"&gt;ไม่มีข้อมูล&lt;/text&gt;';return;}
+  const P=(r,a)=&gt;[cx+r*Math.sin(a),cy-r*Math.cos(a)];
+  const arc=(r0,r1,a0,a1,fill)=&gt;{
+    if(a1-a0&lt;=0.0001)return '';
+    const big=(a1-a0)&gt;Math.PI?1:0;
+    const [x1,y1]=P(r1,a0),[x2,y2]=P(r1,a1),[x3,y3]=P(r0,a1),[x4,y4]=P(r0,a0);
+    return '&lt;path d="M'+x1+' '+y1+'A'+r1+' '+r1+' 0 '+big+' 1 '+x2+' '+y2+'L'+x3+' '+y3
+      +'A'+r0+' '+r0+' 0 '+big+' 0 '+x4+' '+y4+'Z" fill="'+fill+'" stroke="#fff" stroke-width="1.5"/&gt;';};
+  let out='',ang=0;
+  show.forEach(([,n,col])=&gt;{
+    const a2=ang+n/total*2*Math.PI;
+    out+=arc(IN,R,ang,a2,col);
+    const share=n/total*100;
+    if(share&gt;=11){const mid=(ang+a2)/2,[tx,ty]=P((IN+R)/2,mid);
+      out+='&lt;text x="'+tx+'" y="'+(ty+4)+'" text-anchor="middle" font-size="12.5" font-weight="650" fill="#fff"&gt;'+share.toFixed(0)+'%&lt;/text&gt;';}
+    ang=a2;});
+  out+='&lt;text x="'+cx+'" y="'+(cy+2)+'" text-anchor="middle" font-size="26" font-weight="660"&gt;'+total+'&lt;/text&gt;';
+  out+='&lt;text x="'+cx+'" y="'+(cy+19)+'" text-anchor="middle" font-size="10.5" fill="#6B7266"&gt;ใบ&lt;/text&gt;';
+  let y=legendTop;
+  show.forEach(([nm,n,col])=&gt;{
+    out+='&lt;rect x="10" y="'+(y-9)+'" width="11" height="11" rx="3" fill="'+col+'"/&gt;'
+       +'&lt;text x="28" y="'+y+'" font-size="12"&gt;'+nm+'&lt;/text&gt;'
+       +'&lt;text x="'+(W-10)+'" y="'+y+'" font-size="12" text-anchor="end" fill="#6B7266"&gt;'+n+' · '+pct(n,total).toFixed(0)+'%&lt;/text&gt;';
+    y+=19;});
+  svg.innerHTML=out;
+}
+
+function trend(D){
+  const wk={},first={};
+  D.forEach(r=&gt;{const k=r.w||'?';(wk[k]??={});CATS.forEach(c=&gt;wk[k][c]??=0);wk[k][r.c]++;
+    if(!first[k]||r.d&lt;first[k])first[k]=r.d;});
+  const ks=Object.keys(wk).sort((a,b)=&gt;first[a]&lt;first[b]?-1:1);   // เรียงตามวันที่จริง ไม่ใช่เลขสัปดาห์
+  if(!ks.length){el('trend').innerHTML='&lt;text x="450" y="110" text-anchor="middle" font-size="14" fill="#6B7266"&gt;ไม่มีข้อมูลในช่วงนี้&lt;/text&gt;';el('trendnote').textContent='';return;}
+  const tot=k=&gt;CATS.reduce((s,c)=&gt;s+wk[k][c],0);
+  const max=Math.max(...ks.map(tot))*1.15||1;
+  const W=900,H=220,P=34,bw=Math.min(90,(W-P*2)/ks.length*0.6);
+  const x=i=&gt;P+(W-P*2)*(i+0.5)/ks.length, y=v=&gt;H-30-(H-56)*v/max;
+  let s='';
+  [0,Math.round(max/2),Math.round(max)].forEach(v=&gt;{
+    s+='&lt;line x1="'+P+'" y1="'+y(v)+'" x2="'+(W-P)+'" y2="'+y(v)+'" stroke="#D9D8CF"/&gt;'
+      +'&lt;text x="4" y="'+(y(v)+4)+'" font-size="11" fill="#6B7266"&gt;'+v+'&lt;/text&gt;';});
+  ks.forEach((k,i)=&gt;{
+    let acc=0;
+    CATS.forEach(c=&gt;{const n=wk[k][c]; if(!n)return;
+      s+='&lt;rect x="'+(x(i)-bw/2)+'" y="'+y(acc+n)+'" width="'+bw+'" height="'+Math.max(0,y(acc)-y(acc+n))
+        +'" fill="'+COLORS[c]+'" rx="3"/&gt;'; acc+=n;});
+    s+='&lt;text x="'+x(i)+'" y="'+(y(acc)-7)+'" font-size="12" font-weight="600" text-anchor="middle"&gt;'+acc+'&lt;/text&gt;';
+    s+='&lt;text x="'+x(i)+'" y="'+(H-10)+'" font-size="11.5" text-anchor="middle" fill="#6B7266"&gt;สัปดาห์ '+k+'&lt;/text&gt;';});
+  el('trend').innerHTML=s;
+  el('trendleg').innerHTML=CATS.map(c=&gt;'&lt;span&gt;&lt;i style="background:'+COLORS[c]+'"&gt;&lt;/i&gt;'+c+'&lt;/span&gt;').join('');
+  el('trendnote').textContent=ks.length&lt;6?'ข้อมูลยังมี '+ks.length+' สัปดาห์ ต้องสะสมอีกสักระยะถึงจะอ่านแนวโน้มได้จริง':'';
+}
+
+function render(){
+  const D=current();
+  el('meta').textContent=(LIVE?'ข้อมูลสดจากชีต':'ข้อมูลสำรองในไฟล์')
+    +' · '+ALL.length+' ใบ · '+MIN+' ถึง '+MAX;
+  el('hint').textContent='กำลังแสดง '+D.length+' ใบ จาก '+ALL.length+' ใบ';
+
+  const nShip=D.filter(shipped).length;
+  const nPack=D.filter(r=&gt;r.c==='ยกเลิกก่อนแพ็ค').length;
+  const nPick=D.filter(r=&gt;r.c==='ยกเลิกก่อนหยิบ').length;
+  el('kpis').innerHTML=[
+   '&lt;b&gt;'+D.length+'&lt;/b&gt;&lt;span&gt;ใบยกเลิกทั้งหมด&lt;/span&gt;',
+   '&lt;b&gt;'+nPick+'&lt;/b&gt;&lt;span&gt;ใบยกเลิกก่อนหยิบ&lt;/span&gt;&lt;small&gt;'+pct(nPick,D.length).toFixed(0)+'%&lt;/small&gt;',
+   '&lt;b&gt;'+nPack+'&lt;/b&gt;&lt;span&gt;ใบยกเลิกก่อนแพ็ค&lt;/span&gt;&lt;small&gt;'+pct(nPack,D.length).toFixed(0)+'%&lt;/small&gt;',
+   '&lt;b&gt;'+nShip+'&lt;/b&gt;&lt;span&gt;ใบยกเลิกหลังแพ็ค&lt;/span&gt;&lt;small&gt;'+pct(nShip,D.length).toFixed(0)+'%&lt;/small&gt;',
+  ].map(x=&gt;'&lt;div class="kpi"&gt;'+x+'&lt;/div&gt;').join('');
+
+  const cs={}; D.forEach(r=&gt;(cs[r.c]??=[]).push(r));
+  const cats=CATS.filter(c=&gt;cs[c]).map(c=&gt;[c,cs[c]]);
+  donut('d2',cats.map(([c,rs])=&gt;[c,rs.length,COLORS[c]]),D.length);
+
+  document.querySelector('#cattbl tbody').innerHTML=cats.map(([c,rs])=&gt;
+    '&lt;tr&gt;&lt;td&gt;&lt;i style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;background:'
+    +COLORS[c]+'"&gt;&lt;/i&gt;'+c+'&lt;/td&gt;&lt;td&gt;'+rs.length+'&lt;/td&gt;&lt;td&gt;'+pct(rs.length,D.length).toFixed(1)+'%&lt;/td&gt;'
+    +'&lt;/tr&gt;').join('')
+   ||'&lt;tr&gt;&lt;td colspan="3" class="note"&gt;ไม่มีข้อมูลในช่วงนี้&lt;/td&gt;&lt;/tr&gt;';
+
+  const plats=[...new Set(D.map(r=&gt;r.p||'ไม่ระบุ'))]
+    .sort((a,b)=&gt;D.filter(r=&gt;(r.p||'ไม่ระบุ')===b).length-D.filter(r=&gt;(r.p||'ไม่ระบุ')===a).length);
+  const th='&lt;thead&gt;&lt;tr&gt;&lt;th&gt;หมวด&lt;/th&gt;'+plats.map(p=&gt;'&lt;th&gt;'+p+'&lt;/th&gt;').join('')+'&lt;th&gt;รวม&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;';
+  const tb=cats.map(([c,rs])=&gt;{
+    const pc={}; rs.forEach(r=&gt;pc[r.p||'ไม่ระบุ']=(pc[r.p||'ไม่ระบุ']||0)+1);
+    const top=Math.max(...plats.map(p=&gt;pc[p]||0));
+    return '&lt;tr&gt;&lt;td&gt;&lt;i style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;background:'
+      +COLORS[c]+'"&gt;&lt;/i&gt;'+c+'&lt;/td&gt;'
+      +plats.map(p=&gt;{const n=pc[p]||0;
+        return '&lt;td class="'+(n&amp;&amp;n===top?'hi':'')+'"&gt;'+(n?pct(n,rs.length).toFixed(0)+'%&lt;span style="color:var(--muted);font-weight:400"&gt; ('+n+')&lt;/span&gt;':'—')+'&lt;/td&gt;';}).join('')
+      +'&lt;td&gt;'+rs.length+'&lt;/td&gt;&lt;/tr&gt;';}).join('');
+  el('matrix').innerHTML=cats.length?th+'&lt;tbody&gt;'+tb+'&lt;/tbody&gt;':'&lt;tbody&gt;&lt;tr&gt;&lt;td class="note"&gt;ไม่มีข้อมูลในช่วงนี้&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;';
+
+  el('platleg').innerHTML=CATS.filter(c=&gt;cs[c]).map(c=&gt;'&lt;span&gt;&lt;i style="background:'+COLORS[c]+'"&gt;&lt;/i&gt;'+c+'&lt;/span&gt;').join('');
+  const bp={}; D.forEach(r=&gt;(bp[r.p||'ไม่ระบุ']??=[]).push(r));
+  el('platwrap').innerHTML=Object.entries(bp).sort((a,b)=&gt;b[1].length-a[1].length).map(([p,rs])=&gt;{
+    const c={}; rs.forEach(r=&gt;c[r.c]=(c[r.c]||0)+1);
+    const ord=CATS.filter(x=&gt;c[x]).map(x=&gt;[x,c[x]]);
+    const sh=rs.filter(shipped).length;
+    return '&lt;div style="margin-bottom:14px"&gt;'
+     +'&lt;div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:550"&gt;'
+     +'&lt;span&gt;'+p+'&lt;/span&gt;&lt;span style="color:var(--muted);font-weight:400"&gt;'+rs.length+' ใบ · ของออกไปแล้ว '
+     +pct(sh,rs.length).toFixed(0)+'%'+(pct(sh,rs.length)&gt;60?'&lt;span class="tag"&gt;สูง&lt;/span&gt;':'')+'&lt;/span&gt;&lt;/div&gt;'
+     +'&lt;div class="bar" style="height:22px;margin:6px 0 4px"&gt;'
+     +ord.map(([cc,n])=&gt;{const w=pct(n,rs.length);
+       return '&lt;div style="width:'+w+'%;background:'+COLORS[cc]+'" title="'+cc+' '+n+' ใบ"&gt;'+(w&gt;14?n:'')+'&lt;/div&gt;';}).join('')
+     +'&lt;/div&gt;&lt;div class="note"&gt;'+ord.map(([cc,n])=&gt;cc+' '+pct(n,rs.length).toFixed(0)+'%').join(' · ')+'&lt;/div&gt;&lt;/div&gt;';
+  }).join('')||'&lt;div class="empty"&gt;ไม่มีข้อมูลในช่วงนี้&lt;/div&gt;';
+
+  platChart(D,bp);
+  trend(D);
+}
+
+let PLATMODE='count';
+el('mCount').onclick=()=&gt;{PLATMODE='count';el('mCount').classList.add('on');el('mPct').classList.remove('on');render();};
+el('mPct').onclick=()=&gt;{PLATMODE='pct';el('mPct').classList.add('on');el('mCount').classList.remove('on');render();};
+
+// กราฟแท่งแยกช่องทาง — แท่งซ้อนสามหมวด
+function platChart(D,bp){
+  const ks=Object.entries(bp).sort((a,b)=&gt;b[1].length-a[1].length).map(x=&gt;x[0]);
+  const svg=el('platchart');
+  if(!ks.length){svg.innerHTML='&lt;text x="450" y="130" text-anchor="middle" font-size="14" fill="#6B7266"&gt;ไม่มีข้อมูลในช่วงนี้&lt;/text&gt;';return;}
+  const cnt={}; ks.forEach(k=&gt;{cnt[k]={}; CATS.forEach(c=&gt;cnt[k][c]=0);
+    bp[k].forEach(r=&gt;cnt[k][r.c]++);});
+  const tot=k=&gt;CATS.reduce((s,c)=&gt;s+cnt[k][c],0);
+  const PC=PLATMODE==='pct';
+  const val=(k,c)=&gt;PC?pct(cnt[k][c],tot(k)):cnt[k][c];
+  const max=PC?100:Math.max(...ks.map(tot))*1.15||1;
+  const W=900,H=260,P=40,bw=Math.min(110,(W-P*2)/ks.length*0.55);
+  const x=i=&gt;P+(W-P*2)*(i+0.5)/ks.length, y=v=&gt;H-34-(H-64)*v/max;
+  let s='';
+  (PC?[0,50,100]:[0,Math.round(max/2),Math.round(max)]).forEach(v=&gt;{
+    s+='&lt;line x1="'+P+'" y1="'+y(v)+'" x2="'+(W-P)+'" y2="'+y(v)+'" stroke="#D9D8CF"/&gt;'
+      +'&lt;text x="6" y="'+(y(v)+4)+'" font-size="11" fill="#6B7266"&gt;'+v+(PC?'%':'')+'&lt;/text&gt;';});
+  ks.forEach((k,i)=&gt;{
+    let acc=0;
+    CATS.forEach(c=&gt;{const v=val(k,c); if(!v)return;
+      const h=Math.max(0,y(acc)-y(acc+v));
+      s+='&lt;rect x="'+(x(i)-bw/2)+'" y="'+y(acc+v)+'" width="'+bw+'" height="'+h+'" fill="'+COLORS[c]+'" rx="3"/&gt;';
+      const lbl=PC?v.toFixed(0)+'%':cnt[k][c];
+      if(h&gt;18) s+='&lt;text x="'+x(i)+'" y="'+(y(acc+v)+h/2+4)+'" text-anchor="middle" font-size="12" font-weight="600" fill="#fff"&gt;'+lbl+'&lt;/text&gt;';
+      acc+=v;});
+    s+='&lt;text x="'+x(i)+'" y="'+(y(acc)-8)+'" font-size="13" font-weight="650" text-anchor="middle"&gt;'
+      +(PC?tot(k)+' ใบ':tot(k))+'&lt;/text&gt;';
+    s+='&lt;text x="'+x(i)+'" y="'+(H-12)+'" font-size="12" text-anchor="middle" fill="#1C2119"&gt;'+k+'&lt;/text&gt;';});
+  svg.innerHTML=s;
+  el('platnote').textContent=PC
+    ?'แท่งสูงเท่ากันทุกช่องทาง เทียบสัดส่วนได้แม้ช่องทางที่มีใบน้อย · ตัวเลขบนหัวแท่งคือจำนวนใบจริง'
+    :'ความสูงตามจำนวนใบจริง · ช่องทางที่มีใบน้อยจะเห็นยาก ให้สลับไปดูสัดส่วน';
+}
+// ผูกเหตุการณ์ครั้งเดียว ไม่ผูกซ้ำทุกครั้งที่ setup() ทำงาน
+function bindOnce(){
+el('mon').addEventListener('change',()=&gt;{
+  const k=el('mon').value; el('wk').value='';
+  if(k){const ds=ALL.filter(r=&gt;monKey(r.d)===k).map(r=&gt;r.d).sort();
+    el('from').value=ds[0]; el('to').value=ds[ds.length-1];}
+  else {el('from').value=MIN; el('to').value=MAX;}
+  document.querySelectorAll('.chip').forEach(x=&gt;{if(x.dataset.i)x.classList.remove('on');});
+  render();});
+el('wk').addEventListener('change',()=&gt;{
+  const i=el('wk').value; el('mon').value='';
+  if(i!==''){const o=WKS[+i]; el('from').value=o.min; el('to').value=o.max;}
+  else {el('from').value=MIN; el('to').value=MAX;}
+  document.querySelectorAll('.chip').forEach(x=&gt;{if(x.dataset.i)x.classList.remove('on');});
+  render();});
+document.querySelectorAll('.chip').forEach(b=&gt;b.onclick=()=&gt;{
+  document.querySelectorAll('.chip').forEach(x=&gt;{if(x.dataset.i)x.classList.remove('on')}); b.classList.add('on');
+  el('mon').value=''; el('wk').value='';
+  const v=PRESETS[+b.dataset.i][1], end=new Date(MAX+'T00:00:00Z');
+  el('from').value = v===null?MIN:new Date(end.getTime()-(v-1)*864e5).toISOString().slice(0,10);
+  el('to').value=MAX; render();});
+['from','to'].forEach(id=&gt;el(id).addEventListener('input',()=&gt;{
+  document.querySelectorAll('.chip').forEach(x=&gt;{if(x.dataset.i)x.classList.remove('on')});
+  el('mon').value=''; el('wk').value=''; render();}));
+['plat','cat'].forEach(id=&gt;el(id).addEventListener('input',render));
+}
+
+
+(async function boot(){
+  setup(); bindOnce();                       // วาดด้วยข้อมูลสำรองก่อน หน้าจะได้ไม่ว่าง
+  if(!CSV_URL) return;
+  try{
+    const ctl=new AbortController(); const to=setTimeout(()=&gt;ctl.abort(),10000);
+    const res=await fetch(CSV_URL,{cache:'no-store',signal:ctl.signal});
+    clearTimeout(to);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const rows=fromSheet(await res.text());
+    if(rows.length&lt;3) throw new Error('ข้อมูลน้อยผิดปกติ');
+    ALL=rows; LIVE=true; setup();
+  }catch(e){ console.warn('ดึงข้อมูลสดไม่ได้ ใช้ข้อมูลสำรองในไฟล์:',e.message); }
+})();
+
+el('save').onclick=async function(){
+  const b=this,old=b.textContent; b.disabled=true; b.textContent='กำลังสร้างภาพ...';
+  try{
+    if(!window.html2canvas){await new Promise((ok,err)=&gt;{const sc=document.createElement('script');
+      sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      sc.onload=ok; sc.onerror=()=&gt;err(new Error('โหลดไม่ได้')); document.head.appendChild(sc);});}
+    b.style.visibility='hidden';
+    const cv=await html2canvas(document.querySelector('.wrap'),{backgroundColor:'#F7F6F1',scale:2});
+    b.style.visibility='visible';
+    const a=document.createElement('a');
+    a.download='cancel-dashboard-'+el('from').value+'_'+el('to').value+'.png';
+    a.href=cv.toDataURL('image/png'); a.click();
+  }catch(e){b.style.visibility='visible';
+    alert('บันทึกภาพไม่ได้ ('+e.message+')\nถ้าไม่ได้ต่ออินเทอร์เน็ต ให้ใช้การจับภาพหน้าจอแทน');}
   b.disabled=false; b.textContent=old;
 };
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;</template>
