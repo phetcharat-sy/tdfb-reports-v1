@@ -776,6 +776,12 @@ body.present #vKPI .tscroll{max-height:none}
 .side .brand span{font-size:24.5px}
 .sidenav .grp{font-size:24.5px}
 .sidenav button{font-size:38px;padding:19px 20px}
+/* v-side3: เมนูซ้ายตรึงอยู่กับที่ เลื่อนหน้าแล้วขยับเฉพาะเนื้อหาด้านขวา
+   (เดิมใช้ sticky + height:100vh แต่ body มี zoom ทำให้ความสูงเกินจอ เมนูเลยเลื่อนตาม) */
+.side{position:fixed;left:0;top:0;bottom:0;height:auto;z-index:60}
+.main{margin-left:540px}
+body.present .main{margin-left:0}
+@media(max-width:1100px){.main{margin-left:0}.side{z-index:70}}
 .side-foot{font-size:23.5px}
 </style>
 </head>
