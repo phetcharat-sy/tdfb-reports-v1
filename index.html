@@ -20,7 +20,7 @@
                    radial-gradient(700px 460px at 100% 4%,rgba(124,58,237,.05),transparent 58%);
   background-attachment:fixed;
   font-family:'Baloo 2','Mitr',-apple-system,BlinkMacSystemFont,sans-serif;font-size:27.7px;line-height:1.6;zoom:1.3}
-/* v-size: ขยายทั้งหน้าขึ้น ~13% (1.15 → 1.3) ตามขนาดที่ต้องการ · โหมดพรีเซนต์คงขนาดเดิม */
+/* v-size: ค่าฐาน 1.3 (จอกว้าง 2380px) · ตอนใช้งานจริงสคริปต์ v-fit ท้ายไฟล์ปรับตามความกว้างจอ · โหมดพรีเซนต์คงขนาดเดิม */
 body.present{zoom:1.15}
 #vKPI .wrap{max-width:none;margin:0 auto;padding:26px 6% 44px}#vKPI .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}#vKPI .btn{background:var(--teal);color:#fff;border:0;font-family:inherit;font-weight:bold;
   font-size:30.7px;padding:13px 24px;border-radius:7px;cursor:pointer}#vKPI .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:normal}#vKPI .btn:disabled{opacity:.5;cursor:default}#vKPI select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:7px;
@@ -5746,6 +5746,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
   if(btn)btn.disabled=true;
   say('กำลังเตรียมภาพ…');
   const w0=root.offsetWidth;
+  window.__noFit=true;   /* v-fit: ห้ามปรับ zoom อัตโนมัติระหว่างถ่ายภาพ */
   const saved=zoomEls.map(e=>[e,e.style.zoom]);
   const rw=[root.style.width,root.style.maxWidth];
   zoomEls.forEach(e=>e.style.zoom='1');
@@ -5867,6 +5868,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
   }catch(e){ alert('บันทึกรูปไม่สำเร็จ: '+e.message); }
   marked.forEach(([e,k])=>{delete e.dataset[k];});
   saved.forEach(([e,z])=>e.style.zoom=z);
+  window.__noFit=false; if(window.fitZoom)fitZoom();
   root.style.width=rw[0]; root.style.maxWidth=rw[1];
   charts.forEach(c=>{try{delete c.options.devicePixelRatio;c.resize();}catch(e){}});
   if(btn){btn.disabled=false;btn.textContent=label;}
@@ -7753,5 +7755,28 @@ el('save').onclick=async function(){
   b.disabled=false; b.textContent=old;
 };
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;</template>
+<script>
+/* v-fit: ปรับขนาดทั้งหน้าอัตโนมัติตามความกว้างจอของแต่ละคน
+   เดิมใช้ zoom คงที่ (1.3) + ตัวหนังสือเป็น px ที่ออกแบบไว้สำหรับจอกว้าง ~2380px
+   ทำให้คนที่เปิดจอ/โน้ตบุ๊กขนาดอื่น หรือ Chrome zoom 100% เห็นใหญ่ล้นจอ ต้องย่อเองเหลือ 33–50%
+   ตอนนี้: คำนวณ zoom = ค่าฐาน × (ความกว้างจอ ÷ 2380) ทุกคนจะเห็นสัดส่วนเดียวกันเสมอ */
+(function(){
+  const DESIGN_W=2380, BASE=1.3, BASE_PRESENT=1.15;
+  function fitZoom(){
+    if(window.__noFit||!document.body)return;
+    const base=document.body.classList.contains('present')?BASE_PRESENT:BASE;
+    const w=document.documentElement.clientWidth||window.innerWidth;
+    const z=Math.max(0.4,Math.min(1.6,base*w/DESIGN_W));
+    const v=z.toFixed(3);
+    if(document.body.style.zoom!==v){ document.body.style.zoom=v;
+      /* กราฟต้องวัดขนาดกล่องใหม่หลังเปลี่ยน zoom */
+      try{ if(typeof CH!=='undefined')Object.values(CH).flat().forEach(c=>c&&c.resize&&c.resize()); }catch(e){} }
+  }
+  window.fitZoom=fitZoom;
+  let t; window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(fitZoom,120);});
+  new MutationObserver(fitZoom).observe(document.body,{attributes:true,attributeFilter:['class']});
+  fitZoom();
+})();
+</script>
 </body>
 </html>
