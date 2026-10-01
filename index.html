@@ -800,7 +800,7 @@ body.present #vKPI .tscroll{max-height:none}
       <button data-view="kpi" data-sec="can">Cancel</button>
 
       <div class="grp">Admin</div>
-      <button data-view="kpi" data-sec="ontime">KPI On-Time Performance</button>
+      <!-- ซ่อนไว้ก่อน: <button data-view="kpi" data-sec="ontime">KPI On-Time Performance</button> -->
       <button data-view="kpi" data-sec="ship">การจัดส่ง (Shipping)</button>
 
       <div class="grp">วิธีการปฏิบัติงาน</div>
@@ -6954,7 +6954,7 @@ td.hi{font-weight:650}
     &lt;div&gt;&lt;h3&gt;แยกตามสาเหตุ&lt;/h3&gt;&lt;svg id=&quot;d2&quot;&gt;&lt;/svg&gt;&lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&quot;scroll&quot;&gt;
-  &lt;table id=&quot;causetbl&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สาเหตุ&lt;/th&gt;&lt;th&gt;ใบ&lt;/th&gt;&lt;th&gt;สัดส่วน&lt;/th&gt;&lt;th&gt;ห่าง (กลาง)&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
+  &lt;table id=&quot;causetbl&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สาเหตุ&lt;/th&gt;&lt;th&gt;ออเดอร์&lt;/th&gt;&lt;th&gt;สัดส่วน&lt;/th&gt;&lt;th&gt;ห่าง (กลาง)&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
   &lt;/div&gt;
 &lt;/div&gt;
 
@@ -6975,12 +6975,12 @@ td.hi{font-weight:650}
   &lt;div class=&quot;panel&quot;&gt;
     &lt;h2&gt;สินค้าที่ตีกลับบ่อย&lt;/h2&gt;
     &lt;p class=&quot;note&quot;&gt;ของออกจากคลังไปแล้ว เสียค่าส่งสองเที่ยว&lt;/p&gt;
-    &lt;table id=&quot;prodret&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สินค้า&lt;/th&gt;&lt;th&gt;ใบ&lt;/th&gt;&lt;th&gt;ชิ้น&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
+    &lt;table id=&quot;prodret&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สินค้า&lt;/th&gt;&lt;th&gt;ออเดอร์&lt;/th&gt;&lt;th&gt;ชิ้น&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
   &lt;/div&gt;
   &lt;div class=&quot;panel&quot;&gt;
     &lt;h2&gt;สินค้าที่ยกเลิกในวันบ่อย&lt;/h2&gt;
     &lt;p class=&quot;note&quot;&gt;จับได้ก่อนของออก ไม่เสียค่าส่ง&lt;/p&gt;
-    &lt;table id=&quot;prodcan&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สินค้า&lt;/th&gt;&lt;th&gt;ใบ&lt;/th&gt;&lt;th&gt;ชิ้น&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
+    &lt;table id=&quot;prodcan&quot;&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;สินค้า&lt;/th&gt;&lt;th&gt;ออเดอร์&lt;/th&gt;&lt;th&gt;ชิ้น&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
   &lt;/div&gt;
 &lt;/div&gt;
 
@@ -7077,7 +7077,7 @@ function donut(svgId,parts,total){
         +share.toFixed(0)+&#x27;%&lt;/text&gt;&#x27;;}
     ang=a2;});
   out+=&#x27;&lt;text x=&quot;&#x27;+cx+&#x27;&quot; y=&quot;&#x27;+(cy+2)+&#x27;&quot; text-anchor=&quot;middle&quot; font-size=&quot;26&quot; font-weight=&quot;660&quot;&gt;&#x27;+total+&#x27;&lt;/text&gt;&#x27;;
-  out+=&#x27;&lt;text x=&quot;&#x27;+cx+&#x27;&quot; y=&quot;&#x27;+(cy+19)+&#x27;&quot; text-anchor=&quot;middle&quot; font-size=&quot;10.5&quot; fill=&quot;#6B7266&quot;&gt;ใบ&lt;/text&gt;&#x27;;
+  out+=&#x27;&lt;text x=&quot;&#x27;+cx+&#x27;&quot; y=&quot;&#x27;+(cy+19)+&#x27;&quot; text-anchor=&quot;middle&quot; font-size=&quot;10.5&quot; fill=&quot;#6B7266&quot;&gt;ออเดอร์&lt;/text&gt;&#x27;;
   let y=legendTop;
   show.forEach(([nm,n,col])=&gt;{
     out+=&#x27;&lt;rect x=&quot;10&quot; y=&quot;&#x27;+(y-9)+&#x27;&quot; width=&quot;11&quot; height=&quot;11&quot; rx=&quot;3&quot; fill=&quot;&#x27;+col+&#x27;&quot;/&gt;&#x27;
@@ -7123,13 +7123,13 @@ const current=()=&gt;{const f=el(&#x27;from&#x27;).value,t=el(&#x27;to&#x27;).va
 function render(){
   const D=current();
   const skipped=RAW.length-ALL.length;
-  el(&#x27;meta&#x27;).textContent=(LIVE?&#x27;ข้อมูลสดจากชีต&#x27;:&#x27;ข้อมูลสำรองในไฟล์&#x27;)+&#x27; · &#x27;+ALL.length+&#x27; ใบ · &#x27;+MIN+&#x27; ถึง &#x27;+MAX
-    +(skipped?&#x27; · ไม่นับอีก &#x27;+skipped+&#x27; ใบที่ยังไม่ได้ระบุสาเหตุใน Odoo&#x27;:&#x27;&#x27;);
-  el(&#x27;hint&#x27;).textContent=&#x27;กำลังแสดง &#x27;+D.length+&#x27; ใบ จาก &#x27;+ALL.length+&#x27; ใบ&#x27;;
+  el(&#x27;meta&#x27;).textContent=(LIVE?&#x27;ข้อมูลสดจากชีต&#x27;:&#x27;ข้อมูลสำรองในไฟล์&#x27;)+&#x27; · &#x27;+ALL.length+&#x27; ออเดอร์ · &#x27;+MIN+&#x27; ถึง &#x27;+MAX
+    +(skipped?&#x27; · ไม่นับอีก &#x27;+skipped+&#x27; ออเดอร์ที่ยังไม่ได้ระบุสาเหตุใน Odoo&#x27;:&#x27;&#x27;);
+  el(&#x27;hint&#x27;).textContent=&#x27;กำลังแสดง &#x27;+D.length+&#x27; ออเดอร์ จาก &#x27;+ALL.length+&#x27; ออเดอร์&#x27;;
 
   const nShip=D.filter(shipped).length, nCan=D.length-nShip;
   el(&#x27;kpis&#x27;).innerHTML=[
-   &#x27;&lt;b&gt;&#x27;+D.length+&#x27;&lt;/b&gt;&lt;span&gt;ใบในช่วงที่เลือก&lt;/span&gt;&#x27;,
+   &#x27;&lt;b&gt;&#x27;+D.length+&#x27;&lt;/b&gt;&lt;span&gt;ออเดอร์ในช่วงที่เลือก&lt;/span&gt;&#x27;,
    &#x27;&lt;b&gt;&#x27;+nShip+&#x27;&lt;/b&gt;&lt;span&gt;ตีกลับ (ของออกไปแล้ว)&lt;/span&gt;&lt;small&gt;&#x27;+pct(nShip,D.length).toFixed(0)+&#x27;% ของที่แสดง&lt;/small&gt;&#x27;,
    &#x27;&lt;b&gt;&#x27;+nCan+&#x27;&lt;/b&gt;&lt;span&gt;ยกเลิกก่อนของออก&lt;/span&gt;&lt;small&gt;&#x27;+pct(nCan,D.length).toFixed(0)+&#x27;% ไม่เสียค่าส่ง&lt;/small&gt;&#x27;,
   ].map(x=&gt;&#x27;&lt;div class=&quot;kpi&quot;&gt;&#x27;+x+&#x27;&lt;/div&gt;&#x27;).join(&#x27;&#x27;);
@@ -7168,11 +7168,11 @@ function render(){
     const sh=rs.filter(shipped).length;
     return &#x27;&lt;div style=&quot;margin-bottom:14px&quot;&gt;&#x27;
      +&#x27;&lt;div style=&quot;display:flex;justify-content:space-between;font-size:13.5px;font-weight:550&quot;&gt;&#x27;
-     +&#x27;&lt;span&gt;&#x27;+p+&#x27;&lt;/span&gt;&lt;span style=&quot;color:var(--muted);font-weight:400&quot;&gt;&#x27;+rs.length+&#x27; ใบ · ของออกไปแล้ว &#x27;
+     +&#x27;&lt;span&gt;&#x27;+p+&#x27;&lt;/span&gt;&lt;span style=&quot;color:var(--muted);font-weight:400&quot;&gt;&#x27;+rs.length+&#x27; ออเดอร์ · ของออกไปแล้ว &#x27;
      +pct(sh,rs.length).toFixed(0)+&#x27;%&#x27;+(pct(sh,rs.length)&gt;55?&#x27;&lt;span class=&quot;tag warn&quot;&gt;สูง&lt;/span&gt;&#x27;:&#x27;&#x27;)+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;
      +&#x27;&lt;div class=&quot;bar&quot; style=&quot;height:22px;margin:6px 0 4px&quot;&gt;&#x27;
      +ord.map(([cc,n])=&gt;{const w=pct(n,rs.length);
-       return &#x27;&lt;div style=&quot;width:&#x27;+w+&#x27;%;background:&#x27;+(COLORS[cc]||&#x27;#A8A79E&#x27;)+&#x27;&quot; title=&quot;&#x27;+cc+&#x27; &#x27;+n+&#x27; ใบ&quot;&gt;&#x27;+(w&gt;14?n:&#x27;&#x27;)+&#x27;&lt;/div&gt;&#x27;;}).join(&#x27;&#x27;)
+       return &#x27;&lt;div style=&quot;width:&#x27;+w+&#x27;%;background:&#x27;+(COLORS[cc]||&#x27;#A8A79E&#x27;)+&#x27;&quot; title=&quot;&#x27;+cc+&#x27; &#x27;+n+&#x27; ออเดอร์&quot;&gt;&#x27;+(w&gt;14?n:&#x27;&#x27;)+&#x27;&lt;/div&gt;&#x27;;}).join(&#x27;&#x27;)
      +&#x27;&lt;/div&gt;&lt;div class=&quot;note&quot;&gt;&#x27;+ord.map(([cc,n])=&gt;cc+&#x27; &#x27;+pct(n,rs.length).toFixed(0)+&#x27;%&#x27;).join(&#x27; · &#x27;)+&#x27;&lt;/div&gt;&lt;/div&gt;&#x27;;
   }).join(&#x27;&#x27;)||&#x27;&lt;div class=&quot;empty&quot;&gt;ไม่มีข้อมูลในช่วงนี้&lt;/div&gt;&#x27;;
 
@@ -7316,7 +7316,7 @@ td.hi{font-weight:650}
   &lt;h2&gt;แยกตามหมวด&lt;/h2&gt;
   &lt;svg id="d2" style="width:100%;max-width:420px;height:auto;display:block;margin:10px auto 4px"&gt;&lt;/svg&gt;
   &lt;div class="scroll"&gt;
-  &lt;table id="cattbl"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;หมวด&lt;/th&gt;&lt;th&gt;ใบ&lt;/th&gt;&lt;th&gt;สัดส่วน&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
+  &lt;table id="cattbl"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;หมวด&lt;/th&gt;&lt;th&gt;ออเดอร์&lt;/th&gt;&lt;th&gt;สัดส่วน&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;/tbody&gt;&lt;/table&gt;
   &lt;/div&gt;
 &lt;/div&gt;
 
@@ -7332,7 +7332,7 @@ td.hi{font-weight:650}
   &lt;div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 6px"&gt;
     &lt;div class="legend" id="platleg"&gt;&lt;/div&gt;
     &lt;div class="chips" style="margin:0"&gt;
-      &lt;button class="chip on" id="mCount"&gt;จำนวนใบ&lt;/button&gt;
+      &lt;button class="chip on" id="mCount"&gt;จำนวนออเดอร์&lt;/button&gt;
       &lt;button class="chip" id="mPct"&gt;สัดส่วน %&lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
@@ -7461,7 +7461,7 @@ function donut(svgId,parts,total){
       out+='&lt;text x="'+tx+'" y="'+(ty+4)+'" text-anchor="middle" font-size="12.5" font-weight="650" fill="#fff"&gt;'+share.toFixed(0)+'%&lt;/text&gt;';}
     ang=a2;});
   out+='&lt;text x="'+cx+'" y="'+(cy+2)+'" text-anchor="middle" font-size="26" font-weight="660"&gt;'+total+'&lt;/text&gt;';
-  out+='&lt;text x="'+cx+'" y="'+(cy+19)+'" text-anchor="middle" font-size="10.5" fill="#6B7266"&gt;ใบ&lt;/text&gt;';
+  out+='&lt;text x="'+cx+'" y="'+(cy+19)+'" text-anchor="middle" font-size="10.5" fill="#6B7266"&gt;ออเดอร์&lt;/text&gt;';
   let y=legendTop;
   show.forEach(([nm,n,col])=&gt;{
     out+='&lt;rect x="10" y="'+(y-9)+'" width="11" height="11" rx="3" fill="'+col+'"/&gt;'
@@ -7500,17 +7500,17 @@ function trend(D){
 function render(){
   const D=current();
   el('meta').textContent=(LIVE?'ข้อมูลสดจากชีต':'ข้อมูลสำรองในไฟล์')
-    +' · '+ALL.length+' ใบ · '+MIN+' ถึง '+MAX;
-  el('hint').textContent='กำลังแสดง '+D.length+' ใบ จาก '+ALL.length+' ใบ';
+    +' · '+ALL.length+' ออเดอร์ · '+MIN+' ถึง '+MAX;
+  el('hint').textContent='กำลังแสดง '+D.length+' ออเดอร์ จาก '+ALL.length+' ออเดอร์';
 
   const nShip=D.filter(shipped).length;
   const nPack=D.filter(r=&gt;r.c==='ยกเลิกก่อนแพ็ค').length;
   const nPick=D.filter(r=&gt;r.c==='ยกเลิกก่อนหยิบ').length;
   el('kpis').innerHTML=[
-   '&lt;b&gt;'+D.length+'&lt;/b&gt;&lt;span&gt;ใบยกเลิกทั้งหมด&lt;/span&gt;',
-   '&lt;b&gt;'+nPick+'&lt;/b&gt;&lt;span&gt;ใบยกเลิกก่อนหยิบ&lt;/span&gt;&lt;small&gt;'+pct(nPick,D.length).toFixed(0)+'%&lt;/small&gt;',
-   '&lt;b&gt;'+nPack+'&lt;/b&gt;&lt;span&gt;ใบยกเลิกก่อนแพ็ค&lt;/span&gt;&lt;small&gt;'+pct(nPack,D.length).toFixed(0)+'%&lt;/small&gt;',
-   '&lt;b&gt;'+nShip+'&lt;/b&gt;&lt;span&gt;ใบยกเลิกหลังแพ็ค&lt;/span&gt;&lt;small&gt;'+pct(nShip,D.length).toFixed(0)+'%&lt;/small&gt;',
+   '&lt;b&gt;'+D.length+'&lt;/b&gt;&lt;span&gt;ออเดอร์ยกเลิกทั้งหมด&lt;/span&gt;',
+   '&lt;b&gt;'+nPick+'&lt;/b&gt;&lt;span&gt;ออเดอร์ยกเลิกก่อนหยิบ&lt;/span&gt;&lt;small&gt;'+pct(nPick,D.length).toFixed(0)+'%&lt;/small&gt;',
+   '&lt;b&gt;'+nPack+'&lt;/b&gt;&lt;span&gt;ออเดอร์ยกเลิกก่อนแพ็ค&lt;/span&gt;&lt;small&gt;'+pct(nPack,D.length).toFixed(0)+'%&lt;/small&gt;',
+   '&lt;b&gt;'+nShip+'&lt;/b&gt;&lt;span&gt;ออเดอร์ยกเลิกหลังแพ็ค&lt;/span&gt;&lt;small&gt;'+pct(nShip,D.length).toFixed(0)+'%&lt;/small&gt;',
   ].map(x=&gt;'&lt;div class="kpi"&gt;'+x+'&lt;/div&gt;').join('');
 
   const cs={}; D.forEach(r=&gt;(cs[r.c]??=[]).push(r));
@@ -7544,11 +7544,11 @@ function render(){
     const sh=rs.filter(shipped).length;
     return '&lt;div style="margin-bottom:14px"&gt;'
      +'&lt;div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:550"&gt;'
-     +'&lt;span&gt;'+p+'&lt;/span&gt;&lt;span style="color:var(--muted);font-weight:400"&gt;'+rs.length+' ใบ · ของออกไปแล้ว '
+     +'&lt;span&gt;'+p+'&lt;/span&gt;&lt;span style="color:var(--muted);font-weight:400"&gt;'+rs.length+' ออเดอร์ · ของออกไปแล้ว '
      +pct(sh,rs.length).toFixed(0)+'%'+(pct(sh,rs.length)&gt;60?'&lt;span class="tag"&gt;สูง&lt;/span&gt;':'')+'&lt;/span&gt;&lt;/div&gt;'
      +'&lt;div class="bar" style="height:22px;margin:6px 0 4px"&gt;'
      +ord.map(([cc,n])=&gt;{const w=pct(n,rs.length);
-       return '&lt;div style="width:'+w+'%;background:'+COLORS[cc]+'" title="'+cc+' '+n+' ใบ"&gt;'+(w&gt;14?n:'')+'&lt;/div&gt;';}).join('')
+       return '&lt;div style="width:'+w+'%;background:'+COLORS[cc]+'" title="'+cc+' '+n+' ออเดอร์"&gt;'+(w&gt;14?n:'')+'&lt;/div&gt;';}).join('')
      +'&lt;/div&gt;&lt;div class="note"&gt;'+ord.map(([cc,n])=&gt;cc+' '+pct(n,rs.length).toFixed(0)+'%').join(' · ')+'&lt;/div&gt;&lt;/div&gt;';
   }).join('')||'&lt;div class="empty"&gt;ไม่มีข้อมูลในช่วงนี้&lt;/div&gt;';
 
@@ -7586,12 +7586,12 @@ function platChart(D,bp){
       if(h&gt;18) s+='&lt;text x="'+x(i)+'" y="'+(y(acc+v)+h/2+4)+'" text-anchor="middle" font-size="12" font-weight="600" fill="#fff"&gt;'+lbl+'&lt;/text&gt;';
       acc+=v;});
     s+='&lt;text x="'+x(i)+'" y="'+(y(acc)-8)+'" font-size="13" font-weight="650" text-anchor="middle"&gt;'
-      +(PC?tot(k)+' ใบ':tot(k))+'&lt;/text&gt;';
+      +(PC?tot(k)+' ออเดอร์':tot(k))+'&lt;/text&gt;';
     s+='&lt;text x="'+x(i)+'" y="'+(H-12)+'" font-size="12" text-anchor="middle" fill="#1C2119"&gt;'+k+'&lt;/text&gt;';});
   svg.innerHTML=s;
   el('platnote').textContent=PC
-    ?'แท่งสูงเท่ากันทุกช่องทาง เทียบสัดส่วนได้แม้ช่องทางที่มีใบน้อย · ตัวเลขบนหัวแท่งคือจำนวนใบจริง'
-    :'ความสูงตามจำนวนใบจริง · ช่องทางที่มีใบน้อยจะเห็นยาก ให้สลับไปดูสัดส่วน';
+    ?'แท่งสูงเท่ากันทุกช่องทาง เทียบสัดส่วนได้แม้ช่องทางที่มีออเดอร์น้อย · ตัวเลขบนหัวแท่งคือจำนวนออเดอร์จริง'
+    :'ความสูงตามจำนวนออเดอร์จริง · ช่องทางที่มีออเดอร์น้อยจะเห็นยาก ให้สลับไปดูสัดส่วน';
 }
 // ผูกเหตุการณ์ครั้งเดียว ไม่ผูกซ้ำทุกครั้งที่ setup() ทำงาน
 function bindOnce(){
