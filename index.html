@@ -789,6 +789,13 @@ body.present #vKPI .tscroll{max-height:none}
 .side .brand span{font-size:24.5px}
 .sidenav .grp{font-size:24.5px}
 .sidenav button{font-size:38px;padding:19px 20px}
+/* v-usize: ปุ่มปรับขนาด A− 100% A+ ในเมนูซ้าย */
+.usize{display:flex;align-items:center;gap:10px;padding:18px 22px;border-top:1px solid rgba(255,255,255,.1)}
+.usize .ul{font-size:26px;color:#A9A3C9;margin-right:auto;letter-spacing:.06em}
+.usize button{font:inherit;font-size:28px;font-weight:bold;color:#EAF0F0;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:8px 18px;cursor:pointer;min-width:74px}
+.usize button:hover{background:rgba(62,142,140,.55)}
+.usize #usizeV{min-width:120px;font-variant-numeric:tabular-nums}
 /* v-nav: ปุ่มลูกศรซ้าย-ขวาเปลี่ยนหน้า + ป้ายชื่อหน้าตอนเปลี่ยน */
 .navArrow{position:fixed;top:50%;transform:translateY(-50%);z-index:90;width:96px;height:150px;
   border:0;border-radius:24px;background:rgba(28,24,54,.55);color:#fff;font-size:110px;line-height:1;
@@ -5805,14 +5812,33 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     mark(root,'shotRoot','1');
 
     const shoot=async(w,h,sc,prep)=>{
-      const s=Math.min(sc,Math.sqrt(1.2e8/(w*h)));
+      const s=Math.min(sc,Math.sqrt(1.2e8/(w*h)),32000/h,32000/w);   /* กันเกินขนาด canvas สูงสุดของเบราว์เซอร์ */
       return html2canvas(root,{scale:s,backgroundColor:bg,useCORS:true,logging:false,
         x:0,y:0,width:w,height:h,scrollX:0,scrollY:0,windowWidth:w,windowHeight:h,
         onclone:d=>prep(d)});
     };
     const pad2=n=>String(n).padStart(2,'0');
+    /* ---- v-shotpage: ทั้งหน้าเป็นภาพยาวภาพเดียว (.png ไม่ต้อง zip) ---- */
+    if(mode==='page'){
+      say('กำลังสร้างภาพทั้งหน้า…');
+      const hh=Math.max(root.scrollHeight,R.height);
+      let c=await shoot(w0,Math.ceil(hh+60),S,d=>{
+        const rc=d.querySelector('[data-shot-root="1"]'); if(rc)shotIsolate(d,rc,w0);});
+      c=shotTrim(c,bg);
+      const M=Math.round(c.width*0.025), FOOT=Math.round(c.width*0.03);
+      const out=document.createElement('canvas'); out.width=c.width+M*2; out.height=c.height+M+FOOT;
+      const x=out.getContext('2d'); x.fillStyle=bg; x.fillRect(0,0,out.width,out.height);
+      x.drawImage(c,M,M);
+      x.fillStyle=fg; x.font=`500 ${Math.round(FOOT*0.42)}px "Baloo 2","Mitr",sans-serif`; x.textBaseline='middle';
+      x.textAlign='left'; x.fillText('Logistics Dashboard · '+(title||''),M,out.height-FOOT/2);
+      const a=document.createElement('a'); a.download=name+'-fullpage.png';
+      a.href=URL.createObjectURL(await shotBlob(out));
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+      c.width=c.height=out.width=out.height=0;
+    }
     /* ---- แบบที่ 1: สไลด์ 16:9 ---- */
-    for(let i=0;mode!=='charts'&&i<pages.length;i++){
+    for(let i=0;mode!=='charts'&&mode!=='page'&&i<pages.length;i++){
       say(`กำลังสร้างสไลด์ ${i+1}/${pages.length}…`);
       const pg=pages[i], hh=pg[pg.length-1].bot-pg[0].top;
       let c=await shoot(w0,Math.ceil(hh+260),S,d=>{
@@ -5836,7 +5862,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     /* ---- แบบที่ 2 (v-shot6): แยกทีละหัวข้อ — หัวข้อ + เนื้อหาใต้หัวข้อนั้นจนถึงหัวข้อถัดไป
        เป็น 1 ภาพ (เช่น ชื่อหน้า + วงแหวน + การ์ดตัวเลข) ภาพจึงมีหัวข้อติดมาเสมอ ---- */
     const groups=[];
-    if(mode!=='slides'){
+    if(mode!=='slides'&&mode!=='page'){
       let g=null;
       /* v-shot7: ตัดเป็น "ทีละบรรทัด" — แถวที่มีหัวข้อของตัวเอง (เช่น กราฟ 3 ช่องที่มีชื่อกำกับ
          แต่ละช่อง) = 1 ภาพทั้งแถว · แถวที่ไม่มีหัวข้อ (การ์ดตัวเลข/ตาราง) ต่อท้ายภาพก่อนหน้า
@@ -5871,12 +5897,14 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       zip.file(`2-แยกทีละหัวข้อ/${pad2(j+1)}-${shotSafe(nm)}.png`,await shotBlob(c));
       c.width=c.height=0;
     }
+    if(mode!=='page'){
     say('กำลังรวมไฟล์…');
     const blob=await zip.generateAsync({type:'blob'});
     const a=document.createElement('a');
     a.download=name+(mode==='slides'?'-slides':mode==='charts'?'-charts':'')+'.zip'; a.href=URL.createObjectURL(blob);
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    }
   }catch(e){ alert('บันทึกรูปไม่สำเร็จ: '+e.message); }
   marked.forEach(([e,k])=>{delete e.dataset[k];});
   saved.forEach(([e,z])=>e.style.zoom=z);
@@ -5894,6 +5922,7 @@ function shotMenu(btn,onPick){
   m.innerHTML=`<div class="sm-h">บันทึกเป็นรูปแบบไหน? <small style="font-weight:normal;color:var(--mute);font-size:18px">(ตัวบันทึก v8 · 24 ก.ย.)</small></div>
     <button data-m="slides"><b>🖼️ แบบรวม · สไลด์ 16:9</b><span>ทั้งหน้าแบ่งเป็นสไลด์ ขนาด Google Slides</span></button>
     <button data-m="charts"><b>🧩 แบบแยก · ทีละหัวข้อ</b><span>หัวข้อ + กราฟ/การ์ดใต้หัวข้อนั้น เป็น 1 ภาพ</span></button>
+    <button data-m="page"><b>📄 ทั้งหน้า · ภาพเดียว</b><span>ทั้งหน้าตั้งแต่บนสุดถึงล่างสุด เป็นภาพยาว .png ภาพเดียว</span></button>
     <button data-m="both"><b>📦 ทั้ง 2 แบบ</b><span>ได้ทั้งสไลด์และภาพแยก ในไฟล์ zip เดียว</span></button>`;
   document.body.appendChild(m);
   const r=btn.getBoundingClientRect(), z=parseFloat(getComputedStyle(document.body).zoom)||1;
@@ -6316,7 +6345,7 @@ window.RPT_INIT=(t)=>{ if(started){ if(t&&t!==TEAM) team(t); return; } started=t
   /* หน้าที่ฝังเป็น iframe (SOP · Return · Cancel) — คลิกข้างในแล้วคีย์บอร์ดไปอยู่ใน iframe ต้องดักในนั้นด้วย */
   function hookFrames(){
     document.querySelectorAll('iframe.sopframe').forEach(f=>{
-      const h=()=>{try{const d=f.contentDocument; if(d&&!d.__navKey){d.__navKey=1;d.addEventListener('keydown',onKey);}}catch(x){}};
+      const h=()=>{try{const d=f.contentDocument; if(d&&!d.__navKey){d.__navKey=1;d.addEventListener('keydown',onKey);if(window.__usizeKey)d.addEventListener('keydown',window.__usizeKey);}}catch(x){}};
       if(!f.__navHooked){f.__navHooked=1;f.addEventListener('load',h);} h();
     });
   }
@@ -7825,18 +7854,59 @@ el('save').onclick=async function(){
    ทำให้คนที่เปิดจอ/โน้ตบุ๊กขนาดอื่น หรือ Chrome zoom 100% เห็นใหญ่ล้นจอ ต้องย่อเองเหลือ 33–50%
    ตอนนี้: คำนวณ zoom = ค่าฐาน × (ความกว้างจอ ÷ 2380) ทุกคนจะเห็นสัดส่วนเดียวกันเสมอ */
 (function(){
-  const DESIGN_W=2380, BASE=0.55, BASE_PRESENT=1.15;   /* ขยายขึ้นอีก 10% จาก 0.5 */
+  const DESIGN_W=2380, BASE=0.55, BASE_PRESENT=1.15;   /* ขนาดตั้งต้น */
+  /* v-usize: แต่ละคนปรับขนาดเองได้ (⌘+ / ⌘− / ⌘0 หรือปุ่ม A− A+ ในเมนูซ้าย)
+     จำค่าไว้ในเบราว์เซอร์ของคนนั้น เปิดครั้งหน้าก็ยังเป็นขนาดเดิม · ไม่กระทบคนอื่น */
+  const UKEY='ldash.size';
+  let US=1; try{US=parseFloat(localStorage.getItem(UKEY))||1;}catch(e){}
+  const clampUS=v=>Math.max(0.5,Math.min(2.5,Math.round(v*100)/100));
+  function setUS(v,show){
+    US=clampUS(v); try{localStorage.setItem(UKEY,String(US));}catch(e){}
+    fitZoom(); updUI(); if(show)sizeToast();
+  }
   function fitZoom(){
     if(window.__noFit||!document.body)return;
     const base=document.body.classList.contains('present')?BASE_PRESENT:BASE;
     const w=document.documentElement.clientWidth||window.innerWidth;
-    const z=Math.max(0.15,Math.min(1.6,base*w/DESIGN_W));
+    const z=Math.max(0.15,Math.min(3,base*w/DESIGN_W*US));
     const v=z.toFixed(3);
     if(document.body.style.zoom!==v){ document.body.style.zoom=v;
       /* กราฟต้องวัดขนาดกล่องใหม่หลังเปลี่ยน zoom */
       try{ if(typeof CH!=='undefined')Object.values(CH).flat().forEach(c=>c&&c.resize&&c.resize()); }catch(e){} }
   }
   window.fitZoom=fitZoom;
+  const pct=()=>Math.round(US*100)+'%';
+  function updUI(){const v=document.getElementById('usizeV'); if(v)v.textContent=pct();}
+  let tt;
+  function sizeToast(){
+    let el=document.getElementById('navToast');
+    if(!el){el=document.createElement('div');el.id='navToast';document.body.appendChild(el);}
+    el.innerHTML='<b>ขนาดหน้าจอ</b><span>'+pct()+'</span>';
+    el.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),1200);
+  }
+  /* ปุ่มในเมนูซ้าย */
+  const foot=document.querySelector('.side .side-foot');
+  if(foot){
+    const box=document.createElement('div'); box.className='usize';
+    box.innerHTML='<span class="ul">ขนาด</span><button type="button" data-d="-1" title="เล็กลง (⌘−)">A−</button>'
+      +'<button type="button" id="usizeV" data-d="0" title="กลับเป็นขนาดตั้งต้น (⌘0)"></button>'
+      +'<button type="button" data-d="1" title="ใหญ่ขึ้น (⌘+)">A+</button>';
+    foot.parentNode.insertBefore(box,foot);
+    box.addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return;
+      const d=+b.dataset.d; setUS(d===0?1:US*(d>0?1.1:1/1.1),true);});
+  }
+  /* ⌘+ / ⌘− / ⌘0 (Windows: Ctrl) — ปรับขนาดของเราแทนการ zoom ของ Chrome
+     (เพราะ zoom ของ Chrome จะถูกปรับกลับให้พอดีจออยู่ดี) */
+  function onKey(e){
+    if(!(e.metaKey||e.ctrlKey)||e.altKey)return;
+    const k=e.key;
+    if(k==='='||k==='+'){e.preventDefault();setUS(US*1.1,true);}
+    else if(k==='-'||k==='_'){e.preventDefault();setUS(US/1.1,true);}
+    else if(k==='0'){e.preventDefault();setUS(1,true);}
+  }
+  document.addEventListener('keydown',onKey);
+  window.__usizeKey=onKey;   /* ให้ iframe (SOP/Return/Cancel) ใช้ด้วย */
+  updUI();
   let t; window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(fitZoom,120);});
   new MutationObserver(fitZoom).observe(document.body,{attributes:true,attributeFilter:['class']});
   fitZoom();
