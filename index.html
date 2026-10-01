@@ -789,6 +789,20 @@ body.present #vKPI .tscroll{max-height:none}
 .side .brand span{font-size:24.5px}
 .sidenav .grp{font-size:24.5px}
 .sidenav button{font-size:38px;padding:19px 20px}
+/* v-nav: ปุ่มลูกศรซ้าย-ขวาเปลี่ยนหน้า + ป้ายชื่อหน้าตอนเปลี่ยน */
+.navArrow{position:fixed;top:50%;transform:translateY(-50%);z-index:90;width:96px;height:150px;
+  border:0;border-radius:24px;background:rgba(28,24,54,.55);color:#fff;font-size:110px;line-height:1;
+  cursor:pointer;opacity:.35;transition:opacity .15s,background .15s;font-family:inherit;padding:0 0 14px}
+.navArrow:hover,.navArrow:focus-visible{opacity:1;background:rgba(15,118,110,.92);outline:none}
+.navArrow.l{left:560px}.navArrow.r{right:20px}
+body.present .navArrow.l{left:20px}
+@media(max-width:1100px){.navArrow.l{left:10px}}
+#navToast{position:fixed;left:50%;bottom:60px;transform:translate(-50%,20px);z-index:95;
+  background:rgba(28,24,54,.94);color:#fff;border-radius:22px;padding:22px 40px;
+  display:flex;gap:24px;align-items:baseline;font-size:44px;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#navToast span{font-size:30px;color:#8FD6D3}
+#navToast.show{opacity:1;transform:translate(-50%,0)}
 /* v-side3: เมนูซ้ายตรึงอยู่กับที่ เลื่อนหน้าแล้วขยับเฉพาะเนื้อหาด้านขวา
    (เดิมใช้ sticky + height:100vh แต่ body มี zoom ทำให้ความสูงเกินจอ เมนูเลยเลื่อนตาม) */
 .side{position:fixed;left:0;top:0;bottom:0;height:auto;z-index:60}
@@ -6258,6 +6272,58 @@ window.RPT_INIT=(t)=>{ if(started){ if(t&&t!==TEAM) team(t); return; } started=t
 
   btns.forEach(b=>b.addEventListener('click',()=>
     go(b.dataset.view, b.dataset.view==='report'?b.dataset.team:(b.dataset.sec||'overview'))));
+
+  /* v-nav: กด ← / → (คีย์บอร์ด หรือปุ่มลูกศรซ้าย-ขวาบนจอ) เพื่อเปลี่ยน dashboard ไปหน้าก่อน/ถัดไป
+     เรียงตามลำดับในเมนูซ้าย · วนรอบ (หน้าสุดท้าย → หน้าแรก) */
+  const navTitle=b=>(b.textContent||'').trim();
+  function step(dir){
+    const i=btns.findIndex(b=>b.classList.contains('on'));
+    const n=btns[(Math.max(0,i)+dir+btns.length)%btns.length];
+    if(!n)return;
+    n.click();
+    window.scrollTo({top:0});
+    toast(navTitle(n),btns.indexOf(n)+1);
+    setTimeout(updNav,0);
+  }
+  let tT;
+  function toast(t,k){
+    let el=document.getElementById('navToast');
+    if(!el){el=document.createElement('div');el.id='navToast';document.body.appendChild(el);}
+    el.innerHTML='<b></b><span></span>';
+    el.querySelector('b').textContent=t; el.querySelector('span').textContent=k+' / '+btns.length;
+    el.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>el.classList.remove('show'),1400);
+  }
+  const prev=document.createElement('button'), next=document.createElement('button');
+  prev.type=next.type='button'; prev.className='navArrow l'; next.className='navArrow r';
+  prev.innerHTML='&#8249;'; next.innerHTML='&#8250;';
+  prev.addEventListener('click',e=>{e.stopPropagation();step(-1);});
+  next.addEventListener('click',e=>{e.stopPropagation();step(1);});
+  document.body.append(prev,next);
+  function updNav(){
+    const i=Math.max(0,btns.findIndex(b=>b.classList.contains('on')));
+    const pb=btns[(i-1+btns.length)%btns.length], nb=btns[(i+1)%btns.length];
+    prev.title='← '+navTitle(pb); prev.setAttribute('aria-label','หน้าก่อนหน้า: '+navTitle(pb));
+    next.title=navTitle(nb)+' →'; next.setAttribute('aria-label','หน้าถัดไป: '+navTitle(nb));
+  }
+  btns.forEach(b=>b.addEventListener('click',()=>setTimeout(updNav,0)));
+  function onKey(e){
+    if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+    if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)return;
+    const t=e.target, tag=(t&&t.tagName||'').toLowerCase();
+    if(tag==='input'||tag==='select'||tag==='textarea'||(t&&t.isContentEditable))return;
+    if(document.querySelector('.wsel-p:not([hidden]),.kcal-p:not([hidden]),#clkPop'))return;  /* มีดรอปดาวน์/ปฏิทินเปิดอยู่ */
+    e.preventDefault(); step(e.key==='ArrowRight'?1:-1);
+  }
+  document.addEventListener('keydown',onKey);
+  /* หน้าที่ฝังเป็น iframe (SOP · Return · Cancel) — คลิกข้างในแล้วคีย์บอร์ดไปอยู่ใน iframe ต้องดักในนั้นด้วย */
+  function hookFrames(){
+    document.querySelectorAll('iframe.sopframe').forEach(f=>{
+      const h=()=>{try{const d=f.contentDocument; if(d&&!d.__navKey){d.__navKey=1;d.addEventListener('keydown',onKey);}}catch(x){}};
+      if(!f.__navHooked){f.__navHooked=1;f.addEventListener('load',h);} h();
+    });
+  }
+  new MutationObserver(hookFrames).observe(document.getElementById('vKPI'),{childList:true,subtree:true});
+  updNav();
 
   const t=document.getElementById('sideToggle');
   if(t)t.addEventListener('click',e=>{e.stopPropagation();document.body.classList.toggle('side-open');});
