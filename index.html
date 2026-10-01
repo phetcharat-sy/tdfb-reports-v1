@@ -1320,7 +1320,7 @@ async function loadDock(){
           cInD=t.col('รับเข้า(วัน)','ระยะเวลารับเข้า','จำนวนวันรับเข้า'),
           cStD=t.col('จัดเก็บ(วัน)','ระยะเวลาจัดเก็บ','จำนวนวันจัดเก็บ'),
           cQA=t.col('QA');
-    DOCK_MAP={'LOT / SERIAL':cLot,'Product':cName,'ประเภท':cType,'ปลายทาง (TO)':cTo,
+    DOCK_MAP={'Product':cName,'ประเภท':cType,'ปลายทาง (TO)':cTo,
               'วันที่มาส่ง':cSend,'รับเข้าระบบ':cRecv,'จัดเก็บ':cStore,
               'รับเข้า (วัน)':cInD,'จัดเก็บ (วัน)':cStD,'QA (วัน)':cQA};
     if(cIn<0&&cSt<0)throw new Error('หาคอลัมน์เกณฑ์รับเข้า/จัดเก็บ ไม่เจอ');
@@ -2455,9 +2455,8 @@ function secDock(){
           อ่านคอลัมน์เหล่านี้จากชีตไม่เจอ: <b>${esc(miss.join(' · '))}</b><br>
           <span style="color:var(--mute)">หัวคอลัมน์ที่อ่านได้จริง: ${esc((DOCK_H||[]).filter(Boolean).join(' | '))}</span>
         </div>`:'';})()}`
-   +(bad.length?`<div class="tscroll" style="overflow-x:auto"><table class="dt dock-dt" style="min-width:2100px"><thead><tr>
+   +(bad.length?`<div class="tscroll" style="overflow-x:auto"><table class="dt dock-dt" style="min-width:1850px"><thead><tr>
        <th style="width:110px">Week</th>
-       <th style="width:250px">LOT / SERIAL</th>
        <th style="width:380px">Product</th>
        <th style="width:160px">ประเภท</th>
        <th style="width:280px">ปลายทาง (TO)</th>
@@ -2473,7 +2472,6 @@ function secDock(){
         const num=v=>v==null?'—':(Math.round(v*100)/100).toFixed(2);
         return `<tr>
         <td class="c-week"><b>W${esc(r.week)}</b></td>
-        <td class="mono">${esc(r.lot||'—')}</td>
         <td><span class="pname">${esc(r.name||'—')}</span>
           ${r.po?`<span class="pmeta">${esc(r.po)}</span>`:''}</td>
         <td>${r.type?`<span class="why has">${esc(r.type)}</span>`:'—'}</td>
