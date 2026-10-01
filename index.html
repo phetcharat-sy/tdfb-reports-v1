@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TDFB Operations Dashboard</title>
+<title>Logistics Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&family=Baloo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -803,7 +803,7 @@ body.present .main{margin-left:0}
 <button class="side-toggle" id="sideToggle" aria-label="เปิด/ปิดเมนู">☰</button>
 <div class="shell">
   <aside class="side" id="side">
-    <div class="brand"><b>TDFB</b><span>Operations</span></div>
+    <div class="brand"><b>TDFB</b><span>Logistics Dashboard</span></div>
     <nav class="sidenav">
       <div class="grp">ภาพรวม</div>
       <button data-view="kpi" data-sec="overview" class="on">KPI ทุกแผนก</button>
@@ -5816,7 +5816,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       x.imageSmoothingQuality='high';
       x.drawImage(c,(sl.width-dw)/2,M+Math.max(0,(bh-dh)/2)*(dh<bh*0.6?0.4:1),dw,dh);
       x.fillStyle=fg; x.font='500 34px "Baloo 2","Mitr",sans-serif'; x.textBaseline='middle';
-      x.textAlign='left'; x.fillText('TDFB Operations · '+(title||''),M,sl.height-FOOT/2);
+      x.textAlign='left'; x.fillText('TDFB Logistics Dashboard · '+(title||''),M,sl.height-FOOT/2);
       x.textAlign='right'; x.fillText(`${i+1} / ${pages.length}`,sl.width-M,sl.height-FOOT/2);
       zip.file(`1-สไลด์ 16x9/slide-${pad2(i+1)}.png`,await shotBlob(sl));
       c.width=c.height=0;
@@ -7761,7 +7761,7 @@ el('save').onclick=async function(){
    ทำให้คนที่เปิดจอ/โน้ตบุ๊กขนาดอื่น หรือ Chrome zoom 100% เห็นใหญ่ล้นจอ ต้องย่อเองเหลือ 33–50%
    ตอนนี้: คำนวณ zoom = ค่าฐาน × (ความกว้างจอ ÷ 2380) ทุกคนจะเห็นสัดส่วนเดียวกันเสมอ */
 (function(){
-  const DESIGN_W=2380, BASE=1.3, BASE_PRESENT=1.15;
+  const DESIGN_W=2380, BASE=1.15, BASE_PRESENT=1.15;   /* ย่อลง ~12% (เดิม 1.3) */
   function fitZoom(){
     if(window.__noFit||!document.body)return;
     const base=document.body.classList.contains('present')?BASE_PRESENT:BASE;
