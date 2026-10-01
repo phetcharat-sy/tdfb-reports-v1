@@ -2006,7 +2006,9 @@ function secOOS(){
      <!-- "จัดส่งก่อนกำหนด" ย้ายไปแสดงที่หน้า On-Time Performance แล้ว — % ยังคำนวณ (on+early)/total เหมือนเดิม
           เพราะ on-time กับ early ยังนับเป็นผ่านเกณฑ์ทั้งคู่ มีแค่ late เท่านั้นที่ไม่ผ่าน -->
 
-     <h2 class="sec">Weekly Line Items <em>จำนวนชิ้นที่ออกต่อสัปดาห์</em><span></span></h2>
+     <h2 class="sec">${tGrp()==='month'?'Monthly Line Items <em>จำนวนชิ้นที่ออกต่อเดือน</em>'
+        :tGrp()==='day'?'Daily Line Items <em>จำนวนชิ้นที่ออกต่อวัน</em>'
+        :'Weekly Line Items <em>จำนวนชิ้นที่ออกต่อสัปดาห์</em>'}<span></span></h2>
      <div class="cpanel"><div class="cbox"><canvas id="c_wk2"></canvas></div></div>
 
      <div class="g2">
@@ -2024,17 +2026,23 @@ function drawOOS(){
   if(!OOS_CTX)return;
   const {rows,on,ea,la}=OOS_CTX;
 
-  const byW={}; rows.forEach(r=>{ if(r.week)byW[r.week]=(byW[r.week]||0)+r.qty; });
-  const wk=Object.keys(byW).sort((a,b)=>a-b);
+  /* v-grp: ภาพรวม = รายเดือน · เลือกเดือน = รายสัปดาห์ · เลือก Week/Day = รายวัน */
+  const g=tGrp(), byW={};
+  rows.forEach(r=>{
+    const k=g==='week'?(r.week||(r.date?String(isoWeek(r.date)):''))
+           :r.date?(g==='month'?r.date.slice(0,7):r.date):'';
+    if(k)byW[k]=(byW[k]||0)+r.qty; });
+  const wk=Object.keys(byW).sort(g==='week'?((a,b)=>a-b):((a,b)=>a<b?-1:a>b?1:0));
+  const wkLbl=w=>g==='month'?ymLbl(w):g==='day'?shortD(w):'W'+w;
   destroy('wk2');
   const o=baseOpts(false); o.layout={padding:{top:34,right:26}};
   o.plugins.linePt={display:true};
   if(wk.length===1)o.scales.x.offset=true;
   CH.wk2=new Chart(document.getElementById('c_wk2'),{type:'line',
-    data:{labels:wk.map(w=>'W'+w),datasets:[{label:'ชิ้น',data:wk.map(w=>byW[w]),
+    data:{labels:wk.map(wkLbl),datasets:[{label:'ชิ้น',data:wk.map(w=>byW[w]),
       borderColor:C.tealD,backgroundColor:'rgba(15,118,110,.13)',tension:.3,fill:true,
       borderWidth:2,pointRadius:wk.length===1?9:3,pointBackgroundColor:C.tealD}]},options:o});
-  CH.wk2.data._unit='ชิ้น';
+  CH.wk2.data._unit='ชิ้น'; if(g==='day')CH.wk2.data._cfv=wk;
 
   const cnt={}; rows.forEach(r=>{const p=(r.product||'').trim();if(p)cnt[p]=(cnt[p]||0)+r.qty;});
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -2334,12 +2342,23 @@ function secDock(){
   const avg=dd.length?dd.reduce((a,b)=>a+b,0)/dd.length:null;
   const worst=dd.length?Math.max(...dd):null;
 
-  /* สรุปรายสัปดาห์ */
+  /* สรุปตามช่วง — v-grp: ภาพรวม = รายเดือน · เลือกเดือน/สัปดาห์/วัน = รายสัปดาห์ */
+  const dkMon=tGrp()==='month';
+  const dkYr=+(fYear()||new Date().getFullYear());
+  const dkKey=r=>{
+    if(!dkMon)return r.week;
+    const ms=dockDateMs(r);
+    if(!isNaN(ms))return dkey(new Date(ms)).slice(0,7);
+    return parseInt(r.week)?wkToYM(dkYr,parseInt(r.week)):'?';
+  };
   const byW={};
-  rows.forEach(r=>{const o=byW[r.week]=byW[r.week]||{w:r.week,n:0,inOk:0,stOk:0,days:0,dn:0};
+  rows.forEach(r=>{const k=dkKey(r);
+    const o=byW[k]=byW[k]||{w:k,lbl:dkMon?(k==='?'?'ไม่ระบุ':ymLbl(k)):'W'+k,
+      full:dkMon?(k==='?'?'ไม่ระบุ':ymLbl(k)):'Week '+k,n:0,inOk:0,stOk:0,days:0,dn:0};
     o.n++; if(r.inOk)o.inOk++; if(r.stOk)o.stOk++;
     if(r.days!=null){o.days+=r.days;o.dn++;}});
-  const wk=Object.keys(byW).sort((a,b)=>(parseInt(a)||0)-(parseInt(b)||0));
+  const wk=Object.keys(byW).sort(dkMon?((a,b)=>a<b?-1:a>b?1:0):((a,b)=>(parseInt(a)||0)-(parseInt(b)||0)));
+  const dkUnit=dkMon?'เดือน':'สัปดาห์', dkGrp=dkMon?'รายเดือน':'รายสัปดาห์';
   /* ON-TIME รายสัปดาห์ตามมุมมองที่เลือก */
   const wOn=o=>!o.n?0
     : fDk==='in' ? o.inOk/o.n*100
@@ -2358,24 +2377,24 @@ function secDock(){
    +ringHTML(allP,90,
       `<span>ON-TIME ${esc(vName)}</span>`
      +`<span>เป้าหมาย ไม่ผ่านเกณฑ์ <b>&lt; 10%</b> · ตอนนี้ <b>${pct1(100-allP)}</b></span>`
-     +`<span style="opacity:.8">${fmt(n)} รายการ · ${wk.length} สัปดาห์${fWeekLabel()?` · ${fWeekLabel()}`:''}</span>`)
+     +`<span style="opacity:.8">${fmt(n)} รายการ · ${wk.length} ${dkUnit}${fWeekLabel()?` · ${fWeekLabel()}`:''}</span>`)
    +`<div class="sgrid">${card('รับเข้าตรงเวลา',pct1(inP),inP>=90?'teal':'rose')}
       ${card('จัดเก็บตรงเวลา',pct1(stP),stP>=90?'teal':'rose')}
       ${card('ระยะเวลาเฉลี่ย (วัน)',avg==null?'—':avg.toFixed(1),'amber')}
       ${card('นานสุด (วัน)',worst==null?'—':worst.toFixed(1),'rose')}</div>
 
-     <h2 class="sec">ON-TIME รายสัปดาห์ <em>${esc(vName)}</em><span></span></h2>
+     <h2 class="sec">ON-TIME ${dkGrp} <em>${esc(vName)}</em><span></span></h2>
      <div class="cpanel">
        <div class="cscroll"><div class="cbox" style="height:560px;min-width:${Math.max(900,wk.length*122)}px">
          <canvas id="c_dockwk"></canvas></div></div>
      </div>
      <div class="tscroll"><table class="dt"><thead><tr>
-       <th class="c-week">สัปดาห์</th><th class="num">รายการ</th>
+       <th class="c-week">${dkMon?'เดือน':'สัปดาห์'}</th><th class="num">รายการ</th>
        <th class="num">รับเข้าตรงเวลา</th><th class="num">จัดเก็บตรงเวลา</th>
        <th class="num">ระยะเวลาเฉลี่ย (วัน)</th><th class="num">ON-TIME ${esc(vName)}</th>
      </tr></thead><tbody>`
    +wk.map(w=>{const o=byW[w],v=wOn(o);
-      return `<tr><td class="c-week"><b>Week ${o.w}</b></td>
+      return `<tr><td class="c-week"><b>${o.full}</b></td>
         <td class="num">${fmt(o.n)}</td>
         <td class="num">${pct1(o.n?o.inOk/o.n*100:0)}</td>
         <td class="num">${pct1(o.n?o.stOk/o.n*100:0)}</td>
@@ -2435,7 +2454,7 @@ function drawDock(){
   o.scales.y.max=100;
   o.scales.y.suggestedMin=Math.max(0,Math.floor(Math.min(...vals)/10)*10-5);
   o.plugins.tooltip.callbacks={
-    title:c=>'Week '+wk[c[0].dataIndex],
+    title:c=>byW[wk[c[0].dataIndex]].full,
     label:c=>{const d=byW[wk[c.dataIndex]];
       return `ON-TIME ${vName} ${(+c.raw).toFixed(1)}%  ·  ${fmt(d.n)} รายการ`
         +(d.dn?`  ·  เฉลี่ย ${(d.days/d.dn).toFixed(1)} วัน`:'');}};
@@ -2443,7 +2462,7 @@ function drawDock(){
   o.scales.x.ticks.font={size:cf(26)};
   o.scales.y.ticks.font={size:cf(26)};
   CH.dockwk=new Chart(el2,{type:'bar',
-    data:{labels:wk.map(w=>'W'+w),datasets:[{data:vals,
+    data:{labels:wk.map(w=>byW[w].lbl),datasets:[{data:vals,
       backgroundColor:vals.map(v=>v>=90?C.teal:C.rose),borderRadius:6,
       maxBarThickness:70,minBarLength:2}]},options:o});
 }
@@ -4355,7 +4374,15 @@ function secPick(){
   const peakIdx=hrTotal.length?hrTotal.indexOf(Math.max(...hrTotal)):-1;
   const peakHour=peakIdx>=0?hrs[peakIdx]:null;
 
-  PICK_CTX={per,days,dayBy,hrs,hrBy};
+  /* v-grp: กราฟแนวโน้ม — ภาพรวม = รายเดือน · เลือกเดือน = รายสัปดาห์ · เลือก Week/Day = รายวัน */
+  const pg=tGrp();
+  const pKey=d=>pg==='month'?d.slice(0,7):pg==='week'?isoWkKey(d):d;
+  const tk=[...new Set(days.map(pKey))].sort();
+  const tBy={}; per.forEach(p=>tBy[p.who]=tk.map(()=>0));
+  list.forEach(r=>{if(!r.date)return;const i=tk.indexOf(pKey(r.date)); if(i>=0&&tBy[r.who])tBy[r.who][i]+=r.qty;});
+  per.forEach(p=>{tBy[p.who]=tBy[p.who].map(v=>v||null);});
+  const tLbl=tk.map(k=>pg==='month'?ymLbl(k):pg==='week'?'W'+(+k.slice(-2)):shortD(k));
+  PICK_CTX={per,days,dayBy,hrs,hrBy,pg,tk,tBy,tLbl};
 
   return bar
    +`<div class="sgrid">
@@ -4373,9 +4400,9 @@ function secPick(){
            <canvas id="c_pkbat"></canvas></div></div>
      </div>
 
-     <h2 class="sec">แนวโน้มการหยิบในแต่ละวัน <em>จำนวนชิ้นต่อวัน แยกตามคน</em><span></span></h2>
+     <h2 class="sec">แนวโน้มการหยิบ${pg==='month'?'รายเดือน':pg==='week'?'รายสัปดาห์':'ในแต่ละวัน'} <em>จำนวนชิ้นต่อ${pg==='month'?'เดือน':pg==='week'?'สัปดาห์':'วัน'} แยกตามคน</em><span></span></h2>
      <div class="cpanel"><div class="cscroll">
-       <div class="cbox" style="height:480px;min-width:${Math.max(900,days.length*120)}px">
+       <div class="cbox" style="height:480px;min-width:${Math.max(900,tk.length*120)}px">
          <canvas id="c_pkday"></canvas></div></div></div>
 
      <h2 class="sec">ช่วงเวลาที่หยิบหนาแน่น <em>จำนวนชิ้นตามชั่วโมง</em><span></span></h2>
@@ -4404,7 +4431,7 @@ function secPick(){
 
 function drawPick(){
   if(!PICK_CTX)return;
-  const {per,days,dayBy,hrs,hrBy}=PICK_CTX;
+  const {per,days,dayBy,hrs,hrBy,pg,tk,tBy,tLbl}=PICK_CTX;
   const cols=per.map((_,i)=>PICK_PAL[i%PICK_PAL.length]);
   const colOf={}; per.forEach((p,i)=>colOf[p.who]=cols[i]);
 
@@ -4452,7 +4479,7 @@ function drawPick(){
 
   /* แนวโน้มรายวัน — เส้นแยกตามคน */
   const el3=document.getElementById('c_pkday');
-  if(el3&&days.length){
+  if(el3&&tk.length){
     destroy('pkday');
     const o=baseOpts(true);
     o.interaction={mode:'index',intersect:false};
@@ -4461,12 +4488,12 @@ function drawPick(){
     o.scales.y.ticks.callback=v=>fmt(v);
     o.plugins.tooltip.callbacks={label:c=>`${c.dataset.label}: ${fmt(c.raw)} ชิ้น`};
     CH.pkday=new Chart(el3,{type:'line',
-      data:{labels:days.map(d=>shortD(d)),
-        datasets:per.map((p,i)=>({label:p.who,data:dayBy[p.who],
+      data:{labels:tLbl,
+        datasets:per.map((p,i)=>({label:p.who,data:tBy[p.who],
           borderColor:cols[i],backgroundColor:cols[i],borderWidth:3,
           tension:.35,pointRadius:3,pointBackgroundColor:cols[i],
           spanGaps:true,fill:false}))},options:o});
-    CH.pkday.data._cfv=days; CH.pkday.data._unit='ชิ้น';
+    CH.pkday.data._cfv=pg==='day'?tk:tLbl; CH.pkday.data._unit='ชิ้น';
   }
 
   /* ช่วงเวลาที่หยิบหนาแน่น — เส้นโค้งมีพื้นที่ใต้กราฟ แยกตามคน */
@@ -5331,6 +5358,23 @@ function renderKPI(){
   const now=new Date();
   el('kTs').textContent=`ข้อมูล ณ ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()} `
     +`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+}
+
+/* v-grp: กราฟแนวโน้มทุกหน้า — ภาพรวม (ไม่เลือกเดือน) = รายเดือน · เลือกเดือน = รายสัปดาห์
+   · เลือก Week/Day = รายวัน (กราฟที่ข้อมูลเป็นรายสัปดาห์อยู่แล้วจะคงเป็นรายสัปดาห์) */
+function tGrp(){ return (DAYSEL||WKSEL.length)?'day':fMonth()?'week':'month'; }
+function ymLbl(k){ return MON_S[+k.slice(5,7)-1]+' '+k.slice(2,4); }
+function isoWkKey(k){
+  const [y,m,d]=k.split('-').map(Number);
+  const t=new Date(Date.UTC(y,m-1,d));
+  t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));
+  return t.getUTCFullYear()+'-W'+String(isoWeek(k)).padStart(2,'0');
+}
+/* สัปดาห์ ISO → เดือนที่วันพฤหัสของสัปดาห์นั้นอยู่ (ใช้กับแถวที่มีแค่เลขสัปดาห์ ไม่มีวันที่) */
+function wkToYM(y,w){
+  const j4=new Date(Date.UTC(y,0,4)), dn=j4.getUTCDay()||7;
+  const th=new Date(j4.getTime()+((w-1)*7+(4-dn))*864e5);
+  return th.getUTCFullYear()+'-'+String(th.getUTCMonth()+1).padStart(2,'0');
 }
 
 function isoWeek(k){
@@ -6985,7 +7029,7 @@ td.hi{font-weight:650}
 &lt;/div&gt;
 
 &lt;div class=&quot;panel&quot;&gt;
-  &lt;h2&gt;แนวโน้มรายสัปดาห์&lt;/h2&gt;
+  &lt;h2 id=&quot;trendh&quot;&gt;แนวโน้มรายสัปดาห์&lt;/h2&gt;
   &lt;p class=&quot;note&quot; id=&quot;trendnote&quot;&gt;&lt;/p&gt;
   &lt;svg id=&quot;trend&quot; viewBox=&quot;0 0 900 220&quot; style=&quot;width:100%;height:220px&quot;&gt;&lt;/svg&gt;
   &lt;div class=&quot;legend&quot; style=&quot;margin-top:8px&quot;&gt;
@@ -7098,8 +7142,15 @@ function prodTable(D,filter,sel){
 }
 
 function trend(D){
-  const wk={}; D.forEach(r=&gt;{const k=r.w||&#x27;?&#x27;;(wk[k]??={s:0,c:0});shipped(r)?wk[k].s++:wk[k].c++;});
-  const ks=Object.keys(wk).sort((a,b)=&gt;a-b);
+  /* v-grp: ช่วงวันที่ยาวกว่า ~1 เดือน (รวมถึงภาพรวมทั้งหมด) = รายเดือน · สั้นกว่านั้น = รายสัปดาห์ */
+  const f0=el(&#x27;from&#x27;).value,t0=el(&#x27;to&#x27;).value;
+  const byM=!(f0&amp;&amp;t0)||(new Date(t0)-new Date(f0))/864e5&gt;35;
+  const MS=[&#x27;ม.ค.&#x27;,&#x27;ก.พ.&#x27;,&#x27;มี.ค.&#x27;,&#x27;เม.ย.&#x27;,&#x27;พ.ค.&#x27;,&#x27;มิ.ย.&#x27;,&#x27;ก.ค.&#x27;,&#x27;ส.ค.&#x27;,&#x27;ก.ย.&#x27;,&#x27;ต.ค.&#x27;,&#x27;พ.ย.&#x27;,&#x27;ธ.ค.&#x27;];
+  const kOf=r=&gt;byM?((r.d||&#x27;&#x27;).slice(0,7)||&#x27;?&#x27;):(r.w||&#x27;?&#x27;);
+  const lblOf=k=&gt;byM?(k===&#x27;?&#x27;?&#x27;ไม่ระบุ&#x27;:MS[+k.slice(5,7)-1]+&#x27; &#x27;+k.slice(2,4)):&#x27;สัปดาห์ &#x27;+k;
+  el(&#x27;trendh&#x27;).textContent=byM?&#x27;แนวโน้มรายเดือน&#x27;:&#x27;แนวโน้มรายสัปดาห์&#x27;;
+  const wk={}; D.forEach(r=&gt;{const k=kOf(r);(wk[k]??={s:0,c:0});shipped(r)?wk[k].s++:wk[k].c++;});
+  const ks=Object.keys(wk).sort(byM?((a,b)=&gt;a&lt;b?-1:a&gt;b?1:0):((a,b)=&gt;a-b));
   if(!ks.length){el(&#x27;trend&#x27;).innerHTML=&#x27;&lt;text x=&quot;450&quot; y=&quot;110&quot; text-anchor=&quot;middle&quot; font-size=&quot;14&quot; fill=&quot;#6B7266&quot;&gt;ไม่มีข้อมูลในช่วงนี้&lt;/text&gt;&#x27;;el(&#x27;trendnote&#x27;).textContent=&#x27;&#x27;;return;}
   const max=Math.max(...ks.map(k=&gt;wk[k].s+wk[k].c))*1.15||1;
   const W=900,H=220,P=34,bw=Math.min(90,(W-P*2)/ks.length*0.6);
@@ -7112,9 +7163,9 @@ function trend(D){
     s+=&#x27;&lt;rect x=&quot;&#x27;+(x(i)-bw/2)+&#x27;&quot; y=&quot;&#x27;+y(o.c)+&#x27;&quot; width=&quot;&#x27;+bw+&#x27;&quot; height=&quot;&#x27;+Math.max(0,y(0)-y(o.c))+&#x27;&quot; fill=&quot;#3F8E6E&quot; rx=&quot;3&quot;/&gt;&#x27;;
     s+=&#x27;&lt;rect x=&quot;&#x27;+(x(i)-bw/2)+&#x27;&quot; y=&quot;&#x27;+y(t)+&#x27;&quot; width=&quot;&#x27;+bw+&#x27;&quot; height=&quot;&#x27;+Math.max(0,y(o.c)-y(t))+&#x27;&quot; fill=&quot;#C2603C&quot; rx=&quot;3&quot;/&gt;&#x27;;
     s+=&#x27;&lt;text x=&quot;&#x27;+x(i)+&#x27;&quot; y=&quot;&#x27;+(y(t)-7)+&#x27;&quot; font-size=&quot;12&quot; font-weight=&quot;600&quot; text-anchor=&quot;middle&quot;&gt;&#x27;+t+&#x27;&lt;/text&gt;&#x27;;
-    s+=&#x27;&lt;text x=&quot;&#x27;+x(i)+&#x27;&quot; y=&quot;&#x27;+(H-10)+&#x27;&quot; font-size=&quot;11.5&quot; text-anchor=&quot;middle&quot; fill=&quot;#6B7266&quot;&gt;สัปดาห์ &#x27;+k+&#x27;&lt;/text&gt;&#x27;;});
+    s+=&#x27;&lt;text x=&quot;&#x27;+x(i)+&#x27;&quot; y=&quot;&#x27;+(H-10)+&#x27;&quot; font-size=&quot;11.5&quot; text-anchor=&quot;middle&quot; fill=&quot;#6B7266&quot;&gt;&#x27;+lblOf(k)+&#x27;&lt;/text&gt;&#x27;;});
   el(&#x27;trend&#x27;).innerHTML=s;
-  el(&#x27;trendnote&#x27;).textContent=ks.length&lt;6?&#x27;ข้อมูลยังมี &#x27;+ks.length+&#x27; สัปดาห์ ต้องสะสมอีกสักระยะถึงจะอ่านแนวโน้มได้จริง&#x27;:&#x27;&#x27;;
+  el(&#x27;trendnote&#x27;).textContent=!byM&amp;&amp;ks.length&lt;6?&#x27;ข้อมูลยังมี &#x27;+ks.length+&#x27; สัปดาห์ ต้องสะสมอีกสักระยะถึงจะอ่านแนวโน้มได้จริง&#x27;:&#x27;&#x27;;
 }
 
 const current=()=&gt;{const f=el(&#x27;from&#x27;).value,t=el(&#x27;to&#x27;).value,p=el(&#x27;plat&#x27;).value,c=el(&#x27;cause&#x27;).value;
@@ -7342,7 +7393,7 @@ td.hi{font-weight:650}
 &lt;/div&gt;
 
 &lt;div class="panel"&gt;
-  &lt;h2&gt;แนวโน้มรายสัปดาห์&lt;/h2&gt;
+  &lt;h2 id="trendh"&gt;แนวโน้มรายสัปดาห์&lt;/h2&gt;
   &lt;p class="note" id="trendnote"&gt;&lt;/p&gt;
   &lt;svg id="trend" viewBox="0 0 900 220" style="width:100%;height:220px"&gt;&lt;/svg&gt;
   &lt;div class="legend" style="margin-top:8px" id="trendleg"&gt;&lt;/div&gt;
@@ -7472,8 +7523,15 @@ function donut(svgId,parts,total){
 }
 
 function trend(D){
+  /* v-grp: ช่วงวันที่ยาวกว่า ~1 เดือน (รวมถึงภาพรวมทั้งหมด) = รายเดือน · สั้นกว่านั้น = รายสัปดาห์ */
+  const f0=el('from').value,t0=el('to').value;
+  const byM=!(f0&amp;&amp;t0)||(new Date(t0)-new Date(f0))/864e5&gt;35;
+  const MS=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const kOf=r=&gt;byM?((r.d||'').slice(0,7)||'?'):(r.w||'?');
+  const lblOf=k=&gt;byM?(k==='?'?'ไม่ระบุ':MS[+k.slice(5,7)-1]+' '+k.slice(2,4)):'สัปดาห์ '+k;
+  el('trendh').textContent=byM?'แนวโน้มรายเดือน':'แนวโน้มรายสัปดาห์';
   const wk={},first={};
-  D.forEach(r=&gt;{const k=r.w||'?';(wk[k]??={});CATS.forEach(c=&gt;wk[k][c]??=0);wk[k][r.c]++;
+  D.forEach(r=&gt;{const k=kOf(r);(wk[k]??={});CATS.forEach(c=&gt;wk[k][c]??=0);wk[k][r.c]++;
     if(!first[k]||r.d&lt;first[k])first[k]=r.d;});
   const ks=Object.keys(wk).sort((a,b)=&gt;first[a]&lt;first[b]?-1:1);   // เรียงตามวันที่จริง ไม่ใช่เลขสัปดาห์
   if(!ks.length){el('trend').innerHTML='&lt;text x="450" y="110" text-anchor="middle" font-size="14" fill="#6B7266"&gt;ไม่มีข้อมูลในช่วงนี้&lt;/text&gt;';el('trendnote').textContent='';return;}
@@ -7491,10 +7549,10 @@ function trend(D){
       s+='&lt;rect x="'+(x(i)-bw/2)+'" y="'+y(acc+n)+'" width="'+bw+'" height="'+Math.max(0,y(acc)-y(acc+n))
         +'" fill="'+COLORS[c]+'" rx="3"/&gt;'; acc+=n;});
     s+='&lt;text x="'+x(i)+'" y="'+(y(acc)-7)+'" font-size="12" font-weight="600" text-anchor="middle"&gt;'+acc+'&lt;/text&gt;';
-    s+='&lt;text x="'+x(i)+'" y="'+(H-10)+'" font-size="11.5" text-anchor="middle" fill="#6B7266"&gt;สัปดาห์ '+k+'&lt;/text&gt;';});
+    s+='&lt;text x="'+x(i)+'" y="'+(H-10)+'" font-size="11.5" text-anchor="middle" fill="#6B7266"&gt;'+lblOf(k)+'&lt;/text&gt;';});
   el('trend').innerHTML=s;
   el('trendleg').innerHTML=CATS.map(c=&gt;'&lt;span&gt;&lt;i style="background:'+COLORS[c]+'"&gt;&lt;/i&gt;'+c+'&lt;/span&gt;').join('');
-  el('trendnote').textContent=ks.length&lt;6?'ข้อมูลยังมี '+ks.length+' สัปดาห์ ต้องสะสมอีกสักระยะถึงจะอ่านแนวโน้มได้จริง':'';
+  el('trendnote').textContent=!byM&amp;&amp;ks.length&lt;6?'ข้อมูลยังมี '+ks.length+' สัปดาห์ ต้องสะสมอีกสักระยะถึงจะอ่านแนวโน้มได้จริง':'';
 }
 
 function render(){
