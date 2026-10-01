@@ -7761,7 +7761,7 @@ el('save').onclick=async function(){
    ทำให้คนที่เปิดจอ/โน้ตบุ๊กขนาดอื่น หรือ Chrome zoom 100% เห็นใหญ่ล้นจอ ต้องย่อเองเหลือ 33–50%
    ตอนนี้: คำนวณ zoom = ค่าฐาน × (ความกว้างจอ ÷ 2380) ทุกคนจะเห็นสัดส่วนเดียวกันเสมอ */
 (function(){
-  const DESIGN_W=2380, BASE=1.15, BASE_PRESENT=1.15;   /* ย่อลง ~12% (เดิม 1.3) */
+  const DESIGN_W=2380, BASE=1.03, BASE_PRESENT=1.15;   /* ย่อลงอีก ~10% (1.3 → 1.15 → 1.03) */
   function fitZoom(){
     if(window.__noFit||!document.body)return;
     const base=document.body.classList.contains('present')?BASE_PRESENT:BASE;
