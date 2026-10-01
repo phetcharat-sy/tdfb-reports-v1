@@ -270,6 +270,11 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
   box-shadow:0 2px 6px rgba(20,24,40,.10),0 16px 38px rgba(20,24,40,.12)}#vKPI .big.a{background:linear-gradient(140deg,#4AA3A0 0%,var(--teal-d) 100%)}#vKPI .big.b{background:linear-gradient(140deg,#7D6DB8 0%,var(--plum-d) 100%)}#vKPI .big .l{font-size:37.6px;opacity:.95}#vKPI .big .v{font-size:114px;font-weight:bold;line-height:1.05;letter-spacing:-1px;margin-top:4px}#vKPI .big .n{font-size:29.6px;opacity:.9;margin-top:4px}/* KPI เรียงบรรทัดละใบ · จัดเนื้อหาแนวนอนไม่ให้การ์ดสูงเกินไป */
 #vKPI .kpis{display:grid;grid-template-columns:1fr;gap:6px}
 #vKPI .kpis>.subsec{grid-column:1/-1;margin-top:26px}
+/* v-2col: หน้า KPI ทุกแผนก บรรทัดละ 2 KPI */
+#vKPI #ovBox .kpis{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+#vKPI .kcell{display:flex;flex-direction:column;min-width:0}
+#vKPI .kcell>.kpi{flex:1}
+@media(max-width:1000px){#vKPI #ovBox .kpis{grid-template-columns:1fr}}
 #vKPI .kpi-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   padding:0 6px;margin-top:20px}
 #vKPI .kpi-head b{font-size:38px;font-weight:bold;color:var(--page-ink)}
@@ -711,7 +716,10 @@ body.cap .wrap{height:auto;overflow:visible;padding:0}#vRPT #shot.cap-slide{widt
   font-size:27.4px;cursor:pointer}
 body.present .side,body.present .side-toggle{display:none}
 /* ---------- โหมดพรีเซนต์: หน้า KPI ---------- */
-body.present #vKPI .toolbar{display:none}
+/* v-pres3: โหมดพรีเซนต์แสดงแถบตัวกรองด้วย (ซ่อนเฉพาะปุ่มที่ไม่ต้องใช้ตอนนำเสนอ) */
+body.present #vKPI .toolbar{display:flex}
+body.present #vKPI #kSave,body.present #vKPI #kPresent,body.present #vKPI #kReload{display:none}
+body.sopmode.present #vKPI .toolbar{display:none}
 body.present #vKPI .exit{display:block}
 body.present #vKPI .wrap{padding:16px 3% 20px;max-width:none}
 body.present #vKPI #kShot{padding:26px 30px}
@@ -781,7 +789,7 @@ body.present #vKPI .tscroll{max-height:none}
       <div class="grp">Warehouse</div>
       <button data-view="kpi" data-sec="oos">KPI Out Of Stock</button>
       <button data-view="kpi" data-sec="diff">KPI Stock Variance &lt;2%</button>
-      <button data-view="kpi" data-sec="dock">KPI Dock Time To Stock</button>
+      <button data-view="kpi" data-sec="dock">KPI Dock To Stock Time</button>
       <button data-view="kpi" data-sec="pick">Picking</button>
       <button data-view="kpi" data-sec="perr">KPI Human Error On Picking &lt;0.05%</button>
       <button data-view="kpi" data-sec="repl">Replenishment</button>
@@ -1341,6 +1349,10 @@ function deltaHTML(cur,prev,goodUp=true,unit='%'){
 }
 
 function kpiCard(o){
+  /* v-2col: ห่อหัว+การ์ดไว้ใน .kcell เพื่อวางบรรทัดละ 2 KPI */
+  return `<div class="kcell">${kpiCardInner(o)}</div>`;
+}
+function kpiCardInner(o){
   const num=o.n!=null?`<span class="no">${o.n}</span>`:'';
   const head=`<div class="kpi-head">${num}<b>${o.l}</b><span>${o.t}</span></div>`;
   if(o.wait)return head+`<div class="kpi wait">
@@ -3759,7 +3771,11 @@ function secShip(){
   if(!list.length)return bar+'<div class="empty2">ไม่มีข้อมูลตามตัวกรองนี้</div>';
 
   const S=shipStats(list);
+  /* v-shipgrp: ภาพรวม = รายเดือน · เลือกเดือน = รายสัปดาห์ · เลือกสัปดาห์/วัน = รายวัน */
+  S.grp=(DAYSEL||WKSEL.length)?'day':(shipYM||fMonth())?'week':'month';
+  S.list=list;
   SHIP_CTX=S;
+  const grpTxt={month:'รายเดือน',week:'รายสัปดาห์',day:'รายวัน'}[S.grp];
 
   /* v133: หน้านี้ไม่มีเป้า KPI — ส่ง target เป็น null
      วงจะไม่มีป้ายผ่าน/ไม่ผ่าน และไม่เปลี่ยนสีตามเกณฑ์ */
@@ -3777,7 +3793,7 @@ function secShip(){
        ${card('ขนส่งที่ใช้มากสุด',esc(S.topCarrier),'plum')}
        ${card('วันพีคสุด ('+(S.peak||'-')+')',S.peakQty,'amber')}</div>
 
-     <h2 class="sec">ออเดอร์จัดส่งรายวัน <em>นับออเดอร์ไม่ซ้ำ ตาม Expected Delivery</em><span></span></h2>
+     <h2 class="sec">ออเดอร์จัดส่ง${grpTxt} <em>นับออเดอร์ไม่ซ้ำ ตาม Expected Delivery</em><span></span></h2>
      <div class="cpanel"><div class="cbox"><canvas id="c_shDay"></canvas></div></div>
 
      <div class="g2">
@@ -3798,10 +3814,28 @@ function drawShip(){
   /* รายวัน — v134: ลดเหลือ 30 วันล่าสุด + ย่อป้ายเป็น 18px
      เพื่อให้ตัวเลขขึ้นครบทุกแท่ง (60 วันช่องแคบเกินไป ป้ายถูกข้ามกว่าครึ่ง) */
   const SHIP_DAYS_SHOWN=30;
-  const d=S.days.slice(-SHIP_DAYS_SHOWN);
+  let labels, vals;
+  if(S.grp==='day'){
+    const d=S.days.slice(-SHIP_DAYS_SHOWN);
+    labels=d; vals=d.map(k=>S.byDay[k].size);
+  }else{
+    /* นับออเดอร์ไม่ซ้ำต่อเดือน/สัปดาห์ (ออเดอร์เดียวกันข้ามวันนับครั้งเดียวในช่วงนั้น) */
+    const keyOf=S.grp==='month'
+      ? k=>k.slice(0,7)
+      : k=>{const w=isoWeek(k);const[y,m]=k.split('-').map(Number);
+            const wy=(m===1&&w>50)?y-1:(m===12&&w===1)?y+1:y;
+            return wy+'-W'+String(w).padStart(2,'0');};
+    const by={};
+    S.list.forEach((x,i)=>{(by[keyOf(x.day)]=by[keyOf(x.day)]||new Set()).add(x.ref||('r'+i));});
+    const ks=Object.keys(by).sort();
+    labels=ks.map(k=>S.grp==='month'
+      ? MON_S[+k.slice(5,7)-1]+' '+k.slice(2,4)
+      : 'W'+(+k.slice(-2)));
+    vals=ks.map(k=>by[k].size);
+  }
   destroy('shDay');
   CH.shDay=new Chart(document.getElementById('c_shDay'),{type:'bar',
-    data:{labels:d,datasets:[{label:'ออเดอร์',data:d.map(k=>S.byDay[k].size),
+    data:{labels,datasets:[{label:'ออเดอร์',data:vals,
       backgroundColor:C.plum,borderRadius:4}]},
     options:Object.assign(baseOpts(false),{
       plugins:Object.assign({},baseOpts(false).plugins,{
@@ -5116,7 +5150,7 @@ function renderKPI(){
                ontime:['KPI On-Time Performance','Admin · แพ็คสินค้าเสร็จตามวันที่ต้องการ'],
                oos:['KPI Out Of Stock','Warehouse · WH ส่งของให้ Packing ตามกำหนด'],
                diff:['KPI Stock Variance <2%','Warehouse · ความแม่นยำสต็อก · รายการที่นับไม่ตรง'],
-               dock:['KPI Dock Time To Stock','Warehouse · GR → Putaway · รับเข้าและจัดเก็บตามเกณฑ์'],
+               dock:['KPI Dock To Stock Time','Warehouse · GR → Putaway · รับเข้าและจัดเก็บตามเกณฑ์'],
                repl:['Replenishment','Warehouse · รายการที่ต้องเติมสต็อก'],
                fc:['Forecast','Warehouse · พยากรณ์ยอดขาย สต็อก และอัตรากำลังคน'],
                pick:['Picking','Warehouse · ภาพรวมการหยิบสินค้ารายคน ผลงาน และเวลาหนาแน่น'],
@@ -5530,7 +5564,7 @@ el('kReload').addEventListener('click',boot);
    layout จึงไม่เปลี่ยน) และสั่งให้กราฟวาดใหม่ที่ความละเอียดเท่ากับภาพที่ถ่าย */
 const SHOT_SLIDE_W=3840, SHOT_SLIDE_H=2160;
 const SHOT_BG='#100D26';
-const SHOT_PANEL_SEL='.big,.kpi,.cpanel,.fcacc-panel,.fcacc-cards,.sgrid,.brkcard,.panel,.kpis>.kpi';
+const SHOT_PANEL_SEL='.big,.kpi,.cpanel,.fcacc-panel,.fcacc-cards,.sgrid,.brkcard,.panel,.kpis>.kpi,.kpis>.kcell';
 const shotWait=ms=>new Promise(r=>setTimeout(r,ms));
 const shotFrame=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
 async function shotLoadZip(){
