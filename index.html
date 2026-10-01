@@ -19,8 +19,8 @@
   background-image:radial-gradient(900px 500px at 6% -6%,rgba(13,148,136,.05),transparent 62%),
                    radial-gradient(700px 460px at 100% 4%,rgba(124,58,237,.05),transparent 58%);
   background-attachment:fixed;
-  font-family:'Baloo 2','Mitr',-apple-system,BlinkMacSystemFont,sans-serif;font-size:27.7px;line-height:1.6;zoom:1.4}
-/* v-size: ขยายทั้งหน้าขึ้น ~22% (1.15 → 1.4) ตามขนาดที่ต้องการ · โหมดพรีเซนต์คงขนาดเดิม */
+  font-family:'Baloo 2','Mitr',-apple-system,BlinkMacSystemFont,sans-serif;font-size:27.7px;line-height:1.6;zoom:1.3}
+/* v-size: ขยายทั้งหน้าขึ้น ~13% (1.15 → 1.3) ตามขนาดที่ต้องการ · โหมดพรีเซนต์คงขนาดเดิม */
 body.present{zoom:1.15}
 #vKPI .wrap{max-width:none;margin:0 auto;padding:26px 6% 44px}#vKPI .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}#vKPI .btn{background:var(--teal);color:#fff;border:0;font-family:inherit;font-weight:bold;
   font-size:30.7px;padding:13px 24px;border-radius:7px;cursor:pointer}#vKPI .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:normal}#vKPI .btn:disabled{opacity:.5;cursor:default}#vKPI select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:7px;
@@ -151,7 +151,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .pkrank{display:flex;flex-direction:column;gap:10px;width:100%}
 #vKPI .rrow{display:grid;grid-template-columns:64px minmax(150px,1.3fr) 3fr auto;
   align-items:center;gap:16px;padding:10px 6px;border-radius:12px}
-#vKPI .rrow.top{background:var(--soft)}
+#vKPI .rrow.podium{background:var(--soft)}
 #vKPI .rno{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;font-size:28px;font-weight:800;color:#fff;background:#B9BFC9}
 #vKPI .rno.g{background:linear-gradient(160deg,#E8B93E,#C08A16)}
@@ -159,11 +159,17 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .rno.b{background:linear-gradient(160deg,#C98B5E,#9C6236)}
 #vKPI .rname{font-size:29px;font-weight:700;color:var(--ink);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#vKPI .rrow.top .rname{font-size:31px;font-weight:800}
+#vKPI .rrow.podium .rname{font-weight:800}
+#vKPI .rval em{font-style:normal;font-weight:600;color:var(--mute);font-size:.8em;margin-left:6px;
+  display:inline-block;min-width:3.6em}
+#vKPI .rtot{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;padding:4px 6px 12px;
+  border-bottom:1px solid var(--line);margin-bottom:4px;font-size:29px;color:var(--ink)}
+#vKPI .rtot b{font-size:38px}
+#vKPI .rtot span{margin-left:auto;font-size:23px;color:var(--mute)}
 #vKPI .rbar{background:#EDEFF3;border-radius:8px;height:20px;overflow:hidden}
 #vKPI .rbar i{display:block;height:100%;border-radius:8px}
 #vKPI .rval{font-size:31px;font-weight:800;color:var(--ink);
-  font-variant-numeric:tabular-nums;min-width:150px;text-align:right}
+  font-variant-numeric:tabular-nums;min-width:240px;text-align:right;white-space:nowrap}
 #vKPI .pkstations{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;
   align-content:center;padding:14px 0;flex:1}
 #vKPI .pkgauge{width:45%;min-width:190px;display:flex;flex-direction:column;align-items:center}
@@ -350,6 +356,13 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .fbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 16px}
 #vKPI .fbar .fl{font-size:25px;color:var(--mute);letter-spacing:.12em;
   text-transform:uppercase;margin-right:6px}
+/* v-fl2: ป้ายตัวกรองย่อย (พนักงานแพ็ค · มุมมอง · ประเภท · ช่องทางขาย ฯลฯ) อยู่บนพื้นเข้ม
+   เดิมใช้สีเทาเข้ม (--mute) แทบมองไม่เห็น → ใช้สีอ่อนบนพื้นเข้ม ตัวใหญ่ขึ้น หนาขึ้น */
+#vKPI .fbar .fl{font-size:30px;color:var(--page-ink);font-weight:bold;letter-spacing:.04em;
+  margin-right:10px;opacity:1}
+#vKPI .fbar .ddbtn{font-size:30px;padding:10px 26px;border-radius:30px;font-weight:bold}
+#vKPI .fbar button{font-size:30px}
+#vKPI .cpanel .fbar .fl,#vKPI .scard .fbar .fl{color:var(--ink)}   /* ถ้าอยู่บนการ์ดสีอ่อน ใช้สีเข้ม */
 #vKPI .fbar button{font-family:inherit;font-size:28px;padding:9px 24px;border-radius:30px;
   border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;
   transition:background .12s ease,color .12s ease}
@@ -800,7 +813,7 @@ body.present .main{margin-left:0}
       <button data-view="kpi" data-sec="diff">KPI Stock Variance &lt;2%</button>
       <button data-view="kpi" data-sec="dock">KPI Dock To Stock Time</button>
       <button data-view="kpi" data-sec="pick">Picking</button>
-      <button data-view="kpi" data-sec="perr">KPI Human Error On Picking &lt;0.05%</button>
+      <!-- ซ่อนไว้ก่อน: <button data-view="kpi" data-sec="perr">KPI Human Error On Picking &lt;0.05%</button> -->
       <button data-view="kpi" data-sec="repl">Replenishment</button>
 
       <div class="grp">Delivery</div>
@@ -1912,7 +1925,7 @@ const clickF={id:'clickF',
     /* v-clk2: แท่ง/เส้น = คลิกตรงคอลัมน์ไหนก็ได้ (แท่งเตี้ยๆ อย่าง 0.05% ก็กดได้) · วงกลม = ต้องโดนชิ้น */
     const round=/pie|doughnut/.test(ch.config.type);
     let els=[];
-    try{ els=ch.getElementsAtEventForMode(e.native||e,round?'nearest':'index',{intersect:round},false); }catch(x){}
+    try{ els=ch.getElementsAtEventForMode(e,round?'nearest':'index',{intersect:round},false); }catch(x){}
     if(e.type==='mousemove'){ ch.canvas.style.cursor=els.length?'pointer':''; return; }
     if(!els.length)return;
     const key=Object.keys(CH).find(k=>CH[k]===ch)||'';
@@ -1951,10 +1964,10 @@ function clkPop(ch,key,i,ev){
     }else if(isPct){
       rows=`<div class="cp-r"><span>ค่า</span><b>${pc(v)}</b></div>`;
     }else{
-      const vals=ds.data.map(x=>+x||0), tot=D._tot||vals.reduce((t,x)=>t+x,0)||1;
+      const vals=ds.data.map(x=>+x||0), tot=(D._totArr&&D._totArr[i])||D._tot||vals.reduce((t,x)=>t+x,0)||1;
       rows=`<div class="cp-r"><span>จำนวน</span><b>${f(v)} ${esc(unit)}</b></div>`
         +(D._noPct?'':`<div class="cp-r"><span>สัดส่วน</span><b>${pc(v/tot*100)}</b></div>
-        <div class="cp-r dim"><span>จากทั้งหมด</span><b>${fmt(Math.round(tot))} ${esc(unit)}</b></div>`);
+        <div class="cp-r dim"><span>${esc(D._totLbl||'จากทั้งหมด')}</span><b>${fmt(Math.round(tot))} ${esc(unit)}</b></div>`);
     }
   }
   /* ปุ่มกรองตามเวลา (ถ้าเป็นกราฟแกนเวลา) */
@@ -1980,6 +1993,17 @@ function clkPop(ch,key,i,ev){
   if(fb)fb.onclick=()=>{close(); clkHandle({data:{labels:D.labels,_cfv:D._cfv}},'__time',i);};
 }
 if(window.Chart&&!Chart.registry.plugins.get('clickF'))Chart.register(clickF);
+/* v-zoomfix: body ใช้ CSS zoom ทำให้ตำแหน่งเมาส์ที่ Chart.js อ่านเพี้ยน (จิ้มแล้วเลือกผิดแท่ง/ไม่ขึ้นป้าย)
+   คำนวณตำแหน่งใหม่จาก clientX/Y เทียบขนาดจริงของ canvas บนจอ ใช้ได้ทั้งตอนมี/ไม่มี zoom */
+const zoomFix={id:'zoomFix',
+  beforeEvent(ch,args){
+    const e=args.event, n=e&&e.native; if(!n||n.clientX==null)return;
+    const r=ch.canvas.getBoundingClientRect(); if(!r.width||!r.height)return;
+    e.x=(n.clientX-r.left)*ch.width/r.width;
+    e.y=(n.clientY-r.top)*ch.height/r.height;
+    const A=ch.chartArea; if(A)args.inChartArea=e.x>=A.left&&e.x<=A.right&&e.y>=A.top&&e.y<=A.bottom;
+  }};
+if(window.Chart&&!Chart.registry.plugins.get('zoomFix'))Chart.register(zoomFix);
 const G_ONTIME={ok:r=>classify(r.wh)==='late'?'No':'Yes',
   plat:r=>isPlatform(r.source)?'Platform':'Walk-in',
   urg:r=>r.urgent||'ไม่ระบุ', snd:r=>r.sender||'ไม่ระบุ'};
@@ -3928,7 +3952,12 @@ function drawShip(){
    1 แถว = 1 ออเดอร์ (qty=1) ตามที่หน้าเดิมนับ
    ยังไม่ทำ "ขนส่งที่แพ็คบ่อยสุด" เพราะหน้าเดิมต้อง lookup ข้ามชีต Shipping */
 const PACK_CSV='https://docs.google.com/spreadsheets/d/e/2PACX-1vQi8zQULkdkvxAqX8R2Sxcej99RFL90cbmQiWUf4CtViqa3XZlQNceThIBGqVMIbSBAKcSl6_2J-7tM/pub?gid=640931357&single=true&output=csv';
-const PACK_TARGET=200;      /* เป้าออเดอร์/คน/วัน */
+const PACK_TARGET=200;      /* เป้าออเดอร์/คน/วัน (ก่อน 1 ต.ค. 2026) */
+const PACK_TARGET_NEW=300, PACK_TARGET_FROM='2026-10-01';   /* ตั้งแต่ 1/10/26 เป้า 300/คน/วัน */
+const packTgt=fd=>fd&&fd>=PACK_TARGET_FROM?PACK_TARGET_NEW:PACK_TARGET;
+/* ป้ายเป้าตามช่วงที่ดูอยู่ — ทั้งช่วงก่อน = 200 · ทั้งช่วงหลัง = 300 · คร่อมทั้งสองช่วง = 200→300 */
+const packTgtLbl=days=>{const a=days.some(d=>packTgt(d)===PACK_TARGET),b=days.some(d=>packTgt(d)===PACK_TARGET_NEW);
+  return a&&b?PACK_TARGET+'→'+PACK_TARGET_NEW:String(b?PACK_TARGET_NEW:PACK_TARGET);};
 const PACK_FULL_HOUR=12;    /* ชั่วโมงที่แพ็ค >= 12 ใบ ถึงนับเป็นชั่วโมงหลัก */
 const PACK_EXCLUDE=['operation admin1','wh admin 1','operation engineer','pop napat','ton jakapan'];
 
@@ -4036,7 +4065,7 @@ function packStats(list){
   let uSum=0,uN=0;
   for(const d in daily){
     const n=daily[d].packers.size;
-    if(n>0){ uSum+=(daily[d].orders/(n*PACK_TARGET))*100; uN++; }
+    if(n>0){ uSum+=(daily[d].orders/(n*packTgt(d)))*100; uN++; }
   }
   const util=uN?Math.round(uSum/uN):0;
 
@@ -4055,12 +4084,13 @@ function packStats(list){
     const o=per[name];
     const uDays=Math.max(1,o.days.size);
     const aDay=Math.round(o.count/uDays);
+    const tgtAvg=[...o.days].reduce((t,d)=>t+packTgt(d),0)/uDays;   /* เป้าเฉลี่ยตามวันที่คนนั้นทำงาน */
     let ph=0,pq=0;
     for(const s in o.hourQty){ const q=o.hourQty[s]; if(q>=PACK_FULL_HOUR){ph++;pq+=q;} }
     const workHrs=Object.keys(o.hourQty).length;
     const aHr=ph>0?Math.round(pq/ph):(workHrs>0?Math.round(o.count/workHrs):0);
     return {name, count:o.count, aDay, aHr, workHrs,
-            util:Math.round(aDay/PACK_TARGET*100),
+            util:Math.round(o.count/uDays/tgtAvg*100), tgtLbl:packTgtLbl([...o.days]),
             time:Math.floor(o.dur/60)+' ชม. '+Math.round(o.dur%60)+' นาที',
             ch:top(o.ch), st:top(o.st)};
   });
@@ -4116,7 +4146,7 @@ function secPack(){
     <div class="pkcard">
       <div class="pkhead"><span class="pkname">${esc(c.name)}</span>
         <span class="pkutil ${uCls(c.util)}">Util: ${c.util}%</span></div>
-      <div class="pklbl">UTILIZATION (เป้า ${PACK_TARGET}/วัน)</div>
+      <div class="pklbl">UTILIZATION (เป้า ${c.tgtLbl}/วัน)</div>
       <div class="pkbar"><i class="${uCls(c.util)}" style="width:${Math.min(c.util,100)}%"></i></div>
       <div class="pkmain">
         <div><div class="pklbl">ความเร็วเฉลี่ย</div>
@@ -4141,21 +4171,24 @@ function secPack(){
        ${card('ความเร็วแพ็คเฉลี่ย (ออเดอร์/ชม.)',S.speed,'amber')}
        ${card('พีคไทม์',(()=>{const e=Object.entries(S.hrs).filter(x=>x[0]!=='ไม่ระบุ')
            .sort((a,b)=>b[1]-a[1])[0]; return e?e[0]:'—';})(),'rose')}
-       ${card('TEAM UTIL. (เป้า '+PACK_TARGET+'/คน/วัน)',S.util+'%',S.util>=80?'teal':'rose')}</div>
+       ${card('TEAM UTIL. (เป้า '+packTgtLbl(S.days)+'/คน/วัน)',S.util+'%',S.util>=80?'teal':'rose')}</div>
 
      <div class="pkpair">
        <div><h2 class="sec">ผลงานพนักงานแพ็ค (Leaderboard)<span></span></h2>
-         <div class="cpanel"><div class="pkrank">${
-           S.pArr.map((n,i)=>{
-             const v=S.per[n].count, mx=S.per[S.pArr[0]].count||1;
+         <div class="cpanel"><div class="pkrank">${(()=>{
+           /* v-rank2: ทุกอันดับใช้รูปแบบเดียวกัน · หลอด = สัดส่วนของออเดอร์ทั้งหมด */
+           const tot=S.pArr.reduce((t,n)=>t+S.per[n].count,0)||1;
+           return `<div class="rtot">รวมทั้งหมด <b>${fmt(tot)}</b> ออเดอร์ · ${S.pArr.length} คน
+               <span>หลอด = สัดส่วนของออเดอร์ทั้งหมด</span></div>`
+            +S.pArr.map((n,i)=>{
+             const v=S.per[n].count, sh=v/tot*100;
              const medal=i<3?['g','s','b'][i]:'';
-             return `<div class="rrow${i<3?' top':''}">
+             return `<div class="rrow${i<3?' podium':''}">
                <span class="rno ${medal}">${i+1}</span>
-               <span class="rname">${esc(n)}</span>
-               <span class="rbar"><i style="width:${Math.max(2,v/mx*100)}%;
-                 background:${['#6B5CA5','#3E8E8C','#D89A2E'][i]||'#9AA1AE'}"></i></span>
-               <span class="rval">${fmt(v)}</span></div>`;
-           }).join('')}</div></div></div>
+               <span class="rname" title="${esc(n)}">${esc(n)}</span>
+               <span class="rbar"><i style="width:${Math.max(1,sh)}%;background:${['#6B5CA5','#3E8E8C','#D89A2E'][i]||'#9AA1AE'}"></i></span>
+               <span class="rval">${fmt(v)} <em>${sh.toFixed(1)}%</em></span></div>`;
+           }).join('');})()}</div></div></div>
        <div><h2 class="sec">Station Utilization <em>วันที่สถานีถูกใช้ ÷ วันทำงาน</em><span></span></h2>
          <div class="cpanel"><div id="pkStations" class="pkstations"></div></div></div>
      </div>
@@ -4269,12 +4302,13 @@ function drawPack(){
       label:c=>cats[c.dataIndex].p+': '+fmt(c.parsed.y),
       footer:its=>'รวมทั้งเดือน '+fmt(gTot[cats[its[0].dataIndex].g])+' กล่อง'};
     CH.pkWk=new Chart(document.getElementById('c_pkWk'),{type:'bar',
-      data:{labels:cats.map((c,i)=>String(i)),
+      data:{labels:cats.map(c=>c.sp?'':c.p+' · '+c.m),
         datasets:[{label:'กล่อง',data:cats.map(c=>c.sp?null:c.v),
           backgroundColor:cats.map(c=>c.sp?'rgba(0,0,0,0)':c.c),
           borderRadius:2,maxBarThickness:90}]},
       options:oWk});
-    CH.pkWk.data._cfv=cats.map(c=>c.sp?'':c.m); CH.pkWk.data._unit='กล่อง';   /* คลิกแท่ง = กรองเดือน/สัปดาห์นั้น */
+    CH.pkWk.data._cfv=cats.map(c=>c.sp?'':c.m); CH.pkWk.data._unit='กล่อง';
+    CH.pkWk.data._totArr=cats.map(c=>c.sp?null:gTot[c.g]); CH.pkWk.data._totLbl='จากทั้ง'+(byMonth?'เดือน':'สัปดาห์');   /* คลิกแท่ง = กรองเดือน/สัปดาห์นั้น */
   }
 
   /* สัดส่วนรายคน — plot เป็น % เพื่อให้ pieLbl เขียนตัวเลขลงบนวงได้ */
