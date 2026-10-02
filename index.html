@@ -3993,9 +3993,17 @@ function packMins(v){
 function packDate(v){
   const s=String(v||'').trim();
   let y,mo,da,m;
-  if((m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))){ y=+m[1];mo=+m[2];da=+m[3]; }
-  else if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))){ da=+m[1];mo=+m[2];y=+m[3]; }
+  const MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12,
+    'ม.ค.':1,'ก.พ.':2,'มี.ค.':3,'เม.ย.':4,'พ.ค.':5,'มิ.ย.':6,'ก.ค.':7,'ส.ค.':8,'ก.ย.':9,'ต.ค.':10,'พ.ย.':11,'ธ.ค.':12};
+  if((m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))){ y=+m[1];mo=+m[2];da=+m[3]; }
+  else if((m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/))){ da=+m[1];mo=+m[2];y=+m[3]; }
+  else if((m=s.match(/^(\d{1,2})\s*([A-Za-z]{3})[A-Za-z]*\.?\s*,?\s*(\d{2,4})/))){ da=+m[1];mo=MON[m[2].toLowerCase()];y=+m[3]; }
+  else if((m=s.match(/^([A-Za-z]{3})[A-Za-z]*\.?\s+(\d{1,2}),?\s+(\d{2,4})/))){ mo=MON[m[1].toLowerCase()];da=+m[2];y=+m[3]; }
+  else if((m=s.match(/^(\d{1,2})\s*([ก-๙]{1,3}\.[ก-๙]{1,2}\.)\s*(\d{2,4})/))){ da=+m[1];mo=MON[m[2]];y=+m[3]; }
   else return null;
+  if(y<100)y+=2000;          /* 26 → 2026 */
+  if(y>2400)y-=543;          /* พ.ศ. 2569 → 2026 */
+  if(mo>12||da>31)return null;
   if(!y||!mo||!da)return null;
   const p=n=>String(n).padStart(2,'0');
   const t=new Date(Date.UTC(y,mo-1,da));
@@ -4022,15 +4030,21 @@ async function loadPack(force){
     const hdr=(rows[0]||[]).map(h=>String(h||'').trim().toLowerCase());
     let CC_AUTO=hdr.findIndex(h=>h==='source'||h==='ช่องทางการขาย'||h==='ช่องทาง');
     if(CC_AUTO<0)CC_AUTO=hdr.findIndex(h=>/source|ช่องทาง/.test(h));
-    const CP=1,CD=2,CT=3,CC=CC_AUTO>=0?CC_AUTO:5,CST=14,CDUR=21;
+    /* หาคอลัมน์ชื่อพนักงาน/วันที่จากหัวตารางก่อน ถ้าไม่เจอใช้ตำแหน่งเดิม (B, C) */
+    const hFind=re=>hdr.findIndex(h=>re.test(h));
+    let CP_AUTO=hFind(/พนักงาน|ผู้แพ็ค|คนแพ็ค|packer|employee|staff/);
+    let CD_AUTO=hFind(/^วันที่$|^date$|วันที่แพ็ค|pack.*date/);
+    const CP=CP_AUTO>=0?CP_AUTO:1,CD=CD_AUTO>=0?CD_AUTO:2,CT=3,CC=CC_AUTO>=0?CC_AUTO:5,CST=14,CDUR=21;
+    let noDate=0,noName=0;
     const list=[];
     rows.slice(1).forEach(r=>{
       if(!r||r.length<=CP)return;
       let d=packDate(r[CD]);
       if(!d){ for(let i=0;i<r.length&&!d;i++) d=packDate(r[i]); }
-      if(!d)return;
+      if(!d){noDate++;return;}
       const p=String(r[CP]||'').trim();
-      if(!p||p==='-'||p.toLowerCase()==='null'||p==='ไม่ระบุ'||p==='ไม่ระบุพนักงาน')return;
+      if(!p){noName++;return;}
+      if(p==='-'||p.toLowerCase()==='null'||p==='ไม่ระบุ'||p==='ไม่ระบุพนักงาน')return;
       if(PACK_EXCLUDE.includes(p.toLowerCase()))return;
       let hr=String(r[CT]||'').trim();
       const hm=hr.match(/^(\d{1,2})[:.](\d{1,2})/);
@@ -4040,7 +4054,12 @@ async function loadPack(force){
       list.push({p, st, c:String(r[CC]||'').trim()||'ไม่ระบุ',
                  hr:hr||'ไม่ระบุ', d, dur:packMins(r[CDUR])});
     });
-    if(!list.length)throw new Error('อ่านได้ 0 แถว (เช็คคอลัมน์ชื่อพนักงาน/วันที่)');
+    if(!list.length){
+      const H=rows[0]||[], R=rows[1]||[];
+      throw new Error(`อ่านได้ 0 แถว จาก ${rows.length-1} แถว · วันที่อ่านไม่ออก ${noDate} · ชื่อว่าง ${noName}`
+        +` · คอลัมน์ชื่อ="${H[CP]||'?'}" (ตัวอย่าง "${R[CP]||''}") · คอลัมน์วันที่="${H[CD]||'?'}" (ตัวอย่าง "${R[CD]||''}")`
+        +` · หัวตาราง: ${H.slice(0,8).join(' | ')}`);
+    }
     PACK={list};
     SHEET_STATE.pack=fmt(list.length)+' ออเดอร์'
       +(CC_AUTO>=0?` · ช่องทางขายอ่านจากคอลัมน์ "${(rows[0]||[])[CC_AUTO]}"`:' · หาคอลัมน์ช่องทางขายไม่เจอ (ใช้ index 5 แทน)');
