@@ -3752,7 +3752,8 @@ async function loadShip(force){
         dst:clean(g(r,E)), send:clean(g(r,J)), ch:clean(g(r,K)),
         urg:clean(g(r,M)), crit:clean(g(r,P)), q:clean(q),
         carrier:clean(g(r,R)),
-        pending:SHIP_PENDING_RE.test(q)||SHIP_PENDING_P_RE.test(g(r,P)) });
+        /* v-ship5: ตัดช่องว่าง/อักขระล่องหน (zero-width) ก่อนเทียบคำ กันพิมพ์ในชีตไม่เหมือนกันเป๊ะ */
+        pending:SHIP_PENDING_RE.test(q)||SHIP_PENDING_P_RE.test(g(r,P).normalize('NFC').replace(/[\s\u200B-\u200D\uFEFF]/g,'')) });
     });
     if(!list.length)throw new Error('อ่านได้ 0 แถว (เช็คคอลัมน์วันที่ / เลขออเดอร์)');
     SHIP={list};
@@ -3872,7 +3873,7 @@ function secShip(){
    + ring
    +`<div class="sgrid">
        ${card('ออเดอร์จัดส่งทั้งหมด',S.orders)}
-       ${card('ค้างส่ง',S.pending,S.pending?'rose':'teal')}
+       ${card('ค้างส่ง <small style="opacity:.5">v5</small>',S.pending,S.pending?'rose':'teal')}
        ${card('ขนส่งที่ใช้มากสุด',esc(S.topCarrier),'plum')}
        ${card('วันพีคสุด ('+(S.peak||'-')+')',S.peakQty,'amber')}</div>
 
