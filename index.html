@@ -3712,7 +3712,10 @@ function drawRetEmbed(fid='retFrame',tid='retDoc'){
      17 R = รูปแบบการจัดส่ง      (ขนส่ง)
    นับ "ค้างส่ง" ด้วยคำใน Q แบบเดียวกับต้นฉบับ: ค้าง|รอ|pending|fail|ยกเลิก|ไม่สำเร็จ */
 let SHIP=null, SHIP_ERR='', SHIP_LOADING=false;
-const SHIP_PENDING_RE=/ค้าง|รอ|pending|fail|ยกเลิก|ไม่สำเร็จ/i;
+const SHIP_PENDING_RE=/ค้าง|รอ|pending|fail|ยกเลิก|ไม่สำเร็จ|ยังไม่/i;
+/* v-ship4: ออเดอร์ที่คอลัมน์ P เป็น "ยังไม่ได้จัดส่ง"/"ค้างส่ง" แต่คอลัมน์ Q ยังว่าง
+   (Q ของวันล่าสุดยังไม่ถูกเติม) ต้องนับเป็นค้างส่งด้วย */
+const SHIP_PENDING_P_RE=/ค้างส่ง|ยังไม่/i;
 
 function shipDateKey(v){
   const s=String(v||'').trim();
@@ -3749,7 +3752,7 @@ async function loadShip(force){
         dst:clean(g(r,E)), send:clean(g(r,J)), ch:clean(g(r,K)),
         urg:clean(g(r,M)), crit:clean(g(r,P)), q:clean(q),
         carrier:clean(g(r,R)),
-        pending:SHIP_PENDING_RE.test(q) });
+        pending:SHIP_PENDING_RE.test(q)||SHIP_PENDING_P_RE.test(g(r,P)) });
     });
     if(!list.length)throw new Error('อ่านได้ 0 แถว (เช็คคอลัมน์วันที่ / เลขออเดอร์)');
     SHIP={list};
