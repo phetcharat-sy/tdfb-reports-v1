@@ -5789,7 +5789,10 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
   const rw=[root.style.width,root.style.maxWidth];
   zoomEls.forEach(e=>e.style.zoom='1');
   root.style.width=w0+'px'; root.style.maxWidth='none';
-  const S=Math.min(5,Math.max(2.5,(SHOT_SLIDE_W+60)/w0));
+  /* v-shot9: เดิมบังคับ scale ขั้นต่ำ 2.5 → คนที่ตั้งขนาดหน้าจอเล็ก/จอกว้าง (w0 กว้าง ~3000px)
+     ได้ canvas กว้าง 7,000–8,000px สูงหลายพัน เกินที่เบราว์เซอร์วาดไหว → ได้ภาพว่างเปล่า
+     ตอนนี้คำนวณ scale ให้ภาพกว้างราว 3,900px เท่ากันทุกคน ไม่ว่าจะตั้งขนาดจอเท่าไร */
+  const S=Math.min(5,Math.max(1,(SHOT_SLIDE_W+60)/w0));
   const charts=doc===document?Object.values(CH):[];
   /* ปิด tooltip ที่ค้างอยู่ตอนเอาเมาส์ชี้กราฟ ไม่ให้ติดไปในภาพ */
   charts.forEach(c=>{try{c.options.devicePixelRatio=S;
@@ -5830,11 +5833,30 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     pages.forEach((pg,i)=>pg.forEach(b=>b.items.forEach(it=>mark(it.el,'shotPg',String(i)))));
     mark(root,'shotRoot','1');
 
+    /* v-shot9: ถ้าภาพที่ได้ว่างเปล่า (เบราว์เซอร์วาด canvas ใหญ่ไม่ไหว — เจอบ่อยใน Safari/เครื่อง RAM น้อย)
+       ลองใหม่อัตโนมัติด้วยขนาดที่เล็กลง แทนการเซฟภาพว่างออกไป */
+    const shotBlank=c=>{
+      try{const x=c.getContext('2d'),w=c.width,h=c.height;
+        const t=document.createElement('canvas').getContext('2d');t.fillStyle=bg;t.fillRect(0,0,1,1);
+        const [r0,g0,b0]=t.getImageData(0,0,1,1).data;
+        const step=Math.max(1,Math.floor(Math.min(w,h)/60));
+        for(let yy=0;yy<h;yy+=step){const row=x.getImageData(0,yy,w,1).data;
+          for(let xx=0;xx<w;xx+=step){const o=xx*4;
+            if(Math.abs(row[o]-r0)+Math.abs(row[o+1]-g0)+Math.abs(row[o+2]-b0)>24)return false;}}
+        return true;}catch(e){return false;}
+    };
     const shoot=async(w,h,sc,prep)=>{
-      const s=Math.min(sc,Math.sqrt(1.2e8/(w*h)),32000/h,32000/w);   /* กันเกินขนาด canvas สูงสุดของเบราว์เซอร์ */
-      return html2canvas(root,{scale:s,backgroundColor:bg,useCORS:true,logging:false,
-        x:0,y:0,width:w,height:h,scrollX:0,scrollY:0,windowWidth:w,windowHeight:h,
-        onclone:d=>prep(d)});
+      const caps=[6e7,1.6e7,6e6];   /* พื้นที่ภาพสูงสุด (พิกเซล) ที่ลองตามลำดับ · 1.6e7 = เพดานของ Safari */
+      let c=null;
+      for(const cap of caps){
+        const s=Math.min(sc,Math.sqrt(cap/(w*h)),16000/h,16000/w);
+        c=await html2canvas(root,{scale:s,backgroundColor:bg,useCORS:true,logging:false,
+          x:0,y:0,width:w,height:h,scrollX:0,scrollY:0,windowWidth:w,windowHeight:h,
+          onclone:d=>prep(d)});
+        if(!shotBlank(c))return c;
+        c.width=c.height=0;
+      }
+      throw new Error('เบราว์เซอร์วาดภาพไม่ออก (ภาพว่าง) — ลองกด A+ ขยายหน้าจอขึ้น หรือใช้ Chrome แล้วบันทึกใหม่');
     };
     const pad2=n=>String(n).padStart(2,'0');
     /* ---- v-shotpage: ทั้งหน้าเป็นภาพยาวภาพเดียว (.png ไม่ต้อง zip) ---- */
