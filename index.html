@@ -3753,7 +3753,12 @@ async function loadShip(force){
     });
     if(!list.length)throw new Error('อ่านได้ 0 แถว (เช็คคอลัมน์วันที่ / เลขออเดอร์)');
     SHIP={list};
-    SHEET_STATE.ship=fmt(list.length)+' แถว';
+    /* v-ship2: โชว์ค่าที่เจอในคอลัมน์ Q (เช็คค้างส่ง) ไว้ที่แถบสถานะชีตด้านล่าง
+       ถ้าค้างส่งขึ้น 0 ทั้งที่มีของค้าง จะเห็นทันทีว่าในชีตเขียนคำว่าอะไร */
+    const qCnt={}; list.forEach(x=>{qCnt[x.q]=(qCnt[x.q]||0)+1;});
+    const qTop=Object.entries(qCnt).sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(([k,v])=>`"${k}" ${fmt(v)}`).join(', ');
+    SHEET_STATE.ship=fmt(list.length)+' แถว · คอลัมน์ Q (เช็คค้างส่ง): '+qTop;
   }catch(e){ SHIP=null; SHIP_ERR=e.message; SHEET_STATE.ship='ผิดพลาด — '+e.message; }
   SHIP_LOADING=false;
   return SHIP;
