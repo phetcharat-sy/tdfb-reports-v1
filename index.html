@@ -3791,6 +3791,8 @@ function shipStats(list){
   const carrierE=numEnt(byCarrier);
   const isOK=v=>/สำเร็จ|ตรง|ผ่าน|on ?time|delivered/i.test(v||'');
   const okCrit=list.filter(x=>isOK(x.crit)).length;
+  /* v-ship3: รายการที่ไม่ตรงเกณฑ์ (คอลัมน์ P) — แยกจาก "ค้างส่ง" (คอลัมน์ Q) */
+  const badCrit={}; list.filter(x=>!isOK(x.crit)).forEach(x=>{badCrit[x.crit]=(badCrit[x.crit]||0)+1;});
   return {
     orders:ords.size, pending:pend.size,
     pendingPct:ords.size?pend.size/ords.size*100:null,
@@ -3802,6 +3804,7 @@ function shipStats(list){
     carrierE, topCarrier:carrierE[0]?carrierE[0][0]:'-',
     statusE:numEnt(byStatus), urgE:numEnt(byUrg),
     critPct:list.length?okCrit/list.length*100:null,
+    critBad:list.length-okCrit, critBadE:Object.entries(badCrit).sort((a,b)=>b[1]-a[1]),
     rows:list.length
   };
 }
@@ -3858,7 +3861,8 @@ function secShip(){
   const ring=S.critPct!=null
     ? ringHTML(S.critPct, null,
         `<span>จัดส่งตรงตามเกณฑ์ในชีต</span>`
-       +`<span style="opacity:.8">${fmt(S.rows)} รายการ · ${fmt(S.days.length)} วัน</span>`)
+       +`<span style="opacity:.8">${fmt(S.rows)} รายการ · ${fmt(S.days.length)} วัน</span>`
+       +(S.critBad?`<span style="opacity:.8">ไม่ตรงเกณฑ์ ${fmt(S.critBad)} รายการ (${S.critBadE.slice(0,3).map(([k,v])=>esc(k)+' '+fmt(v)).join(' · ')}) — คนละเรื่องกับค้างส่ง</span>`:''))
     : '<div class="empty2">ไม่มีคอลัมน์เกณฑ์การจัดส่งให้คำนวณ</div>';
 
   return bar
