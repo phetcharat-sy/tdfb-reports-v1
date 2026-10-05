@@ -2167,7 +2167,7 @@ function secOOS(){
          <div class="cpanel"><div class="cbox"><canvas id="c_oos"></canvas></div></div></div>
      </div>
 
-     <h2 class="sec">Order Detail <em>เฉพาะรายการที่ไม่ผ่าน — ล่าช้า (ส่งก่อนกำหนดถือว่าผ่าน ไม่แสดง)</em><span></span></h2>
+     <h2 class="sec" data-shot-break="1">Order Detail <em>เฉพาะรายการที่ไม่ผ่าน — ล่าช้า (ส่งก่อนกำหนดถือว่าผ่าน ไม่แสดง)</em><span></span></h2>
      ${detailTable(rows,'fail',
         /* ภาพรวม (ไม่ได้เลือกเดือน/สัปดาห์/วัน และไม่มีตัวกรองย่อย) = เลื่อนในกรอบ · มีตัวกรอง = แสดงทั้งหมด */
         tGrp()!=='month'||stSel.length>0||Object.keys(catF()).length>0)}`;
