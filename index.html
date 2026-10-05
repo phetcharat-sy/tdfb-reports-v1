@@ -2160,7 +2160,7 @@ function secOOS(){
         :'Weekly Line Items <em>จำนวนชิ้นที่ออกต่อสัปดาห์</em>'}<span></span></h2>
      <div class="cpanel"><div class="cbox"><canvas id="c_wk2"></canvas></div></div>
 
-     <div class="g2">
+     <div class="g2" data-shot-break="1">   <!-- สไลด์ 16:9: กราฟแถวนี้ + Order Detail อยู่สไลด์เดียวกัน -->
        <div><h2 class="sec">Top 5 Products<span></span></h2>
          <div class="cpanel"><div class="cbox"><canvas id="c_top5"></canvas></div></div></div>
        <div><h2 class="sec">Out-of-Stock Rate <em>เป้า 99%</em><span></span></h2>
@@ -5982,7 +5982,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     const pages=[], keep=new Set();
     segs.forEach((sg,si)=>{
       const hasBrk=segs.length>1;
-      if(hasBrk&&si<segs.length-1&&sg[sg.length-1].bot-sg[0].top<=pageH*1.6){ keep.add(pages.length); pages.push(sg); return; }
+      if(hasBrk&&sg[sg.length-1].bot-sg[0].top<=pageH*1.6){ keep.add(pages.length); pages.push(sg); return; }
       let cur=[];
       sg.forEach(b=>{
         if(cur.length&&(b.bot-cur[0].top)>pageH){
