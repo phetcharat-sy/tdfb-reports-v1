@@ -1771,7 +1771,7 @@ function detailTable(rows,mode,full){
   const seen=new Set(), out=[];
   sorted.forEach(r=>{ if(!r.key||seen.has(r.key))return; seen.add(r.key); out.push(r); });
   if(!out.length)return '<div class="empty2">ไม่มีรายการที่ตรงกับตัวกรองนี้</div>';
-  return `<div class="tscroll ${full?'tfull':'t10b'}"><table class="dt"><thead><tr>
+  return `<div class="tscroll"><table class="dt"><thead><tr>
     <th style="width:270px">วันที่ต้องการส่ง</th>
     <th>Order Ref</th><th>Source</th><th>Product</th>
     <th>สถานะ</th><th>Remark Team</th></tr></thead><tbody>`
@@ -5314,12 +5314,37 @@ el('detail').addEventListener('click',async e=>{
 });
 
 /* ตารางสั้น (ไม่ถึง 10 แถว) ไม่ต้องมีกล่องเลื่อน — แสดงยาวรวดเดียวไปเลย */
+/* กติกาตาราง Detail ทุกหน้า (ยกเว้น Forecast / Return / Cancel)
+   - มีตัวกรองใดๆ (เดือน / Week / วัน / ชิป / ดรอปดาวน์ / คลิกกราฟ) → แสดงครบทุกแถว ไม่มีแถบเลื่อน
+   - ภาพรวม (ไม่มีตัวกรอง) → กรอบสูงพอดี 10 แถว เกินกว่านั้นค่อยเลื่อน   */
+function kpiFiltered(){
+  if(tGrp()!=='month')return true;
+  if(Object.keys(catF()).length)return true;   /* คลิกกราฟเพื่อกรอง */
+  const box=el('detail'); if(!box)return false;
+  if(box.querySelector('button[data-sf][data-multi].on:not([data-v=""])'))return true;
+  if(box.querySelector('.ddbtn[data-on="1"]'))return true;
+  return false;
+}
 function fitScrolls(){
-  document.querySelectorAll('#vKPI .tscroll').forEach(d=>{
-    const n=d.querySelectorAll('tbody tr').length;
-    if(n&&n<10){ d.style.maxHeight='none'; d.style.overflowY='visible'; }
+  if(SEC==='fc'||SEC==='ret'||SEC==='can')return;
+  const full=kpiFiltered();
+  document.querySelectorAll('#detail .tscroll').forEach(d=>{
+    const rows=d.querySelectorAll(':scope > table > tbody > tr');
+    if(full||rows.length<=10){
+      d.style.setProperty('max-height','none');
+      d.style.setProperty('overflow-y','visible');
+      return;
+    }
+    const head=d.querySelector(':scope > table > thead');
+    let h=head?head.offsetHeight:0;
+    for(let i=0;i<10;i++)h+=rows[i].offsetHeight;
+    d.style.setProperty('max-height',(h+2)+'px');
+    d.style.setProperty('overflow-y','auto');
   });
 }
+/* ฟอนต์โหลดเสร็จ/ปรับขนาดหน้าต่าง/กด A+ A- แล้วความสูงแถวเปลี่ยน → คำนวณใหม่ */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{try{fitScrolls();}catch(e){}});
+window.addEventListener('resize',()=>{try{fitScrolls();}catch(e){}});
 
 function renderKPI(){
   const isOv = SEC==='overview';
