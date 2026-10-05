@@ -243,6 +243,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .tscroll.t10{max-height:1150px}
 /* โชว์พอดี 10 แถวแรกของตาราง Order Detail (แถวเดียว บรรทัดเดียวต่อแถว เตี้ยกว่า t10) */
 #vKPI .tscroll.t10b{max-height:880px}
+#vKPI .tscroll.tfull{max-height:none!important;overflow:visible}
 #vKPI .chip{display:inline-block;padding:3px 12px;border-radius:7px;font-weight:bold;font-size:23.9px}
 #vKPI .qty{display:inline-block;background:#F7E4DF;color:var(--bad);font-weight:bold;
   padding:2px 10px;border-radius:6px}
@@ -1709,7 +1710,7 @@ function chipOne(key,label,items,cur){
         class="${cur===v?'on':''}">${esc(t)}</button>`).join('')
     +`</div>`;
 }
-function detailTable(rows,mode){
+function detailTable(rows,mode,full){
   mode=mode||'ex';
   /* ex = เฉพาะที่ไม่ใช่ "ส่งในวัน" (ค่าเดิม) · all = ทุกแถว
      yes = ตรงเวลา+ก่อนกำหนด · no = ล่าช้า · หรือระบุตรงๆ ontime/early/late */
@@ -1729,7 +1730,7 @@ function detailTable(rows,mode){
   const seen=new Set(), out=[];
   sorted.forEach(r=>{ if(!r.key||seen.has(r.key))return; seen.add(r.key); out.push(r); });
   if(!out.length)return '<div class="empty2">ไม่มีรายการที่ตรงกับตัวกรองนี้</div>';
-  return `<div class="tscroll t10b"><table class="dt"><thead><tr>
+  return `<div class="tscroll ${full?'tfull':'t10b'}"><table class="dt"><thead><tr>
     <th style="width:270px">วันที่ต้องการส่ง</th>
     <th>Order Ref</th><th>Source</th><th>Product</th>
     <th>สถานะ</th><th>Remark Team</th></tr></thead><tbody>`
@@ -2077,7 +2078,9 @@ function secOOS(){
      </div>
 
      <h2 class="sec">Order Detail <em>เฉพาะรายการที่ไม่ผ่าน — ล่าช้า (ส่งก่อนกำหนดถือว่าผ่าน ไม่แสดง)</em><span></span></h2>
-     ${detailTable(rows,'fail')}`;
+     ${detailTable(rows,'fail',
+        /* ภาพรวม (ไม่ได้เลือกเดือน/สัปดาห์/วัน และไม่มีตัวกรองย่อย) = เลื่อนในกรอบ · มีตัวกรอง = แสดงทั้งหมด */
+        tGrp()!=='month'||stSel.length>0||Object.keys(catF()).length>0)}`;
 }
 
 function drawOOS(){
