@@ -5287,7 +5287,7 @@ function secRepl(){
         <td class="num"><span class="qty">${fmt(r.qty)}</span></td>
         <td>${esc(r.remark||'—')}</td></tr>`).join('')+'</tbody></table></div>';})():''}
 
-    <h2 class="sec">รวมทั้งหมด <em>เรียง “ต้องเติม” ก่อน แล้วตามคะแนนขายดี</em><span></span></h2>
+    <h2 class="sec" data-shot-break="1">รวมทั้งหมด <em>เรียง “ต้องเติม” ก่อน แล้วตามคะแนนขายดี</em><span></span></h2>
     <div class="tscroll" style="overflow-x:auto"><table class="dt" style="min-width:1000px"><thead><tr>
       <th>No</th><th>Product</th><th class="num">คะแนนขายดี</th><th>สถานะ</th>
       <th class="num">WH300</th><th class="num">QUOTA</th><th class="num">Plan PD</th>
@@ -5975,16 +5975,36 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     blocks.forEach(b=>{const L=bands[bands.length-1];
       if(L&&b.top<L.bot-1){L.bot=Math.max(L.bot,b.bot);L.head=L.head&&b.head;L.items.push(b);}
       else bands.push({top:b.top,bot:b.bot,head:b.head,items:[b]});});
-    const pages=[]; let cur=[];
-    bands.forEach(b=>{
-      if(cur.length&&(b.bot-cur[0].top)>pageH){
-        const carry=[]; while(cur.length>1&&cur[cur.length-1].head)carry.unshift(cur.pop());
-        pages.push(cur); cur=carry;
-        if(cur.length&&(b.bot-cur[0].top)>pageH){pages.push(cur);cur=[];}
-      }
-      cur.push(b);
+    /* data-shot-break = ขึ้นสไลด์ใหม่ที่หัวข้อนี้เสมอ · เนื้อหาก่อนหน้า (ตั้งแต่ตัวตัดก่อนหน้า) รวมเป็นสไลด์เดียว
+       ถ้าสูงไม่เกิน 1.6 เท่าของสไลด์ (เช่น Replenishment: การ์ด + ต้องเติม + สาเหตุ = สไลด์ 1, รวมทั้งหมด = สไลด์ถัดไป) */
+    const isBrk=b=>b.items.some(it=>it.el.matches('[data-shot-break]')||it.el.querySelector('[data-shot-break]'));
+    const segs=[[]]; bands.forEach(b=>{ if(isBrk(b)&&segs[segs.length-1].length)segs.push([]); segs[segs.length-1].push(b); });
+    const pages=[], keep=new Set();
+    segs.forEach((sg,si)=>{
+      const hasBrk=segs.length>1;
+      if(hasBrk&&si<segs.length-1&&sg[sg.length-1].bot-sg[0].top<=pageH*1.6){ keep.add(pages.length); pages.push(sg); return; }
+      let cur=[];
+      sg.forEach(b=>{
+        if(cur.length&&(b.bot-cur[0].top)>pageH){
+          const carry=[]; while(cur.length>1&&cur[cur.length-1].head)carry.unshift(cur.pop());
+          pages.push(cur); cur=carry;
+          if(cur.length&&(b.bot-cur[0].top)>pageH){pages.push(cur);cur=[];}
+        }
+        cur.push(b);
+      });
+      if(cur.length)pages.push(cur);
+      if(hasBrk)keep.add(pages.length-1);   /* ไม่รวมข้ามตัวตัด */
     });
-    if(cur.length)pages.push(cur);
+    /* รวมหน้าที่ติดกันเข้าด้วยกัน ถ้ารวมแล้วสูงไม่เกิน ~1.35 เท่าของสไลด์
+       (เช่น กราฟแถวเตี้ยๆ + ตาราง Detail 10 แถว) — ภาพย่อลงนิดเดียวให้พอดี 16:9
+       ดีกว่าแยกเป็นสไลด์ที่มีกราฟแถวเดียวแล้วเหลือที่ว่างครึ่งหน้า */
+    const MERGE=1.35;
+    const isKeep=pages.map((_,i)=>keep.has(i));   /* หน้าสุดท้ายของแต่ละช่วงตัด — ห้ามรวมกับหน้าถัดไป */
+    for(let i=0;i<pages.length-1;){
+      const a=pages[i], b=pages[i+1];
+      if(!isKeep[i]&&b[b.length-1].bot-a[0].top<=pageH*MERGE){ pages.splice(i,2,a.concat(b)); isKeep.splice(i,2,isKeep[i+1]); }
+      else i++;
+    }
     pages.forEach((pg,i)=>pg.forEach(b=>b.items.forEach(it=>mark(it.el,'shotPg',String(i)))));
     mark(root,'shotRoot','1');
 
