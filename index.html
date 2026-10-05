@@ -335,6 +335,7 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI table.dt{font-size:36px}
 #vKPI table.dt th{font-size:31px}
 #vKPI table.dt td{padding:17px 18px}
+#vKPI table.dt .chip{font-size:.92em;padding:5px 16px;line-height:1.35}   /* Remark Team ในตาราง — ใหญ่เกือบเท่าตัวหนังสือในตาราง */
 #vKPI .foot{font-size:29px}
 /* v-kpi3: หัวข้อ KPI แต่ละใบใหญ่ขึ้น (ชื่อ KPI · Target · เลขลำดับ) */
 #vKPI .kpi-head{gap:16px;margin-top:30px;margin-bottom:6px}
@@ -1069,7 +1070,7 @@ let DATES=[],DIFF=null,DOCK=null,DOCK_ROWS=null,DOCK_H=null,DOCK_MAP=null,LAST_S
    1. ตัดสินค้าที่ไม่ใช่สินค้าจริงออกก่อน (Box / ค่าส่ง / คูปอง / ส่วนลด / Product Card / เอกสาร)
    2. On-Time = ระดับ "ออเดอร์" · สถานะของออเดอร์ = อันที่แย่ที่สุดในออเดอร์นั้น
       และตัวหารนับเฉพาะ on-time + late (ไม่รวมที่ระบุไม่ได้)
-   3. Out of Stock = ระดับ "ชิ้น" ถ่วงน้ำหนักด้วย Order Line · ว่าง/ไม่ระบุ ถือเป็น late */
+   3. Out of Stock = ระดับ "ชิ้น" ถ่วงน้ำหนักด้วย Order Line · ล่าช้า = ส่งไม่ตรงวันจัดส่งเท่านั้น · ว่าง/อื่นๆ ถือเป็นปกติ */
 const EXCLUDED_PREFIX=['box','shipping fee','coupon','discount','product card','เอกสาร'];
 const isExcludedProduct=n=>{n=(n||'').trim().toLowerCase();
   return !!n&&EXCLUDED_PREFIX.some(p=>n.startsWith(p));};
@@ -1089,6 +1090,8 @@ function classify(status){
   if(m&&Number(m[1])>=2)return 'late';
   return 'unknown';
 }
+/* KPI Out Of Stock: มีแค่ 2 สถานะ — late = ส่งไม่ตรงวันจัดส่ง · ontime = ที่เหลือทั้งหมด (ส่งให้ในวัน / ส่งก่อนวันจัดส่ง / ว่าง) */
+function oosCls(status){return classify(status)==='late'?'late':'ontime';}
 function combineStatus(p,w){
   if(p==='late'||w==='late')return 'late';
   if(p==='ontime'||p==='early')return p;
@@ -1192,7 +1195,7 @@ async function loadOTP(){
 
 /* ===== คำนวณตามกติกา dashboard เดิม =====
    On-Time  : ระดับออเดอร์ · สถานะ = แย่สุดใน (Packing, WH) · ตัวหาร = on-time + late เท่านั้น
-   Out of Stock : ระดับชิ้น ถ่วงน้ำหนักด้วย Order Line · ดูจาก WH เท่านั้น · ว่าง = late  */
+   Out of Stock : ระดับชิ้น ถ่วงน้ำหนักด้วย Order Line · ดูจาก WH เท่านั้น · ล่าช้า = ส่งไม่ตรงวันจัดส่งเท่านั้น ที่เหลือปกติ  */
 function statsOf(rows){
   if(!rows.length)return null;
   const rank={late:3,unknown:2,early:1,ontime:1};
@@ -1211,7 +1214,7 @@ function statsOf(rows){
   rows.forEach(r=>{
     items+=r.qty;
     const c=classify(r.wh);
-    if(c==='ontime'||c==='early')okQty+=r.qty;
+    if(c!=='late')okQty+=r.qty;   /* OOS: ไม่ผ่านเฉพาะล่าช้า (ส่งไม่ตรงวันจัดส่ง) */
   });
 
   return {orders,items,lines:rows.length,onTimeOrders,lateOrders,denom,
@@ -1715,7 +1718,7 @@ function detailTable(rows,mode){
          : mode==='ex'  ? c!=='ontime'
          : mode==='yes' ? (c==='ontime'||c==='early')
          : mode==='no'  ? c==='late'
-         : mode==='fail'? (c!=='ontime'&&c!=='early')   /* ไม่ผ่านจริง = ล่าช้า/ไม่ระบุ · ก่อนกำหนดถือว่าผ่าน */
+         : mode==='fail'? c==='late'   /* ไม่ผ่านจริง = WH ระบุว่าล่าช้าเท่านั้น · ก่อนกำหนด/ส่งในวัน/ยังไม่กรอก ไม่แสดง */
          : c===mode;};
   const ex=rows.filter(keep);
   const sorted=[...ex].sort((a,b)=>{
@@ -2037,16 +2040,16 @@ function secOOS(){
   if(!all0.length)return '<div class="empty2">ไม่มีข้อมูลในช่วงที่เลือก</div>';
 
   /* ตัวกรองย่อย — มีผลทั้งหน้า เหมือนหน้า Dock To Stock Time */
-  const stSel=String(sf('oos_st','')).split('|').filter(Boolean);
+  const stSel=String(sf('oos_st','')).split('|').filter(v=>v==='ontime'||v==='late');
   const bars=chipMulti('oos_st','สถานะการส่งของ',
-    [['ontime','On time'],['early','Early'],['late','Late']],stSel);
-  const rows=catApply(stSel.length?all0.filter(r=>stSel.includes(classify(r.wh))):all0,
+    [['ontime','On time'],['late','Late']],stSel);
+  const rows=catApply(stSel.length?all0.filter(r=>stSel.includes(oosCls(r.wh))):all0,
                       {prod:r=>(r.product||'').trim()});
   if(!rows.length)return bars+'<div class="empty2">ไม่มีข้อมูลที่ตรงกับตัวกรองนี้</div>';
 
   let tq=0,on=0,ea=0,la=0;
   rows.forEach(r=>{const q=r.qty;tq+=q;
-    const c=classify(r.wh);
+    const c=oosCls(r.wh);
     if(c==='ontime')on+=q; else if(c==='early')ea+=q; else la+=q;});
   const ord=uniqOrders(rows);
   const p=((on+ea)/(tq||1))*100;   /* ไม่ปัดตรงนี้ — ให้ ringHTML จัดการทศนิยม */
@@ -2113,12 +2116,12 @@ function drawOOS(){
   const t=on+ea+la||1;
   destroy('oos');
   const oO=pctOpts(99);
-  oO.onClick=(e,els)=>{ if(els.length){ SUBF.oos_st=['ontime|early','late'][els[0].index]; renderKPI(); } };
+  oO.onClick=(e,els)=>{ if(els.length){ SUBF.oos_st=['ontime','late'][els[0].index]; renderKPI(); } };
   oO.onHover=(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default';};
   const os=pctSet([on+ea,la],t);   /* ก่อนกำหนด = ผ่าน รวมไว้กับ On time */   /* ตรงกับวงแหวน — ไม่ปัดเป็น 100% / 0% */
   oO.plugins.barPct.digits=os.digits;
   CH.oos=new Chart(document.getElementById('c_oos'),{type:'bar',
-    data:{labels:['On time (รวมก่อนกำหนด)','Late'],datasets:[{
+    data:{labels:['On time','Late'],datasets:[{
       data:os.data,
       backgroundColor:[C.teal,C.rose],borderRadius:6,maxBarThickness:74}]},
     options:oO});
