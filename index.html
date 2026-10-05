@@ -1715,6 +1715,7 @@ function detailTable(rows,mode){
          : mode==='ex'  ? c!=='ontime'
          : mode==='yes' ? (c==='ontime'||c==='early')
          : mode==='no'  ? c==='late'
+         : mode==='fail'? (c!=='ontime'&&c!=='early')   /* ไม่ผ่านจริง = ล่าช้า/ไม่ระบุ · ก่อนกำหนดถือว่าผ่าน */
          : c===mode;};
   const ex=rows.filter(keep);
   const sorted=[...ex].sort((a,b)=>{
@@ -2055,7 +2056,7 @@ function secOOS(){
   return bars
    +(stSel.length?`<div class="chint">กำลังกรอง — แสดง ${fmt(tq)} ชิ้น จากทั้งหมด ${fmt(totQ)} ชิ้นในช่วงนี้</div>`:'')
    +ringHTML(p,99,`<span>WH ส่งของให้ Packing ตามกำหนด</span><span>เป้าหมาย <b>≥ 99%</b></span>`)
-   +`<div class="sgrid">${card('จำนวนสินค้า (ชิ้น)',tq)}${card('On-Time Dispatch',on,'teal')}
+   +`<div class="sgrid">${card('จำนวนสินค้า (ชิ้น)',tq)}${card('On-Time Dispatch',on+ea,'teal')}
       ${card('จัดส่งล่าช้า',la,'rose')}${card('Orders',ord)}</div>
      <!-- "จัดส่งก่อนกำหนด" ย้ายไปแสดงที่หน้า On-Time Performance แล้ว — % ยังคำนวณ (on+early)/total เหมือนเดิม
           เพราะ on-time กับ early ยังนับเป็นผ่านเกณฑ์ทั้งคู่ มีแค่ late เท่านั้นที่ไม่ผ่าน -->
@@ -2072,8 +2073,8 @@ function secOOS(){
          <div class="cpanel"><div class="cbox"><canvas id="c_oos"></canvas></div></div></div>
      </div>
 
-     <h2 class="sec">Order Detail <em>เฉพาะรายการที่มีปัญหา — ไม่ใช่ “ส่งในวัน”</em><span></span></h2>
-     ${detailTable(rows,'ex')}`;
+     <h2 class="sec">Order Detail <em>เฉพาะรายการที่ไม่ผ่าน — ล่าช้า (ส่งก่อนกำหนดถือว่าผ่าน ไม่แสดง)</em><span></span></h2>
+     ${detailTable(rows,'fail')}`;
 }
 
 function drawOOS(){
@@ -2112,14 +2113,14 @@ function drawOOS(){
   const t=on+ea+la||1;
   destroy('oos');
   const oO=pctOpts(99);
-  oO.onClick=(e,els)=>{ if(els.length){ SUBF.oos_st=['ontime','early','late'][els[0].index]; renderKPI(); } };
+  oO.onClick=(e,els)=>{ if(els.length){ SUBF.oos_st=['ontime|early','late'][els[0].index]; renderKPI(); } };
   oO.onHover=(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default';};
-  const os=pctSet([on,ea,la],t);   /* ตรงกับวงแหวน — ไม่ปัดเป็น 100% / 0% */
+  const os=pctSet([on+ea,la],t);   /* ก่อนกำหนด = ผ่าน รวมไว้กับ On time */   /* ตรงกับวงแหวน — ไม่ปัดเป็น 100% / 0% */
   oO.plugins.barPct.digits=os.digits;
   CH.oos=new Chart(document.getElementById('c_oos'),{type:'bar',
-    data:{labels:['On time','Early','Late'],datasets:[{
+    data:{labels:['On time (รวมก่อนกำหนด)','Late'],datasets:[{
       data:os.data,
-      backgroundColor:[C.teal,C.tealD,C.rose],borderRadius:6,maxBarThickness:74}]},
+      backgroundColor:[C.teal,C.rose],borderRadius:6,maxBarThickness:74}]},
     options:oO});
 }
 
