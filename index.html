@@ -878,6 +878,23 @@ body.present .main{margin-left:0}
 #vKPI .pkgauge .gname{font-size:38px}
 #vKPI .pklbl{font-size:30px}
 #vKPI .pksub{font-size:33px}
+
+/* ป้ายสีกราฟแบบ HTML (Packing / Picking) */
+#vKPI .hleg{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:4px 18px;
+  margin:0 0 16px;padding:0 0 14px;border-bottom:1px solid var(--line)}
+#vKPI .hleg:empty{display:none}
+#vKPI .hleg button{display:flex;align-items:center;gap:14px;min-width:0;background:none;border:0;
+  padding:7px 10px;border-radius:10px;font:inherit;font-size:31px;color:var(--ink);text-align:left;cursor:pointer}
+#vKPI .hleg button:hover{background:var(--soft)}
+#vKPI .hleg button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#vKPI .hleg i{width:24px;height:24px;border-radius:6px;flex:none}
+#vKPI .hleg b{margin-left:auto;padding-left:14px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--mute);font-weight:600}
+#vKPI .hleg button.off{opacity:.35}
+#vKPI .hleg button.off span{text-decoration:line-through}
+#vKPI .piewrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(520px,.85fr);gap:36px;align-items:center}
+#vKPI .hleg.side{grid-template-columns:1fr;gap:2px;margin:0;padding:0;border:0}
+#vKPI .hleg.side button{padding:6px 12px;border-bottom:1px solid var(--soft);border-radius:0}
+@media(max-width:1100px){#vKPI .piewrap{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1500,6 +1517,20 @@ function toOrderLevel(rows){
 
 /* ---------- ตัวช่วยวาด ---------- */
 function destroy(k){ if(CH[k]){try{CH[k].destroy();}catch(e){} delete CH[k];} }
+/* ป้ายสี (legend) แบบ HTML — เรียงเป็นตาราง อ่านง่าย ไม่ทับแกนกราฟ · กดเพื่อซ่อน/แสดงคนนั้น
+   mode: 'ds' = ซ่อนทั้งชุดข้อมูล · 'pie' = ซ่อนชิ้นในโดนัท · 'none' = ดูอย่างเดียว */
+function htmlLegend(id,ch,items,mode){
+  const box=document.getElementById(id); if(!box||!ch)return;
+  const hid=i=>mode==='pie'?!ch.getDataVisibility(i):mode==='ds'?!ch.isDatasetVisible(i):false;
+  box.innerHTML=items.map((x,k)=>`<button type="button" data-k="${k}" class="${hid(x.i)?'off':''}"
+      title="${esc(x.t)}"><i style="background:${x.c}"></i><span>${esc(x.t)}</span>${x.v!=null?`<b>${x.v}</b>`:''}</button>`).join('');
+  box.onclick=e=>{const b=e.target.closest('button[data-k]'); if(!b||mode==='none')return;
+    const x=items[+b.dataset.k];
+    if(mode==='pie')ch.toggleDataVisibility(x.i); else ch.setDatasetVisibility(x.i,!ch.isDatasetVisible(x.i));
+    ch.update(); b.classList.toggle('off',hid(x.i));};
+}
+const dsLegend=(id,ch)=>htmlLegend(id,ch,ch.data.datasets.map((d,i)=>({t:d.label,
+  c:Array.isArray(d.borderColor)?d.borderColor[0]:(d.borderColor||d.backgroundColor),i})),'ds');
 function baseOpts(legend){
   return {responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:!!legend,labels:{color:C.mute,font:{size:cf(23)}}},
@@ -4322,13 +4353,14 @@ function secPack(){
 
      <h2 class="sec">แนวโน้มการแพ็ค <em>${tSpan==='w'?'รายสัปดาห์ — ตามฟิลเตอร์ '+fWeekLabel():'รายเดือน'} · ${tStack?'ซ้อนแท่ง = ยอดรวมทีม':'แยกแท่งรายคน'}</em><span></span></h2>
      ${chipOne('pk2_stack','รูปแบบ',[['0','แยกแท่ง (เทียบรายคน)'],['1','ซ้อนแท่ง (ดูยอดรวม)']],tStack?'1':'0')}
-     <div class="cpanel"><div class="cbox xl"><canvas id="c_pkWk"></canvas></div></div>
+     <div class="cpanel"><div class="hleg" id="lg_pkWk"></div><div class="cbox xl"><canvas id="c_pkWk"></canvas></div></div>
 
      <h2 class="sec">สัดส่วนการแพ็ค (เทียบรายบุคคล)<span></span></h2>
-     <div class="cpanel"><div class="cbox" style="height:640px"><canvas id="c_pkShare"></canvas></div></div>
+     <div class="cpanel"><div class="piewrap"><div class="cbox" style="height:640px"><canvas id="c_pkShare"></canvas></div>
+       <div class="hleg side" id="lg_pkShare"></div></div></div>
 
      <h2 class="sec">เวลาที่ใช้งานหนาแน่น (Peak Hours - เปรียบเทียบ)<span></span></h2>
-     <div class="cpanel"><div class="cbox"><canvas id="c_pkHour"></canvas></div></div>
+     <div class="cpanel"><div class="hleg" id="lg_pkHour"></div><div class="cbox"><canvas id="c_pkHour"></canvas></div></div>
 
      <h2 class="sec">ข้อมูลเชิงลึกรายบุคคล (Individual Deep Dive)<span></span></h2>
      <div class="pkcards">${S.cards.map(pcard).join('')}</div>`;
@@ -4376,6 +4408,7 @@ function drawPack(){
     return yrs.size>1?t+' '+k.slice(2,4):t;            /* ปีเดียว = ไม่ต้องใส่ปี */
   };
   const oWk=baseOpts(true);
+  oWk.plugins.legend.display=false;   /* ใช้ป้ายสี HTML ด้านบนแทน */
   oWk.scales.y.ticks.callback=v=>fmt(v);
   oWk.plugins.legend.labels.boxWidth=18;
   oWk.plugins.tooltip.footerFont={size:cf(21)};
@@ -4400,6 +4433,7 @@ function drawPack(){
       data:{_unit:'กล่อง',labels:keys.map(lab),datasets:dsets.map(x=>({label:x.n,
         data:x.d,backgroundColor:col(x.i),maxBarThickness:140}))},
       options:oWk});
+    dsLegend('lg_pkWk',CH.pkWk);
   }else{
     /* แยกแท่งรายคน — 1 แท่ง = 1 คนในเดือนนั้น
        คนที่เดือนนั้นยอดเป็น 0 จะไม่มีแท่ง และไม่จองช่องว่างไว้ด้วย
@@ -4435,6 +4469,7 @@ function drawPack(){
           borderRadius:2,maxBarThickness:90}]},
       options:oWk});
     CH.pkWk.data._cfv=cats.map(c=>c.sp?'':c.m); CH.pkWk.data._unit='กล่อง';
+    htmlLegend('lg_pkWk',CH.pkWk,S.pArr.map((n,i)=>({t:n,c:col(i),i})).filter(x=>present.has(x.t)),'none');
     CH.pkWk.data._totArr=cats.map(c=>c.sp?null:gTot[c.g]); CH.pkWk.data._totLbl='จากทั้ง'+(byMonth?'เดือน':'สัปดาห์');   /* คลิกแท่ง = กรองเดือน/สัปดาห์นั้น */
   }
 
@@ -4446,12 +4481,14 @@ function drawPack(){
     data:{labels:S.pArr,datasets:[{data:sharePct,
       backgroundColor:S.pArr.map((n,i)=>col(i)),borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',layout:{padding:10},
-      plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(24)},boxWidth:20}},
+      plugins:{legend:{display:false},
         pieLbl:{display:true,minPercent:3,size:30,fit:true},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('
             +fmt(shareVal[c.dataIndex])+' กล่อง)'}}}}});
   Object.assign(CH.pkShare.data,{_cnt:shareVal,_unit:'กล่อง'});
+  htmlLegend('lg_pkShare',CH.pkShare,S.pArr.map((n,i)=>({t:n,c:col(i),i,
+    v:`${(+sharePct[i]).toFixed(1)}% · ${fmt(shareVal[i])}`})),'pie');
   /* บังคับคำนวณขนาด canvas ใหม่ทันที — พอดันความสูงกล่องขึ้นจาก 520 เป็น 640px
      Chart.js บางทีจับตำแหน่งเมาส์ยังอิงขนาดเก่าก่อน resize จริง ทำให้ tooltip ขึ้นผิดจุด */
   requestAnimationFrame(()=>{ if(CH.pkShare)CH.pkShare.resize(); });
@@ -4465,6 +4502,7 @@ function drawPack(){
   /* ค่า default ของ Chart.js ต้องชี้เป๊ะจุดถึงจะขึ้น tooltip (intersect:true) — เส้นโค้งบางจุดเล็ก
      กดแล้วไม่ขึ้นอะไรเลย เปลี่ยนเป็นชี้ตรงคอลัมน์ไหนก็ได้ (ไม่ต้องตรงจุดเป๊ะ) แล้วโชว์ทุกเส้นพร้อมกัน */
   oHour.interaction={mode:'index',intersect:false};
+  oHour.plugins.legend={display:false};
   oHour.plugins.tooltip.callbacks={label:c=>`${c.dataset.label}: ${fmt(c.raw)} ใบ`};
   CH.pkHour=new Chart(document.getElementById('c_pkHour'),{type:'line',
     data:{labels:hArr,datasets:S.pArr.map((n,i)=>({label:n,
@@ -4472,6 +4510,7 @@ function drawPack(){
       backgroundColor:col(i)+'22',fill:true,tension:.4,pointRadius:3,pointHoverRadius:6}))},
     options:oHour});
   CH.pkHour.data._unit='ใบ';
+  dsLegend('lg_pkHour',CH.pkHour);
 }
 
 function secPick(){
@@ -4571,12 +4610,12 @@ function secPick(){
      </div>
 
      <h2 class="sec">แนวโน้มการหยิบ${pg==='month'?'รายเดือน':pg==='week'?'รายสัปดาห์':'ในแต่ละวัน'} <em>จำนวนชิ้นต่อ${pg==='month'?'เดือน':pg==='week'?'สัปดาห์':'วัน'} แยกตามคน</em><span></span></h2>
-     <div class="cpanel"><div class="cscroll">
+     <div class="cpanel"><div class="hleg" id="lg_pkday"></div><div class="cscroll">
        <div class="cbox" style="height:480px;min-width:${Math.max(900,tk.length*120)}px">
          <canvas id="c_pkday"></canvas></div></div></div>
 
      <h2 class="sec">ช่วงเวลาที่หยิบหนาแน่น <em>จำนวนชิ้นตามชั่วโมง</em><span></span></h2>
-     <div class="cpanel"><div class="cscroll">
+     <div class="cpanel"><div class="hleg" id="lg_pkhr"></div><div class="cscroll">
        <div class="cbox" style="height:520px;min-width:${Math.max(900,hrs.length*175)}px">
          <canvas id="c_pkhr"></canvas></div></div></div>
 
@@ -4664,6 +4703,7 @@ function drawPick(){
           tension:.35,pointRadius:3,pointBackgroundColor:cols[i],
           spanGaps:true,fill:false}))},options:o});
     CH.pkday.data._cfv=pg==='day'?tk:tLbl; CH.pkday.data._unit='ชิ้น';
+    CH.pkday.options.plugins.legend.display=false; CH.pkday.update('none'); dsLegend('lg_pkday',CH.pkday);
   }
 
   /* ช่วงเวลาที่หยิบหนาแน่น — เส้นโค้งมีพื้นที่ใต้กราฟ แยกตามคน */
@@ -4686,6 +4726,7 @@ function drawPick(){
           borderWidth:3,tension:.45,pointRadius:4,
           pointBackgroundColor:cols[i],fill:true}))},options:o});
     CH.pkhr.data._cfv=hrs; CH.pkhr.data._unit='ชิ้น';
+    CH.pkhr.options.plugins.legend.display=false; CH.pkhr.update('none'); dsLegend('lg_pkhr',CH.pkhr);
   }
 }
 
