@@ -2160,7 +2160,7 @@ function secOOS(){
         :'Weekly Line Items <em>จำนวนชิ้นที่ออกต่อสัปดาห์</em>'}<span></span></h2>
      <div class="cpanel"><div class="cbox"><canvas id="c_wk2"></canvas></div></div>
 
-     <div class="g2" data-shot-break="1">   <!-- สไลด์ 16:9: กราฟแถวนี้ + Order Detail อยู่สไลด์เดียวกัน -->
+     <div class="g2">
        <div><h2 class="sec">Top 5 Products<span></span></h2>
          <div class="cpanel"><div class="cbox"><canvas id="c_top5"></canvas></div></div></div>
        <div><h2 class="sec">Out-of-Stock Rate <em>เป้า 99%</em><span></span></h2>
@@ -5998,7 +5998,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     /* รวมหน้าที่ติดกันเข้าด้วยกัน ถ้ารวมแล้วสูงไม่เกิน ~1.35 เท่าของสไลด์
        (เช่น กราฟแถวเตี้ยๆ + ตาราง Detail 10 แถว) — ภาพย่อลงนิดเดียวให้พอดี 16:9
        ดีกว่าแยกเป็นสไลด์ที่มีกราฟแถวเดียวแล้วเหลือที่ว่างครึ่งหน้า */
-    const MERGE=1.35;
+    const MERGE=1.0;   /* รวมเฉพาะเมื่อพอดีสไลด์โดยไม่ต้องย่อ — ผู้ใช้ต้องการตัวใหญ่เต็มจอ */
     const isKeep=pages.map((_,i)=>keep.has(i));   /* หน้าสุดท้ายของแต่ละช่วงตัด — ห้ามรวมกับหน้าถัดไป */
     for(let i=0;i<pages.length-1;){
       const a=pages[i], b=pages[i+1];
@@ -6056,10 +6056,27 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     /* ---- แบบที่ 1: สไลด์ 16:9 ---- */
     for(let i=0;mode!=='charts'&&mode!=='page'&&i<pages.length;i++){
       say(`กำลังสร้างสไลด์ ${i+1}/${pages.length}…`);
-      const pg=pages[i], hh=pg[pg.length-1].bot-pg[0].top;
-      let c=await shoot(w0,Math.ceil(hh+260),S,d=>{
+      const pg=pages[i]; let hh=pg[pg.length-1].bot-pg[0].top, wS=w0;
+      /* สไลด์ที่เนื้อหาสูงกว่าสัดส่วน 16:9 → ขยายความกว้างหน้าชั่วคราวให้เนื้อหาเรียงใหม่
+         จนได้สัดส่วนใกล้ 16:9 ภาพจะเต็มสไลด์ ไม่เหลือขอบว่างซ้ายขวา */
+      const relayout=async w=>{ root.style.width=w+'px';
+        charts.forEach(ch=>{try{ch.resize();ch.update('none');}catch(e){}});
+        await shotFrame(); await shotWait(180);
+        const R2=root.getBoundingClientRect(); let t=1e9,b=-1e9;
+        root.querySelectorAll('[data-shot-pg="'+i+'"]').forEach(e=>{const r=e.getBoundingClientRect();
+          if(r.height<1)return; t=Math.min(t,r.top); b=Math.max(b,r.bottom);});
+        return b>t?b-t:hh; };
+      if(hh*(SHOT_SLIDE_W-140)/(SHOT_SLIDE_H-160)>w0*1.03){
+        for(let it=0;it<3;it++){
+          const want=Math.round(Math.min(w0*1.8,Math.max(w0,hh*(SHOT_SLIDE_W-140)/(SHOT_SLIDE_H-160)*0.98)));
+          if(Math.abs(want-wS)<w0*0.02)break;
+          wS=want; hh=await relayout(wS);
+        }
+      }
+      const S1=Math.min(5,Math.max(1,(SHOT_SLIDE_W+60)/wS));
+      let c=await shoot(wS,Math.ceil(hh+260),S1,d=>{
         const rc=d.querySelector('[data-shot-root="1"]'); if(!rc)return;
-        shotIsolate(d,rc,w0);
+        shotIsolate(d,rc,wS);
         d.querySelectorAll('[data-shot-pg]').forEach(e=>{if(e.dataset.shotPg!==String(i))e.style.setProperty('display','none','important');});
       });
       c=shotTrim(c,bg);
@@ -6074,6 +6091,8 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       x.textAlign='right'; x.fillText(`${i+1} / ${pages.length}`,sl.width-M,sl.height-FOOT/2);
       zip.file(`1-สไลด์ 16x9/slide-${pad2(i+1)}.png`,await shotBlob(sl));
       c.width=c.height=0;
+      if(wS!==w0){ root.style.width=w0+'px'; charts.forEach(ch=>{try{ch.resize();ch.update('none');}catch(e){}});
+        await shotFrame(); await shotWait(150); }
     }
     /* ---- แบบที่ 2 (v-shot6): แยกทีละหัวข้อ — หัวข้อ + เนื้อหาใต้หัวข้อนั้นจนถึงหัวข้อถัดไป
        เป็น 1 ภาพ (เช่น ชื่อหน้า + วงแหวน + การ์ดตัวเลข) ภาพจึงมีหัวข้อติดมาเสมอ ---- */
