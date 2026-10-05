@@ -860,6 +860,24 @@ body.present .main{margin-left:0}
 /* Forecast — Stock Depletion */
 #vKPI table.dt.dep-dt .why{font-size:33px}
 #vKPI .tscroll.tdep{max-height:1300px;overflow:auto}
+
+/* กราฟ / การ์ดสรุป / Leaderboard / Station — ขยายให้อ่านง่าย */
+#vKPI .scard .sl{font-size:38px}
+#vKPI .chname2{font-size:42px}
+#vKPI h2.sec{font-size:46px}
+#vKPI .rrow{grid-template-columns:76px minmax(180px,1.3fr) 3fr auto;padding:14px 8px}
+#vKPI .rno{width:66px;height:66px;font-size:34px}
+#vKPI .rname{font-size:38px}
+#vKPI .rval{font-size:40px;min-width:300px}
+#vKPI .rbar{height:24px}
+#vKPI .rtot{font-size:36px}
+#vKPI .rtot b{font-size:46px}
+#vKPI .rtot span{font-size:30px}
+#vKPI .pkgauge .gwrap{height:250px}
+#vKPI .pkgauge .gval{font-size:54px}
+#vKPI .pkgauge .gname{font-size:38px}
+#vKPI .pklbl{font-size:30px}
+#vKPI .pksub{font-size:33px}
 </style>
 </head>
 <body>
@@ -1456,7 +1474,7 @@ function kpiCardInner(o){
 /* ---------- หน้าย่อยของ Warehouse ---------- */
 const S_REPL='1QenNK8fW03G5bfQYStkufPa8RybxuK-W9d0ktz-mr4Y';
 const CH={};
-let CFZ=1.18;                    /* ตัวคูณขนาดฟอนต์ในกราฟ (โหมดพรีเซนต์ = 1.6) */
+let CFZ=1.6;                    /* ตัวคูณขนาดฟอนต์ในกราฟ (โหมดพรีเซนต์ = 1.6) */
 const cf=n=>Math.round(n*CFZ);
 const C={teal:'#0D9488',tealD:'#0F766E',plum:'#6366F1',plumD:'#4F46E5',
          amber:'#D89A2E',rose:'#EF4444',good:'#10B981',mute:'#64748B'};
@@ -3982,7 +4000,7 @@ function drawShip(){
     options:Object.assign(baseOpts(false),{
       plugins:Object.assign({},baseOpts(false).plugins,{
         legend:{display:false},
-        barPct:{display:true,raw:true,size:18}})})});
+        barPct:{display:true,raw:true,size:24}})})});
   CH.shDay.data._unit='ออเดอร์';
 
   /* โดนัทช่องทางขาย Top 5 — plot เป็น % ให้ pieLbl เขียนตัวเลขบนวงได้
@@ -6084,7 +6102,7 @@ function kPresent(on){
   if(on&&!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(()=>{});
   if(!on&&document.fullscreenElement)document.exitFullscreen?.();
   /* กราฟต้องวาดใหม่ตามกล่องที่เปลี่ยนขนาด */
-  CFZ=on?1.6:1.18;
+  CFZ=on?2.0:1.6;
   renderKPI();   /* วาดกราฟใหม่ด้วยขนาดฟอนต์ของโหมดนั้น */
 }
 el('kPresent').addEventListener('click',()=>kPresent(true));
