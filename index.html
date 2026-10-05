@@ -892,8 +892,8 @@ body.present .main{margin-left:0}
 #vKPI .hleg button.off{opacity:.35}
 #vKPI .hleg button.off span{text-decoration:line-through}
 #vKPI .piewrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(520px,.85fr);gap:36px;align-items:center}
-#vKPI .hleg.side{grid-template-columns:1fr;gap:2px;margin:0;padding:0;border:0}
-#vKPI .hleg.side button{padding:6px 12px;border-bottom:1px solid var(--soft);border-radius:0}
+#vKPI .hleg.hleg-side{grid-template-columns:1fr;gap:2px;margin:0;padding:0;border:0}
+#vKPI .hleg.hleg-side button{padding:6px 12px;border-bottom:1px solid var(--soft);border-radius:0}
 @media(max-width:1100px){#vKPI .piewrap{grid-template-columns:1fr}}
 </style>
 </head>
@@ -4357,7 +4357,7 @@ function secPack(){
 
      <h2 class="sec">สัดส่วนการแพ็ค (เทียบรายบุคคล)<span></span></h2>
      <div class="cpanel"><div class="piewrap"><div class="cbox" style="height:640px"><canvas id="c_pkShare"></canvas></div>
-       <div class="hleg side" id="lg_pkShare"></div></div></div>
+       <div class="hleg hleg-side" id="lg_pkShare"></div></div></div>
 
      <h2 class="sec">เวลาที่ใช้งานหนาแน่น (Peak Hours - เปรียบเทียบ)<span></span></h2>
      <div class="cpanel"><div class="hleg" id="lg_pkHour"></div><div class="cbox"><canvas id="c_pkHour"></canvas></div></div>
