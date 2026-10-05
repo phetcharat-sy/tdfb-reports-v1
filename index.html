@@ -821,28 +821,45 @@ body.present .main{margin-left:0}
 .side-foot{font-size:23.5px}
 </style>
 <style id="detail-bigger">
-/* ตัวหนังสือในตาราง Detail ทุกหน้า — ขยายประมาณ 15–20% */
-#vKPI table.dt{font-size:42px}
-#vKPI table.dt th{font-size:35px}
-#vKPI table.dt td{padding:20px 20px}
-#vKPI table.dt.big-rows{font-size:36px}
-#vKPI table.dt.big-rows th{font-size:31px}
-#vKPI table.dt.dock-dt{font-size:37px}
-#vKPI table.dt.dock-dt th{font-size:32px}
-#vKPI table.dt.brk{font-size:41px}
-#vKPI table.dt.brk th{font-size:34px}
-#vKPI table.dt.ret-dt{font-size:43px}
+/* ตัวหนังสือในตาราง Detail ทุกหน้า — ขยายให้อ่านง่าย */
+#vKPI table.dt{font-size:44px}
+#vKPI table.dt th{font-size:36px}
+#vKPI table.dt td{padding:22px 20px}
+#vKPI .pname{font-size:40px}
+#vKPI .pmeta{font-size:31px}
+#vKPI .why{font-size:33px;padding:4px 16px}
+#vKPI .mono{font-size:33px}
+#vKPI h2.sec em{font-size:37px}
+/* Stock Variance — รายการที่นับไม่ตรง */
+#vKPI table.dt.big-rows{font-size:44px}
+#vKPI table.dt.big-rows th{font-size:36px}
+#vKPI table.dt.big-rows .pname{font-size:40px}
+#vKPI table.dt.big-rows .pmeta{font-size:31px}
+#vKPI table.dt.big-rows .why{font-size:34px}
+#vKPI .tscroll.t10{max-height:1500px}
+/* Dock To Stock — รายละเอียดรายการ */
+#vKPI table.dt.dock-dt{font-size:42px}
+#vKPI table.dt.dock-dt th{font-size:35px}
+#vKPI table.dt.dock-dt td{padding:20px 16px}
+#vKPI table.dt.dock-dt .pname{font-size:39px}
+#vKPI table.dt.dock-dt .pmeta{font-size:31px}
+#vKPI table.dt.dock-dt .why{font-size:33px}
+#vKPI table.dt.dock-dt .mono{font-size:34px}
+/* ตารางสรุป / Return */
+#vKPI table.dt.brk{font-size:43px}
+#vKPI table.dt.brk th{font-size:35px}
+#vKPI table.dt.ret-dt{font-size:44px}
 #vKPI table.dt.ret-dt th{font-size:36px}
 #vKPI table.dt.ret-dt .mono{font-size:38px}
 #vKPI table.dt.ret-dt .why,#vKPI table.dt.ret-dt .retnote{font-size:37px}
-#vKPI table.dt.ret-dt.auto-w{font-size:41px}
+#vKPI table.dt.ret-dt.auto-w{font-size:42px}
 #vKPI table.dt.ret-dt.auto-w th{font-size:35px}
 #vKPI table.dt.ret-dt.auto-w .mono{font-size:37px}
 #vKPI table.dt.ret-dt.auto-w .why{font-size:36px}
 #vKPI table.dt.ret-dt.auto-w td.wide-col .retnote{font-size:35px}
-#vKPI .pname{font-size:36px}
-#vKPI .pmeta{font-size:28px}
-#vKPI h2.sec em{font-size:37px}
+/* Forecast — Stock Depletion */
+#vKPI table.dt.dep-dt .why{font-size:33px}
+#vKPI .tscroll.tdep{max-height:1300px;overflow:auto}
 </style>
 </head>
 <body>
@@ -3020,6 +3037,14 @@ function secForecast(){
   const crit=dep.filter(r=>r.weeksLeft!=null&&r.weeksLeft<2).length;
   const warn=dep.filter(r=>r.weeksLeft!=null&&r.weeksLeft>=2&&r.weeksLeft<4).length;
   const okc=dep.filter(r=>r.weeksLeft==null||r.weeksLeft>=4).length;
+  /* ตัวกรองสถานะ — มีผลเฉพาะตาราง Stock Depletion Forecast */
+  const depCls=r=>r.weeksLeft==null?'nodem':r.weeksLeft<2?'crit':r.weeksLeft<4?'watch':'ok';
+  const depCnt={crit:0,watch:0,ok:0,nodem:0}; dep.forEach(r=>depCnt[depCls(r)]++);
+  const depSel=String(sf('fc_dep','')).split('|').filter(v=>v in depCnt);
+  const depBar=chipMulti('fc_dep','สถานะ',
+    [['crit',`วิกฤต (${depCnt.crit})`],['watch',`เฝ้าระวัง (${depCnt.watch})`],
+     ['ok',`ปกติ (${depCnt.ok})`],['nodem',`ไม่มี demand (${depCnt.nodem})`]],depSel);
+  const depShow=depSel.length?dep.filter(r=>depSel.includes(depCls(r))):dep;
 
   /* กำลังคน 7 วันข้างหน้า — คงไว้ 7 วันเหมือนเดิม แม้พยากรณ์รายวันด้านบนขยายเป็น 14 วันแล้ว
      (จำกัดด้วย .slice(0,7) เพราะ dOrd.fc ตอนนี้มี 14 ค่า) */
@@ -3200,13 +3225,14 @@ function secForecast(){
         <div class="cbox" style="height:${Math.max(420,items4.length*54)}px"><canvas id="c_fc4w"></canvas></div></div>
     </div>`:''}
 
-    ${dep.length?`<h2 class="sec">Stock Depletion Forecast <em>${fmt(dep.length)} สินค้า · เรียงจากวิกฤตที่สุด</em><span></span></h2>
-    <div class="tscroll" style="max-height:none;overflow:visible"><table class="dt"><thead><tr>
+    ${dep.length?`<h2 class="sec">Stock Depletion Forecast <em>${depSel.length?fmt(depShow.length)+' จาก ':''}${fmt(dep.length)} สินค้า · เรียงจากวิกฤตที่สุด</em><span></span></h2>
+    ${depBar}
+    ${depShow.length?`<div class="tscroll tdep"><table class="dt dep-dt"><thead><tr>
       <th>Product</th><th class="num">Demand เฉลี่ย/สัปดาห์</th>
       <th class="num">Stock WH300</th><th class="num">เหลือ (สัปดาห์)</th>
       <th class="num">สถานะ</th><th>สาเหตุที่ยังไม่เติม</th>
     </tr></thead><tbody>`
-    +dep.map(r=>{
+    +depShow.map(r=>{
       const w=r.weeksLeft;
       const st=w==null?'<span style="color:var(--mute)">ไม่มี demand</span>'
         :w<2?'<span class="bad">วิกฤต</span>'
@@ -3220,6 +3246,7 @@ function secForecast(){
         <td>${r.remark?`<span class="why has">${esc(r.remark)}</span>`:'<span class="why">—</span>'}</td></tr>`;
     }).join('')
     +'</tbody></table></div>'
+    :'<div class="empty2">ไม่มีสินค้าในสถานะที่เลือก</div>'}`
     :'<div class="empty2">ยังไม่มีข้อมูล Replenishment สำหรับคำนวณ Stock Depletion</div>'}`;
 }
 
