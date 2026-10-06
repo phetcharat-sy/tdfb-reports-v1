@@ -917,12 +917,12 @@ body.present .main{margin-left:0}
 
       <div class="grp">Delivery</div>
       <button data-view="kpi" data-sec="pack">Packing</button>
-      <button data-view="kpi" data-sec="ret">Return</button>
-      <button data-view="kpi" data-sec="can">Cancel</button>
 
       <div class="grp">Admin</div>
       <!-- ซ่อนไว้ก่อน: <button data-view="kpi" data-sec="ontime">KPI On-Time Performance</button> -->
       <button data-view="kpi" data-sec="ship">การจัดส่ง (Shipping)</button>
+      <button data-view="kpi" data-sec="ret">Return</button>
+      <button data-view="kpi" data-sec="can">Cancel</button>
 
       <div class="grp">วิธีการปฏิบัติงาน</div>
       <button data-view="kpi" data-sec="sop">เงื่อนไขการส่งสินค้าแต่ละ Platform</button>
@@ -5430,8 +5430,8 @@ function renderKPI(){
                pack:['Packing','Delivery · ผลงานพนักงานแพ็ค สถานี และเวลาหนาแน่น'],
                sop:['เงื่อนไขการส่งสินค้าแต่ละ Platform','วิธีการปฏิบัติงาน · รอบตัดคำสั่งซื้อ Shopee · Lazada · TikTok'],
                ship:['การจัดส่ง (Shipping)','Admin · ปริมาณจัดส่ง ค้างส่ง ช่องทาง และขนส่ง'],
-               ret:['Return','Delivery · งานตีคืน ยกเลิก และเคสค้าง'],
-               can:['Cancel','Delivery · ออเดอร์ยกเลิก']};
+               ret:['Return','Admin · งานตีคืน ยกเลิก และเคสค้าง'],
+               can:['Cancel','Admin · ออเดอร์ยกเลิก']};
   const tt=TITLE[SEC]||TITLE.overview;
   el('kTitle').textContent=tt[0];
   el('kSub').textContent=tt[1];
