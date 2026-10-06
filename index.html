@@ -6681,11 +6681,9 @@ const DEPT_TXT=v=>{v=String(v||'').trim(); if(!v)return '';
 const TEAMS={
   delivery:{
     title:'รายงานทีม Delivery',
-    sub:'ออเดอร์จัดส่ง · ค้างส่ง · งานจัดทำ MO · การแจ้งปัญหาประจำวัน',
-    source:'Job Dairy Delivery (MO Delivery) · Packing 2026 (ออเดอร์จัดส่ง) และ แจ้งรายการมีปัญหาประจำวันของ Operation (แท็บ Delivery.)',
+    sub:'งานจัดทำ MO · การแจ้งปัญหาประจำวัน',
+    source:'Job Dairy Delivery (MO Delivery) และ แจ้งรายการมีปัญหาประจำวันของ Operation (แท็บ Delivery.)',
     panels:[
-      {k:'order',t:'ออเดอร์ค้างส่ง', c:'พร้อมเหตุผล · จากชีต Packing 2026', hd:'d', unit:'ออเดอร์',
-       ship:true, empty:'ไม่มีออเดอร์ค้างส่ง'},
       {k:'mo',   t:'MO ประจำวัน',      c:'รายการจัดทำ MO Delivery', hd:'a', unit:'รายการ',
        sheet:JOB, gid:'0',          empty:'ไม่มีรายการทำ MO'},
       {k:'issue',t:'แจ้งปัญหาประจำวัน', c:'ป้ายสี = เกณฑ์', hd:'c', unit:'เคส',
@@ -6708,9 +6706,12 @@ const TEAMS={
   },
   admin:{
     title:'รายงานทีม Admin',
-    sub:'ยกเลิกในวัน · ของออกไปแล้ว · การแจ้งปัญหาประจำวัน',
-    source:'แท็บ "ยกเลิกและคืนสินค้า" ในไฟล์ Job Daily Admin (ชุดเดียวกับหน้า ยกเลิกและคืนสินค้า) และ แจ้งรายการมีปัญหาประจำวันของ Operation (แท็บ Admin)',
+    sub:'ออเดอร์จัดส่ง · ค้างส่ง · ยกเลิกในวัน · ของออกไปแล้ว · การแจ้งปัญหาประจำวัน',
+    source:'Packing 2026 (ออเดอร์จัดส่ง · ชุดเดียวกับหน้า Shipping) · แท็บ "ยกเลิกและคืนสินค้า" ในไฟล์ Job Daily Admin (ชุดเดียวกับหน้า ยกเลิกและคืนสินค้า) และ แจ้งรายการมีปัญหาประจำวันของ Operation (แท็บ Admin)',
     panels:[
+      /* v-shipadm: ออเดอร์ค้างส่ง ย้ายจากรายงาน Delivery มาอยู่รายงาน Admin */
+      {k:'order',t:'ออเดอร์ค้างส่ง', c:'พร้อมเหตุผล · จากชีต Packing 2026', hd:'d', unit:'ออเดอร์',
+       ship:true, empty:'ไม่มีออเดอร์ค้างส่ง'},
       /* v-crrpt: ใช้ข้อมูลชุดเดียวกับหน้า "ยกเลิกและคืนสินค้า" · ยกเลิกในวัน = ก่อนหยิบ/ก่อนแพ็ค/หลังแพ็ค
          ของออกไปแล้ว = ตีกลับ (ยกเลิกจากผู้ซื้อ/จัดส่งไม่สำเร็จ) + เคลม/อื่นๆ · ไม่นับใบ RT ที่ถูกยกเลิก และ "รอระบุสาเหตุ" */
       {k:'cancel',t:'ยกเลิกในวัน', c:'ป้ายสี = ขั้นที่ยกเลิก', hd:'d', unit:'ออเดอร์',
@@ -6887,8 +6888,9 @@ const match=r=>{const y=$('fy').value,m=$('fm').value,d=FD.value;
   return (!m||r.m===m)&&(!RWK.length||RWK.includes(String(r.wk)));};
 const cfg=()=>TEAMS[TEAM];
 let SHIPROWS=[];   /* ออเดอร์ทุกแถวจากชีต Packing (ใช้นับยอด) */
+const hasShip=()=>cfg().panels.some(p=>p.ship);   /* v-shipadm: ทีมไหนมีช่องค้างส่ง (ตอนนี้ = Admin) */
 const allRows=()=>cfg().panels.filter(p=>!p.ship).flatMap(p=>DATA[p.k]||[])
-                   .concat(TEAM==='delivery'?SHIPROWS:[]);
+                   .concat(hasShip()?SHIPROWS:[]);
 const SHIP_OK=/สำเร็จ|ตรง|ผ่าน|on ?time|delivered/i;   /* เกณฑ์เดียวกับหน้า Shipping */
 function buildShipRows(){
   const src=(window.LOGI_SHIP&&LOGI_SHIP.list())||[];
@@ -6946,7 +6948,7 @@ function renderReport(){
   el('subtitle').textContent=c.sub;
   el('source').textContent='ที่มา: '+c.source;
 
-  const shipSel=TEAM==='delivery'?SHIPROWS.filter(match):[];
+  const shipSel=hasShip()?SHIPROWS.filter(match):[];
   const sets=c.panels.map(p=>({p,rows:p.ship?shipProblemRows(shipSel):(DATA[p.k]||[]).filter(match)}));
   const work=sets.filter(s=>!s.p.ship);
 
@@ -6966,8 +6968,11 @@ function renderReport(){
   if(false) k.push({l:'วันที่มีงาน',v:days.size,
     n:days.size?`เฉลี่ย ${(total/days.size).toFixed(1)} รายการ/วัน`:'วัน'});
   if(TEAM==='delivery'){
-    const kMO=k[0], kIS=k[1];      /* MO, แจ้งปัญหา (เรียงตาม panels ที่ไม่ใช่ออเดอร์) */
+    const kMO=k[0], kIS=k[1];      /* MO, แจ้งปัญหา */
     kMO.cls='c0'; kIS.cls='c2';
+  }
+  if(hasShip()){                    /* v-shipadm: การ์ดจำนวนออเดอร์ + ค้างส่ง นำหน้าการ์ดอื่นของทีม */
+    const rest=k;
     k=[];
     if(!SHIPROWS.length){
       const er=window.LOGI_SHIP&&LOGI_SHIP.err();
@@ -6981,7 +6986,7 @@ function renderReport(){
       k.push({l:'ค้างส่ง',v:S.pending,cls:S.pending?'rose':'ok',
               n:S.pending?`${S.pendingPct.toFixed(2)}% ของออเดอร์`:'ไม่มีค้างส่ง'});
     }
-    k.push(kMO,kIS);
+    k.push(...rest);
   }
   if(TEAM==='warehouse'){   /* v136: Admin ไม่ต้องมีการ์ดพบบ่อยที่สุด */
     const tg={};(sets.find(x=>x.p.k==='issue')||sets[0]).rows.forEach(r=>{const t=r.tag||'ไม่ระบุ';tg[t]=(tg[t]||0)+1;});
