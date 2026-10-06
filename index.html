@@ -701,7 +701,7 @@ body.cap #vKPI .tscroll{max-height:none!important;overflow:visible}
   font-size:26.2px;padding:1px 10px;border-radius:5px;margin-bottom:4px}#vRPT .empty{color:var(--mute);text-align:center;padding:70px 18px;font-size:24.4px;line-height:1.95}#vRPT .empty b{display:block;color:var(--ink);font-weight:normal;margin-bottom:6px;font-size:28.2px}#vRPT .scroll{flex:1;min-height:0;overflow:auto}#vRPT .scroll::-webkit-scrollbar{width:8px}#vRPT .scroll::-webkit-scrollbar-thumb{background:#CBD0D9;border-radius:4px}#vRPT .foot{margin-top:14px;flex:none;padding-top:12px;border-top:1px solid var(--line);
   color:var(--mute);font-size:20.7px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}#vRPT /* โหมดพรีเซนต์ */
 body.present .teams, body.present #vRPT .toolbar{display:none}body.present #vRPT .wrap{padding:14px 26px 16px;max-width:none;height:100vh}body.present #vRPT #shot{padding:26px 30px}body.present #vRPT .kpi .v{font-size:86.6px}body.present #vRPT table{font-size:29.6px}body.present #vRPT h1{font-size:63.8px}#vRPT .exit{position:fixed;top:12px;right:16px;z-index:99;display:none}body.present #vRPT .exit{display:block}#vRPT /* โหมดถ่ายรูป */
-body.cap .wrap{height:auto;overflow:visible;padding:0}#vRPT #shot.cap-slide{width:1600px;height:900px;flex:none;overflow:hidden;border-radius:0;padding:34px 52px}#vRPT #shot.cap-full{height:auto;flex:none;overflow:visible}#vRPT #shot.cap-full .panels{flex:none}#vRPT #shot.cap-full .scroll{overflow:visible;max-height:none}#vRPT #shot.cap-full .panel{min-height:0}#vRPT #shot.cap-tall header{flex-wrap:wrap;gap:10px 24px}#vRPT #shot.cap-tall .panels{grid-template-columns:1fr!important}#vRPT @media(max-width:1600px){#shot{padding-left:32px;padding-right:32px}}#vRPT @media(max-width:1400px){.panels{grid-template-columns:1fr 1fr!important}.kpis{grid-template-columns:repeat(3,1fr)!important}}#vRPT @media(max-width:1000px){.wrap{padding-left:4%;padding-right:4%}#shot{padding-left:18px;padding-right:18px}}#vRPT @media(max-width:900px){.panels{grid-template-columns:1fr!important}.kpis{grid-template-columns:1fr 1fr!important}h1{font-size:41.5px}}
+body.cap .wrap{height:auto;overflow:visible;padding:0}body.rptfull #vRPT .wrap{height:auto!important;min-height:0!important;overflow:visible!important}body.rptfull #vRPT #shot{height:auto!important;flex:none!important;overflow:visible!important}body.rptfull #vRPT .panels{flex:none!important;align-items:start}body.rptfull #vRPT .panel{min-height:0}body.rptfull #vRPT .scroll{overflow:visible!important;max-height:none!important;flex:none!important}#vRPT #shot.cap-slide{width:1600px;height:900px;flex:none;overflow:hidden;border-radius:0;padding:34px 52px}#vRPT #shot.cap-full{height:auto;flex:none;overflow:visible}#vRPT #shot.cap-full .panels{flex:none}#vRPT #shot.cap-full .scroll{overflow:visible;max-height:none}#vRPT #shot.cap-full .panel{min-height:0}#vRPT #shot.cap-tall header{flex-wrap:wrap;gap:10px 24px}#vRPT #shot.cap-tall .panels{grid-template-columns:1fr!important}#vRPT @media(max-width:1600px){#shot{padding-left:32px;padding-right:32px}}#vRPT @media(max-width:1400px){.panels{grid-template-columns:1fr 1fr!important}.kpis{grid-template-columns:repeat(3,1fr)!important}}#vRPT @media(max-width:1000px){.wrap{padding-left:4%;padding-right:4%}#shot{padding-left:18px;padding-right:18px}}#vRPT @media(max-width:900px){.panels{grid-template-columns:1fr!important}.kpis{grid-template-columns:1fr 1fr!important}h1{font-size:41.5px}}
 
 /* ---------- แถบเมนูด้านข้าง ---------- */
 .shell{display:flex;min-height:100vh}
@@ -5835,12 +5835,35 @@ el('detail').addEventListener('click',async e=>{
 });
 
 /* ตารางสั้น (ไม่ถึง 10 แถว) ไม่ต้องมีกล่องเลื่อน — แสดงยาวรวดเดียวไปเลย */
+/* v-full: เลือกฟิลเตอร์ใดๆ = ตารางแสดงครบทุกแถว ไม่มีสกรอลล์ · ภาพรวม = สูง 10 แถวแล้วค่อยเลื่อน (นำกลับมาจากเวอร์ชัน 17) */
+function kpiFiltered(){
+  if(tGrp()!=='month')return true;
+  if(Object.keys(catF()).length)return true;   /* คลิกกราฟเพื่อกรอง */
+  const box=el('detail'); if(!box)return false;
+  if(box.querySelector('button[data-sf][data-multi].on:not([data-v=""])'))return true;
+  if(box.querySelector('.ddbtn[data-on="1"]'))return true;
+  return false;
+}
 function fitScrolls(){
-  document.querySelectorAll('#vKPI .tscroll').forEach(d=>{
-    const n=d.querySelectorAll('tbody tr').length;
-    if(n&&n<10){ d.style.maxHeight='none'; d.style.overflowY='visible'; }
+  if(SEC==='fc'||SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop')return;
+  const full=kpiFiltered();
+  document.querySelectorAll('#detail .tscroll').forEach(d=>{
+    const rows=d.querySelectorAll(':scope > table > tbody > tr');
+    if(full||rows.length<=10){
+      d.style.setProperty('max-height','none');
+      d.style.setProperty('overflow-y','visible');
+      return;
+    }
+    const head=d.querySelector(':scope > table > thead');
+    let h=head?head.offsetHeight:0;
+    for(let i=0;i<10;i++)h+=rows[i].offsetHeight;
+    d.style.setProperty('max-height',(h+2)+'px');
+    d.style.setProperty('overflow-y','auto');
   });
 }
+/* ฟอนต์โหลดเสร็จ/ปรับขนาดหน้าต่าง/กด A+ A- แล้วความสูงแถวเปลี่ยน → คำนวณใหม่ */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{try{fitScrolls();}catch(e){}});
+window.addEventListener('resize',()=>{try{fitScrolls();}catch(e){}});
 
 function renderKPI(){
   const isOv = SEC==='overview';
@@ -6888,6 +6911,8 @@ const match=r=>{const y=$('fy').value,m=$('fm').value,d=FD.value;
   if(d)return r.date===d;
   return (!m||r.m===m)&&(!RWK.length||RWK.includes(String(r.wk)));};
 const cfg=()=>TEAMS[TEAM];
+/* v-full: หน้ารายงาน — เลือก เดือน / สัปดาห์ / วัน แล้วกล่องทุกกล่องกางออกเต็ม แสดงครบทุกรายการ ไม่ต้องเลื่อนในกล่อง */
+const rptFiltered=()=>!!(el('fm').value||RWK.length||FD.value);
 let SHIPROWS=[];   /* ออเดอร์ทุกแถวจากชีต Packing (ใช้นับยอด) */
 const shipPanel=()=>cfg().panels.some(p=>p.ship);
 const hasShip=()=>shipPanel()||!!cfg().shipStats;   /* v-shipadm: ทีมไหนมีช่องค้างส่ง (ตอนนี้ = Admin) */
@@ -6946,6 +6971,7 @@ function tableHTML(rows,empty,noQty,p){
 
 function renderReport(){
   const c=cfg();
+  document.body.classList.toggle('rptfull',rptFiltered());
   el('title').textContent=c.title;
   el('subtitle').textContent=c.sub;
   el('source').textContent='ที่มา: '+c.source;
