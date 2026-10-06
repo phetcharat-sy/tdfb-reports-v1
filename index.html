@@ -895,6 +895,12 @@ body.present .main{margin-left:0}
 #vKPI .hleg.hleg-side{grid-template-columns:1fr;gap:2px;margin:0;padding:0;border:0}
 #vKPI .hleg.hleg-side button{padding:6px 12px;border-bottom:1px solid var(--soft);border-radius:0}
 @media(max-width:1100px){#vKPI .piewrap{grid-template-columns:1fr}}
+/* ป้ายสีแบบแถวเดียวกึ่งกลาง เหนือกราฟ (เหมือน legend ของ Chart.js) — แนวโน้มการแพ็ค / Peak Hours */
+#vKPI .hleg.hleg-row{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 18px;
+  margin:0 0 6px;padding:0;border:0}
+#vKPI .hleg.hleg-row button{gap:8px;padding:3px 4px;border-radius:6px;font-size:23px;color:var(--mute)}
+#vKPI .hleg.hleg-row i{width:16px;height:16px;border-radius:3px}
+#vKPI .hleg.hleg-row b{display:none}
 </style>
 </head>
 <body>
@@ -3408,8 +3414,14 @@ const fcPtLbl={id:'fcPtLbl',
        (ซึ่งอยู่ริมขวาสุดของกราฟพอดี) ทะลุขอบกล่องออกไปเป็นเส้นตรงยาวๆ ที่เจอซ้ำๆ */
     const need=Math.round(48*CFZ); const p=ch.options.layout&&ch.options.layout.padding;
     const needR=Math.round(50*CFZ);
-    if(typeof p==='object'&&p){ if((p.top||0)<need)p.top=need; if((p.right||0)<needR)p.right=needR; }
-    else ch.options.layout={padding:{top:need,right:needR}}; },
+    /* v134: ที่ว่างด้านบนสำหรับป้ายตัวเลข ย้ายไปไว้ "ใต้" legend แทน padding ของทั้งกราฟ
+       legend เลยชิดขอบบน ไม่ลอยลงมากลางกราฟ */
+    const lg=ch.legend, useLg=lg&&ch.options.plugins.legend&&ch.options.plugins.legend.display!==false;
+    if(useLg){ lg._fcGap=need;
+      if(!lg._fcWrapped){ const f=lg.fit; lg.fit=function(){ f.call(this); this.height+=(this._fcGap||0); }; lg._fcWrapped=1; } }
+    const top=useLg?0:need;
+    if(typeof p==='object'&&p){ if((p.top||0)<top)p.top=top; if((p.right||0)<needR)p.right=needR; }
+    else ch.options.layout={padding:{top,right:needR}}; },
   afterDatasetsDraw(ch,a,op){
     if(!op||!op.display)return;
     const x=ch.ctx, m=ch.getDatasetMeta(1); if(!m||m.hidden)return;
@@ -3478,7 +3490,7 @@ function fcLineChart(id,key,s0,unit,maxHist){
   const ny=fcNiceY([...s.hist,...s.fc,...(hasAct?s.act.filter(v=>v!=null):[])]);
   const o={responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
-    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(25)},usePointStyle:true}},
+    plugins:{legend:{display:true,align:'center',labels:{color:'#475569',font:{size:cf(19)},usePointStyle:true,boxHeight:cf(11),padding:cf(16)}},
       tooltip:{backgroundColor:'#1E293B',padding:10,cornerRadius:6,
         titleFont:{size:cf(25)},bodyFont:{size:cf(23)},
         callbacks:{
@@ -3532,7 +3544,7 @@ function fcAccChart(id,key,bt,unit){
   const ny=fcNiceY([...wk.map(w=>w.actual),...wk.map(w=>w.pred)]);
   const o={responsive:true,maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
-    plugins:{legend:{display:true,labels:{color:'#475569',font:{size:cf(26)},usePointStyle:true}},
+    plugins:{legend:{display:true,align:'center',labels:{color:'#475569',font:{size:cf(19)},usePointStyle:true,boxHeight:cf(11),padding:cf(16)}},
       tooltip:{backgroundColor:'#1E293B',padding:10,cornerRadius:6,
         titleFont:{size:cf(25)},bodyFont:{size:cf(23)},
         callbacks:{title:c=>wk[c[0].dataIndex].range}}},
@@ -3989,7 +4001,7 @@ function secShip(){
    + ring
    +`<div class="sgrid">
        ${card('ออเดอร์จัดส่งทั้งหมด',S.orders)}
-       ${card('ค้างส่ง <small style="opacity:.5">v5</small>',S.pending,S.pending?'rose':'teal')}
+       ${card('ค้างส่ง',S.pending,S.pending?'rose':'teal')}
        ${card('ขนส่งที่ใช้มากสุด',esc(S.topCarrier),'plum')}
        ${card('วันพีคสุด ('+(S.peak||'-')+')',S.peakQty,'amber')}</div>
 
@@ -4065,17 +4077,21 @@ function drawShip(){
   /* โดนัทสถานะพัสดุ — สำเร็จ vs ค้างส่ง พร้อม % ตรงกลางวง */
   const done=Math.max(0,S.orders-S.pending);
   const stTot=done+S.pending||1;
-  const donePct=Math.round(done/stTot*1000)/10;
+  /* v134: เดิมปัดทศนิยม 1 ตำแหน่ง → ค้างส่ง 26 จาก 145k = 0.0% วงขึ้น 100% ไม่เห็นสีแดง
+     ตอนนี้ใช้ pctSet (เพิ่มทศนิยมจนไม่ปัดเป็น 0/100) และบังคับให้ชิ้นค้างส่งเห็นอย่างน้อย ~1.5% ของวง */
+  const stP=pctSet([done,S.pending],stTot);
+  const donePct=stP.data[0], pendPct=stP.data[1];
+  const pendDraw=S.pending>0?Math.max(pendPct,1.5):0;
   destroy('shSt');
   CH.shSt=new Chart(document.getElementById('c_shSt'),{type:'doughnut',
     data:{labels:['จัดส่งสำเร็จ','ค้างส่ง'],datasets:[{
-      data:[Math.round(done/stTot*1000)/10, Math.round(S.pending/stTot*1000)/10],
+      data:[100-pendDraw, pendDraw],
       backgroundColor:[C.good,C.rose],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'62%',layout:{padding:10},
       plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(22)},boxWidth:20}},
-        donutMid:{display:true,top:pct1(donePct),bot:'จัดส่งสำเร็จ'},
+        donutMid:{display:true,top:donePct.toFixed(stP.digits)+'%',bot:'จัดส่งสำเร็จ'},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
-          callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('
+          callbacks:{label:c=>c.label+': '+stP.data[c.dataIndex].toFixed(stP.digits)+'% ('
             +fmt(c.dataIndex===0?done:S.pending)+' ออเดอร์)'}}}}});
   Object.assign(CH.shSt.data,{_cnt:[done,S.pending],_unit:'ออเดอร์'});
 
@@ -4362,14 +4378,14 @@ function secPack(){
 
      <h2 class="sec">แนวโน้มการแพ็ค <em>${tSpan==='w'?'รายสัปดาห์ — ตามฟิลเตอร์ '+fWeekLabel():'รายเดือน'} · ${tStack?'ซ้อนแท่ง = ยอดรวมทีม':'แยกแท่งรายคน'}</em><span></span></h2>
      ${chipOne('pk2_stack','รูปแบบ',[['0','แยกแท่ง (เทียบรายคน)'],['1','ซ้อนแท่ง (ดูยอดรวม)']],tStack?'1':'0')}
-     <div class="cpanel"><div class="hleg" id="lg_pkWk"></div><div class="cbox xl"><canvas id="c_pkWk"></canvas></div></div>
+     <div class="cpanel"><div class="hleg hleg-row" id="lg_pkWk"></div><div class="cbox xl"><canvas id="c_pkWk"></canvas></div></div>
 
      <h2 class="sec">สัดส่วนการแพ็ค (เทียบรายบุคคล)<span></span></h2>
      <div class="cpanel"><div class="piewrap"><div class="cbox" style="height:640px"><canvas id="c_pkShare"></canvas></div>
        <div class="hleg hleg-side" id="lg_pkShare"></div></div></div>
 
      <h2 class="sec">เวลาที่ใช้งานหนาแน่น (Peak Hours - เปรียบเทียบ)<span></span></h2>
-     <div class="cpanel"><div class="hleg" id="lg_pkHour"></div><div class="cbox"><canvas id="c_pkHour"></canvas></div></div>
+     <div class="cpanel"><div class="hleg hleg-row" id="lg_pkHour"></div><div class="cbox"><canvas id="c_pkHour"></canvas></div></div>
 
      <h2 class="sec">ข้อมูลเชิงลึกรายบุคคล (Individual Deep Dive)<span></span></h2>
      <div class="pkcards">${S.cards.map(pcard).join('')}</div>`;
@@ -4619,12 +4635,12 @@ function secPick(){
      </div>
 
      <h2 class="sec">แนวโน้มการหยิบ${pg==='month'?'รายเดือน':pg==='week'?'รายสัปดาห์':'ในแต่ละวัน'} <em>จำนวนชิ้นต่อ${pg==='month'?'เดือน':pg==='week'?'สัปดาห์':'วัน'} แยกตามคน</em><span></span></h2>
-     <div class="cpanel"><div class="hleg" id="lg_pkday"></div><div class="cscroll">
+     <div class="cpanel"><div class="hleg hleg-row" id="lg_pkday"></div><div class="cscroll">
        <div class="cbox" style="height:480px;min-width:${Math.max(900,tk.length*120)}px">
          <canvas id="c_pkday"></canvas></div></div></div>
 
      <h2 class="sec">ช่วงเวลาที่หยิบหนาแน่น <em>จำนวนชิ้นตามชั่วโมง</em><span></span></h2>
-     <div class="cpanel"><div class="hleg" id="lg_pkhr"></div><div class="cscroll">
+     <div class="cpanel"><div class="hleg hleg-row" id="lg_pkhr"></div><div class="cscroll">
        <div class="cbox" style="height:520px;min-width:${Math.max(900,hrs.length*175)}px">
          <canvas id="c_pkhr"></canvas></div></div></div>
 
