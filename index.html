@@ -2462,15 +2462,26 @@ function secDock(){
      ทำให้เลือกเดือน/วันแล้วข้อมูลไม่ขยับ — ใช้วันที่จริงจากคอลัมน์ "วันที่ของมาส่ง/รับเข้าระบบ/วันที่จัดเก็บ" มาช่วยกรองเพิ่ม */
   const dockDateMs=r=>{const a=dparse(r.send||''),b=dparse(r.recv||''),c=dparse(r.store||'');
     return !isNaN(a)?a:(!isNaN(b)?b:(!isNaN(c)?c:NaN));};
+  /* v133: เดือนของแถว = เดือนของ "สัปดาห์" (วันพฤหัสของ ISO week) ไม่ใช่วันที่ของแถว
+     เดิมสัปดาห์ที่คร่อมเดือน (เช่น W40 = 28 ก.ย.–4 ต.ค.) ถูกหั่นครึ่ง → % รายสัปดาห์เพี้ยน */
+  const dockWkYM=r=>{
+    const wN=parseInt(r.week), ms=dockDateMs(r);
+    if(!wN)return isNaN(ms)?'':dkey(new Date(ms)).slice(0,7);
+    let y=+(fYear()||new Date().getFullYear());
+    if(!isNaN(ms)){const dd=new Date(ms); y=dd.getFullYear();
+      if(dd.getMonth()===11&&wN===1)y++;        /* ปลายธ.ค. ที่เป็น W1 ของปีถัดไป */
+      else if(dd.getMonth()===0&&wN>=52)y--;}   /* ต้นม.ค. ที่ยังเป็น W52/53 ของปีก่อน */
+    return wkToYM(y,wN);
+  };
   const dockOK=r=>{
     if(!weekOK(r.week))return false;
     const ms=dockDateMs(r);
-    if(isNaN(ms))return !DAYSEL; /* ไม่มีวันที่ให้เช็ค: ผ่านเว้นแต่เลือก Day เจาะจงมา ซึ่งยืนยันไม่ได้ */
-    const d=dkey(new Date(ms));
-    if(fYear()&&d.slice(0,4)!==fYear())return false;
-    if(DAYSEL)return d===DAYSEL;
-    const ym=fYear()&&fMonth()?fYear()+'-'+String(MONTH_ORDER.indexOf(fMonth())+1).padStart(2,'0'):'';
-    if(ym&&d.slice(0,7)!==ym)return false;
+    if(DAYSEL)return !isNaN(ms)&&dkey(new Date(ms))===DAYSEL;
+    const ym=dockWkYM(r);
+    if(!ym)return !fYear();
+    if(fYear()&&ym.slice(0,4)!==fYear())return false;
+    const selYM=fYear()&&fMonth()?fYear()+'-'+String(MONTH_ORDER.indexOf(fMonth())+1).padStart(2,'0'):'';
+    if(selYM&&ym!==selYM)return false;
     return true;
   };
   const rowsByDate=(DOCK_ROWS||[]).filter(dockOK);
@@ -2498,9 +2509,7 @@ function secDock(){
   const dkYr=+(fYear()||new Date().getFullYear());
   const dkKey=r=>{
     if(!dkMon)return r.week;
-    const ms=dockDateMs(r);
-    if(!isNaN(ms))return dkey(new Date(ms)).slice(0,7);
-    return parseInt(r.week)?wkToYM(dkYr,parseInt(r.week)):'?';
+    return dockWkYM(r)||'?';
   };
   const byW={};
   rows.forEach(r=>{const k=dkKey(r);
