@@ -901,6 +901,16 @@ body.present .main{margin-left:0}
 #vKPI .hleg.hleg-row button{gap:8px;padding:3px 4px;border-radius:6px;font-size:23px;color:var(--mute)}
 #vKPI .hleg.hleg-row i{width:16px;height:16px;border-radius:3px}
 #vKPI .hleg.hleg-row b{display:none}
+/* สัดส่วนการแพ็ค — โดนัทอยู่กลาง ป้ายชื่อเล็กๆ ชิดขวาบน (แบบเวอร์ชันเดิม) */
+#vKPI .piewrap.pw-c{grid-template-columns:1fr minmax(0,680px) 1fr;gap:24px;align-items:start}
+#vKPI .piewrap.pw-c>.cbox{grid-column:2}
+#vKPI .piewrap.pw-c>.hleg{grid-column:3;justify-self:end}
+#vKPI .hleg.hleg-mini{gap:0}
+#vKPI .hleg.hleg-mini button{gap:8px;padding:1px 4px;border:0;border-radius:4px;font-size:21px;color:var(--mute)}
+#vKPI .hleg.hleg-mini i{width:14px;height:14px;border-radius:2px}
+#vKPI .hleg.hleg-mini b{display:none}
+@media(max-width:1100px){#vKPI .piewrap.pw-c{grid-template-columns:1fr}
+  #vKPI .piewrap.pw-c>.cbox,#vKPI .piewrap.pw-c>.hleg{grid-column:auto;justify-self:stretch}}
 </style>
 </head>
 <body>
@@ -4381,8 +4391,8 @@ function secPack(){
      <div class="cpanel"><div class="hleg hleg-row" id="lg_pkWk"></div><div class="cbox xl"><canvas id="c_pkWk"></canvas></div></div>
 
      <h2 class="sec">สัดส่วนการแพ็ค (เทียบรายบุคคล)<span></span></h2>
-     <div class="cpanel"><div class="piewrap"><div class="cbox" style="height:640px"><canvas id="c_pkShare"></canvas></div>
-       <div class="hleg hleg-side" id="lg_pkShare"></div></div></div>
+     <div class="cpanel"><div class="piewrap pw-c"><div class="cbox" style="height:640px"><canvas id="c_pkShare"></canvas></div>
+       <div class="hleg hleg-side hleg-mini" id="lg_pkShare"></div></div></div>
 
      <h2 class="sec">เวลาที่ใช้งานหนาแน่น (Peak Hours - เปรียบเทียบ)<span></span></h2>
      <div class="cpanel"><div class="hleg hleg-row" id="lg_pkHour"></div><div class="cbox"><canvas id="c_pkHour"></canvas></div></div>
