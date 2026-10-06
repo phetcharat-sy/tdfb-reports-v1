@@ -6681,8 +6681,9 @@ const DEPT_TXT=v=>{v=String(v||'').trim(); if(!v)return '';
 const TEAMS={
   delivery:{
     title:'รายงานทีม Delivery',
-    sub:'งานจัดทำ MO · การแจ้งปัญหาประจำวัน',
-    source:'Job Dairy Delivery (MO Delivery) และ แจ้งรายการมีปัญหาประจำวันของ Operation (แท็บ Delivery.)',
+    sub:'ออเดอร์ที่แพ็ค · งานจัดทำ MO · การแจ้งปัญหาประจำวัน',
+    shipStats:true,   /* v-shipadm2: ไม่มีช่องค้างส่งแล้ว แต่ยังโชว์การ์ดจำนวนออเดอร์ (จากชีต Packing 2026) ด้านบน */
+    source:'Packing 2026 (จำนวนออเดอร์) · Job Dairy Delivery (MO Delivery) และ แจ้งรายการมีปัญหาประจำวันของ Operation (แท็บ Delivery.)',
     panels:[
       {k:'mo',   t:'MO ประจำวัน',      c:'รายการจัดทำ MO Delivery', hd:'a', unit:'รายการ',
        sheet:JOB, gid:'0',          empty:'ไม่มีรายการทำ MO'},
@@ -6888,7 +6889,8 @@ const match=r=>{const y=$('fy').value,m=$('fm').value,d=FD.value;
   return (!m||r.m===m)&&(!RWK.length||RWK.includes(String(r.wk)));};
 const cfg=()=>TEAMS[TEAM];
 let SHIPROWS=[];   /* ออเดอร์ทุกแถวจากชีต Packing (ใช้นับยอด) */
-const hasShip=()=>cfg().panels.some(p=>p.ship);   /* v-shipadm: ทีมไหนมีช่องค้างส่ง (ตอนนี้ = Admin) */
+const shipPanel=()=>cfg().panels.some(p=>p.ship);
+const hasShip=()=>shipPanel()||!!cfg().shipStats;   /* v-shipadm: ทีมไหนมีช่องค้างส่ง (ตอนนี้ = Admin) */
 const allRows=()=>cfg().panels.filter(p=>!p.ship).flatMap(p=>DATA[p.k]||[])
                    .concat(hasShip()?SHIPROWS:[]);
 const SHIP_OK=/สำเร็จ|ตรง|ผ่าน|on ?time|delivered/i;   /* เกณฑ์เดียวกับหน้า Shipping */
@@ -6983,7 +6985,7 @@ function renderReport(){
       const S=LOGI_SHIP.stats(shipSel);
       k.push({l:'จำนวนออเดอร์',v:S.orders,cls:'ink',
               n:`ส่งแล้ว ${fmt(S.orders-S.pending)}`+(S.days.length>1?` · เฉลี่ย ${fmt(S.avgDay)}/วัน`:'')});
-      k.push({l:'ค้างส่ง',v:S.pending,cls:S.pending?'rose':'ok',
+      if(shipPanel())k.push({l:'ค้างส่ง',v:S.pending,cls:S.pending?'rose':'ok',
               n:S.pending?`${S.pendingPct.toFixed(2)}% ของออเดอร์`:'ไม่มีค้างส่ง'});
     }
     k.push(...rest);
@@ -7116,9 +7118,11 @@ async function load(){
   ['fy','fm'].forEach(i=>el(i).value='');RWK=[];RYEAR_INIT=false;FD.value='';calYM=null;
   el('stat').className='stat';el('stat').textContent='กำลังดึงข้อมูล…';el('reload').disabled=true;
   const ps=cfg().panels;
+  const extra=(cfg().shipStats&&!ps.some(p=>p.ship))?LOGI_SHIP.load(true).catch(()=>null):null;
   const res=await Promise.allSettled(ps.map(p=>p.ship
     ? LOGI_SHIP.load(true).then(r=>{ if(!r)throw new Error(LOGI_SHIP.err()||'ดึงไม่ได้'); return []; })
     : grab(p)));
+  if(extra)await extra;
   if(seq!==LOAD_SEQ)return;          /* มีการโหลดใหม่กว่าแล้ว ทิ้งผลนี้ */
   buildShipRows();
   DATA={};const bad=[];
