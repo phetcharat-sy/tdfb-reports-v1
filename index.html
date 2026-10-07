@@ -386,6 +386,9 @@ body.sopmode.present #vKPI .sopframe{height:100vh}
 #vKPI .fbar button.on .ck{background:var(--card);border-color:#fff;color:var(--teal)}
 
 /* ---------- หน้า Forecast ---------- */
+#vKPI .fc-spin{display:inline-block;width:.8em;height:.8em;margin-right:.45em;vertical-align:-.08em;
+  border:3px solid currentColor;border-right-color:transparent;border-radius:50%;animation:fcspin .8s linear infinite}
+@keyframes fcspin{to{transform:rotate(360deg)}}
 #vKPI .cgrid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:6px}
 #vKPI .cgrid2>*{min-width:0}
 @media(max-width:1500px){#vKPI .cgrid2{grid-template-columns:1fr}}
@@ -1421,7 +1424,7 @@ function parseDMY(s){
 
 /* dashboard เดิมโหลดทั้งชีตด้วย /export?format=csv แล้วคำนวณในเบราว์เซอร์
    ทำแบบเดียวกันเป๊ะ จะได้ตัวเลขตรงกันทุกตัว ไม่ต้องพึ่งการกรองวันที่ฝั่ง Google */
-let RAW=[], COLS=null, NO_DATE=0, SEC='overview', REPL=null, REPL_ERR='';
+let RAW=[], COLS=null, NO_DATE=0, SEC='overview', REPL=null, REPL_ERR='', OTP_ERR='', OTP_LOADING=true;
 const SHEET_STATE={otp:'รอโหลด',diff:'รอโหลด',dock:'รอโหลด',repl:'ยังไม่เปิด',ret:'ยังไม่เปิด',pick:'ยังไม่เปิด',pack:'ยังไม่เปิด',ship:'ยังไม่เปิด'};
 
 /* ดาวน์โหลดตรงๆ ด้วย r.text() — วิธีเดียวกับ dashboard เดิมที่ใช้งานได้จริง
@@ -1441,6 +1444,7 @@ async function fetchBig(url,ms=180000){
 async function loadOTP(){
   const url=`https://docs.google.com/spreadsheets/d/${S_OTP}/export?format=csv&gid=0&_=${Date.now()}`;
   el('kStat').textContent='กำลังดาวน์โหลดข้อมูลจากชีต…';
+  OTP_ERR=''; OTP_LOADING=true; SHEET_STATE.otp='กำลังดาวน์โหลด…';
   const t=await fetchBig(url);
   SHEET_STATE.otp=`ดาวน์โหลดแล้ว ${(t.length/1048576).toFixed(1)} MB`;
   if(t.trim().startsWith('<'))throw new Error('ชีตยังไม่ได้แชร์เป็น “ทุกคนที่มีลิงก์”');
@@ -3170,7 +3174,7 @@ function fcMemo(tag,fn,byDate,arg){
 /* v-staff300: Packing 1 คน = 300 ออเดอร์/วัน (เดิม 200) */
 const STAFF={ordPerPerson:300,packHours:6,endOfLine:1,
              whPerHour:88,whHours:6,whHandhelds:3,
-             lunchHours:1,otAfter:'17:00',shiftStart:'08:00'};
+             lunchHours:1,otAfter:'17:00',shiftStart:'08:00',packShiftStart:'09:00'};   /* Packing เริ่มกะ 09:00 · WH 08:00 */
 
 const t2m=s=>{const[h,m]=s.split(':').map(Number);return h*60+m;};
 const m2t=mins=>{const d=Math.floor(mins/(24*60));let mm=mins%(24*60);
@@ -3191,7 +3195,7 @@ function shiftOutcome(amount,staffAvail,ratePerHour,opts){
   const cap=opts.maxConcurrent||null;
   const eff=cap?Math.min(working,cap):working;
   const workHours=amount/(eff*ratePerHour);
-  const startMin=t2m(STAFF.shiftStart);
+  const startMin=t2m(opts.shiftStart||STAFF.shiftStart);
   const finishMin=startMin+Math.round(workHours*60)+Math.round(STAFF.lunchHours*60);
   const otMin=Math.max(0,finishMin-t2m(STAFF.otAfter));
   return {notEnough:false,staffAvail,excluded,working,eff,workHours,
@@ -3223,7 +3227,7 @@ function recalcStaff(){
     const n=Number(STAFF_IN.pStaff);
     if(!pr||!n){ pEl.innerHTML=''; }
     else{
-      const r=shiftOutcome(pr.ord,n,STAFF.ordPerPerson/STAFF.packHours,{excludeEndOfLine:true});
+      const r=shiftOutcome(pr.ord,n,STAFF.ordPerPerson/STAFF.packHours,{excludeEndOfLine:true,shiftStart:STAFF.packShiftStart});
       pEl.innerHTML=!r?'':r.notEnough
         ? `<span style="color:var(--bad)">ใส่มา ${r.staffAvail} คน แต่ต้องกันคนท้ายไลน์ไว้ ${r.excluded} คน จึงไม่มีคนแพ็คเหลือ — ต้องมีอย่างน้อย ${r.excluded+1} คน</span>`
         : shiftText(r,'แพ็ค');
@@ -3244,7 +3248,12 @@ function recalcStaff(){
 
 let FC_CTX=null;
 function secForecast(){
-  if(!RAW.length)return '<div class="empty2">ยังไม่มีข้อมูลยอดขาย</div>';
+  if(!RAW.length){
+    /* แยก 3 กรณี: กำลังโหลดชีตใหญ่ / โหลดไม่สำเร็จ / โหลดแล้วแต่ไม่มีข้อมูลจริง */
+    if(OTP_ERR)return `<div class="empty2"><b>ดึงข้อมูลยอดขายไม่ได้</b><br><span style="font-size:.6em;opacity:.8">${OTP_ERR} · กด “ดึงข้อมูลใหม่” เพื่อลองอีกครั้ง</span></div>`;
+    if(OTP_LOADING)return `<div class="empty2"><span class="fc-spin"></span>กำลังโหลดข้อมูลยอดขาย…<br><span style="font-size:.6em;opacity:.8">ชีต On-Time/Out of Stock มีแสนกว่าแถว ใช้เวลาสักครู่ · หน้านี้จะแสดงพยากรณ์ให้เองเมื่อโหลดเสร็จ</span></div>`;
+    return '<div class="empty2">ยังไม่มีข้อมูลยอดขาย</div>';
+  }
 
   /* ตัวกรอง MONTH/WEEK/DAY = "ดูย้อนหลัง ณ วันที่"
      ไม่ได้ตัดข้อมูลเหลือแค่ช่วงที่เลือก (พยากรณ์ต้องเห็นประวัติต่อเนื่อง)
@@ -3444,12 +3453,12 @@ function secForecast(){
       <div><b>ทีม WH หยิบของ</b> — 1 คนหยิบได้ ${STAFF.whPerHour} ชิ้น/ชม. (${STAFF.whHours} ชม. = ${fmt(STAFF.whPerHour*STAFF.whHours)} ชิ้น/วัน) · มี handheld ${STAFF.whHandhelds} เครื่อง เกินกว่านั้นต้องหมุนเวียน</div>
       <code>ตาราง (ควรมีกี่คน): Packing = ceil(ออเดอร์ ÷ ${STAFF.ordPerPerson}) + 1 ท้ายไลน์ · WH = ceil(ชิ้น ÷ ${STAFF.whPerHour*STAFF.whHours})<br>
         ช่องกรอก (เสร็จกี่โมง): คนแพ็ค = คนที่ใส่ − 1 · เวลาสุทธิ = ออเดอร์ ÷ (คนแพ็ค × ${(STAFF.ordPerPerson/STAFF.packHours).toFixed(0)}) · WH = ชิ้น ÷ (คน × ${STAFF.whPerHour})<br>
-        เวลาเลิก = ${STAFF.shiftStart} + เวลาสุทธิ + พักเที่ยง ${STAFF.lunchHours} ชม. · OT = ส่วนที่เลย ${STAFF.otAfter}</code>
+        เวลาเลิก = เวลาเริ่มกะ (Packing ${STAFF.packShiftStart} · WH ${STAFF.shiftStart}) + เวลาสุทธิ + พักเที่ยง ${STAFF.lunchHours} ชม. · OT = ส่วนที่เลย ${STAFF.otAfter}</code>
       </div>
     </details>
     <div class="cgrid2">
       <div class="cpanel">
-        <div class="chname2">Packing / Delivery <span class="dim">(เริ่มกะ ${STAFF.shiftStart} น.)</span></div>
+        <div class="chname2">Packing / Delivery <span class="dim">(เริ่มกะ ${STAFF.packShiftStart} น.)</span></div>
         <div class="stfbar">
           <div class="stf-t"><i>🧮</i>ลองคำนวณ: คนแพ็คเท่านี้ เสร็จกี่โมง? <em>กรอกได้เลย</em></div>
           <label>วันที่ <select id="stfPDate" data-stf="pIdx">${
@@ -6379,6 +6388,7 @@ async function boot(){
   const staticJob=loadStatic().finally(()=>clearInterval(tick));
   try{
     const n=await loadOTP();
+    OTP_LOADING=false;
     if(!DATES.length)throw new Error('อ่านคอลัมน์ “วันที่ต้องการจัดส่ง” ไม่ได้');
     el('kStat').innerHTML=`อ่านวันที่ได้ ${DATES.length} วัน `
       +`(${showD(DATES[0])} – ${showD(DATES[DATES.length-1])}) · ${fmt(n)} บรรทัด · กำลังคำนวณ…`;
@@ -6388,7 +6398,9 @@ async function boot(){
   }catch(e){
     el('kStat').className='stat err';
     el('kStat').innerHTML='<b>ดึงข้อมูลไม่ได้</b> — '+e.message;
+    OTP_LOADING=false; OTP_ERR=e.message; SHEET_STATE.otp='ดึงไม่ได้';
     el('kReload').disabled=false;
+    renderKPI();          /* ให้หน้า Forecast โชว์สาเหตุแทนข้อความ "ยังไม่มีข้อมูล" */
     return;
   }
   el('kReload').disabled=false;
