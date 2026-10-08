@@ -1156,6 +1156,7 @@ body.mobile .side .brand{padding-left:112px;padding-right:16px}body.mobile .side
 
       <div class="grp">วิธีการปฏิบัติงาน</div>
       <button data-view="kpi" data-sec="sop">เงื่อนไขการส่งสินค้าแต่ละ Platform</button>
+      <button data-view="kpi" data-sec="msop">Mini SOP: Cancel และใบ Return</button>
 
       <div class="nav-sep"></div>
       <button data-view="kpi" data-sec="fc">Forecast</button>
@@ -2274,7 +2275,7 @@ function clkHandle(ch,key,i){
 const clickF={id:'clickF',
   afterEvent(ch,args){
     const e=args.event; if(!e||(e.type!=='click'&&e.type!=='mousemove'))return;
-    if(SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='fc'||SEC==='sop'||!document.getElementById('vKPI')||ch.options.onClick)return;
+    if(SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='fc'||SEC==='sop'||SEC==='msop'||!document.getElementById('vKPI')||ch.options.onClick)return;
     if(ch.canvas&&!ch.canvas.closest('#vKPI'))return;
     /* v-clk2: แท่ง/เส้น = คลิกตรงคอลัมน์ไหนก็ได้ (แท่งเตี้ยๆ อย่าง 0.05% ก็กดได้) · วงกลม = ต้องโดนชิ้น */
     const round=/pie|doughnut/.test(ch.config.type);
@@ -4000,6 +4001,32 @@ function drawSOP(){
     }catch(e){}
   };
   f.addEventListener('load',()=>{ inject(); setTimeout(inject,300); setTimeout(inject,1200); });
+  f.srcdoc=doc;
+  f.dataset.ready='1';
+}
+
+/* ================= วิธีการปฏิบัติงาน · Mini SOP: Cancel และใบ Return =================
+   ฝังไฟล์ Mini SOP ผ่าน iframe แบบเดียวกับหน้า Return/Cancel (คนละ CSS scope)
+   ไฟล์ต้นฉบับออกแบบไว้อ่านบนมือถือ/พิมพ์ A5 จึงขยายด้วย zoom ฝั่งแดชบอร์ด ไม่แก้ไฟล์เอง
+   ความสูง iframe ปรับตามเนื้อหาจริงอัตโนมัติ */
+const MSOP_ZOOM=1.9;   /* ย่อ/ขยายทั้งหน้า Mini SOP ที่ตัวเลขนี้ตัวเดียว */
+function secMSOP(){
+  return '<div class="sopwrap"><iframe id="msopFrame" class="sopframe" title="Mini SOP: Cancel และใบ Return"></iframe></div>';
+}
+function drawMSOP(){
+  const f=document.getElementById('msopFrame'), t=document.getElementById('msopDoc');
+  if(!f||!t)return;
+  const fit=()=>{ try{
+    const d=f.contentDocument; if(!d||!d.body)return;
+    f.style.height=Math.ceil(d.documentElement.scrollHeight)+'px';
+  }catch(e){} };
+  if(f.dataset.ready){ fit(); return; }
+  let doc=t.content.textContent;
+  doc=doc.replace('</head>','<style>main{max-width:1100px!important;zoom:'+MSOP_ZOOM+'}</style></head>');
+  f.addEventListener('load',()=>{
+    fit(); setTimeout(fit,200); setTimeout(fit,800);
+    try{ const d=f.contentDocument; if(d&&window.ResizeObserver) new ResizeObserver(fit).observe(d.body); }catch(e){}
+  });
   f.srcdoc=doc;
   f.dataset.ready='1';
 }
@@ -5964,7 +5991,7 @@ function kpiFiltered(){
   return false;
 }
 function fitScrolls(){
-  if(SEC==='fc'||SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop')return;
+  if(SEC==='fc'||SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='msop')return;
   const full=kpiFiltered();
   document.querySelectorAll('#detail .tscroll').forEach(d=>{
     const rows=d.querySelectorAll(':scope > table > tbody > tr');
@@ -5998,6 +6025,7 @@ function renderKPI(){
                pick:['Picking','Warehouse · ภาพรวมการหยิบสินค้ารายคน ผลงาน และเวลาหนาแน่น'],
                perr:['KPI Human Error On Picking <0.05%','Warehouse · หยิบผิด ÷ จำนวนที่หยิบทั้งหมด · เป้า < 0.05%'],
                pack:['Packing','Delivery · ผลงานพนักงานแพ็ค สถานี และเวลาหนาแน่น'],
+               msop:['Mini SOP: Cancel และใบ Return','วิธีการปฏิบัติงาน · แยกเคส Cancel / Return และขั้นตอนทำใบ Return'],
                sop:['เงื่อนไขการส่งสินค้าแต่ละ Platform','วิธีการปฏิบัติงาน · รอบตัดคำสั่งซื้อ Shopee · Lazada · TikTok'],
                ship:['การจัดส่ง (Shipping)','Admin · ปริมาณจัดส่ง ค้างส่ง ช่องทาง และขนส่ง'],
                ret:['Return','Delivery · งานตีคืน ยกเลิก และเคสค้าง'],
@@ -6006,10 +6034,10 @@ function renderKPI(){
   const tt=TITLE[SEC]||TITLE.overview;
   el('kTitle').textContent=tt[0];
   el('kSub').textContent=tt[1];
-  document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='ret'||SEC==='can'||SEC==='cr');
+  document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='msop'||SEC==='ret'||SEC==='can'||SEC==='cr');
   document.body.classList.toggle('crmode', SEC==='cr');
   if(!isOv){
-    el('detail').innerHTML = ((SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='fc')?'':catBar())
+    el('detail').innerHTML = ((SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='msop'||SEC==='fc')?'':catBar())
                            + (SEC==='ontime'?secOnTime() : SEC==='oos'?secOOS()
                            : SEC==='diff'?secDiff() : SEC==='dock'?secDock()
                            : SEC==='fc'?secForecast()
@@ -6018,6 +6046,7 @@ function renderKPI(){
                            : SEC==='pack'?secPack()
                            : SEC==='ship'?secShip()
                            : SEC==='sop'?secSOP()
+                           : SEC==='msop'?secMSOP()
                            : SEC==='ret'?secRetEmbed()
                            : SEC==='can'?secCanEmbed()
                            : SEC==='cr'?secCREmbed() : secRepl());
@@ -6032,6 +6061,7 @@ function renderKPI(){
            else if(SEC==='pack')drawPack();
            else if(SEC==='ship')drawShip();
            else if(SEC==='sop')drawSOP();
+           else if(SEC==='msop')drawMSOP();
            else if(SEC==='ret')drawRetEmbed();
            else if(SEC==='can')drawRetEmbed('canFrame','canDoc');
            else if(SEC==='cr')drawCREmbed(); else drawRepl(); }
@@ -7439,6 +7469,96 @@ window.RPT_INIT=(t)=>{ if(started){ if(t&&t!==TEAM) team(t); return; } started=t
 })();
 </script>
 
+<template id="msopDoc">&lt;!DOCTYPE html&gt;
+&lt;html lang="th"&gt;
+&lt;head&gt;
+&lt;meta charset="utf-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;
+&lt;title&gt;Mini SOP: การ Cancel และใบ Return&lt;/title&gt;
+&lt;style&gt;
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f7f6f2;--card:#fff;--text:#1f2328;--muted:#5d6670;--line:#dcd9d0;--org:#d9650b;--orgbg:#fff1e3;--blue:#1565c0;--bluebg:#e5f0fc;--warn:#b42318;--warnbg:#fdecea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181a;--card:#1f2224;--text:#eceae4;--muted:#a3a9ae;--line:#34383b;--org:#ff9a4d;--orgbg:#3a2a1c;--blue:#6db3ff;--bluebg:#1b2c40;--warn:#ff8a80;--warnbg:#3b1f1d}}
+:root[data-theme="dark"]{--bg:#16181a;--card:#1f2224;--text:#eceae4;--muted:#a3a9ae;--line:#34383b;--org:#ff9a4d;--orgbg:#3a2a1c;--blue:#6db3ff;--bluebg:#1b2c40;--warn:#ff8a80;--warnbg:#3b1f1d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans Thai","Sarabun",system-ui,sans-serif;line-height:1.6}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.1rem;margin:28px 0 10px;border-left:4px solid var(--blue);padding-left:10px}
+.meta{color:var(--muted);font-size:.85rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.key{font-size:1.15rem;font-weight:700;text-align:center;padding:14px;background:var(--bluebg);border-radius:10px;margin:12px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.c{border-top:5px solid var(--org);background:var(--orgbg)}
+.r{border-top:5px solid var(--blue);background:var(--bluebg)}
+.tag{font-weight:700;font-size:1.05rem}
+.c .tag{color:var(--org)}.r .tag{color:var(--blue)}
+.flow{text-align:center}
+.box{display:inline-block;border:2px solid var(--line);background:var(--card);border-radius:8px;padding:8px 14px;margin:4px}
+.fork{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.arrow{color:var(--muted);margin:2px 0}
+.ph{border:2px dashed var(--line);color:var(--muted);border-radius:8px;padding:12px;text-align:center;font-size:.85rem;margin:8px 0}
+.todo{background:#fff8c5;color:#4d3b00;border-radius:4px;padding:0 5px;font-size:.85em}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+.warn{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:10px 14px;font-weight:600}
+ol,ul{margin:6px 0;padding-left:22px}
+@page{size:A5 portrait;margin:7mm}
+@media print{
+:root{padding:0;--bg:#fff;--card:#fff;--text:#000}
+body{background:#fff;font-size:8pt;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+main{max-width:none;padding:0}
+h1{font-size:12pt;margin:0 0 2px}
+h2{font-size:9pt;margin:7px 0 4px;padding-left:6px;border-left-width:3px}
+.meta{font-size:7pt}
+.card{padding:4px 7px;margin:4px 0;border-radius:5px;break-inside:avoid}
+.key{font-size:9pt;padding:5px;margin:5px 0}
+.grid{grid-template-columns:1fr 1fr;gap:5px}
+.grid ul,.card ul{margin:2px 0;padding-left:14px}
+.tag{font-size:9pt}
+.box{padding:3px 8px;margin:2px}
+.arrow{margin:0}
+table{font-size:7.5pt}
+th,td{padding:3px 5px}
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;main&gt;
+&lt;h1&gt;Mini SOP: การ Cancel และใบ Return&lt;/h1&gt;
+&lt;div class="meta"&gt;Carital Admin · วันที่ 2/10/69 · ผู้จัดทำ: กัลยาณี · ผู้อนุมัติ: ________&lt;/div&gt;
+
+&lt;h2&gt;1. วัตถุประสงค์&lt;/h2&gt;
+&lt;div class="card"&gt;เพื่อลดความซ้ำซ้อนและความสับสนของสถานะในระบบและ Dashboard&lt;/div&gt;
+
+&lt;h2&gt;2. หลักเดียวที่ต้องจำ&lt;/h2&gt;
+&lt;div class="key"&gt;ดูที่เดียว: "ของถูกส่งออกไปข้างนอกจริงหรือยัง?"&lt;/div&gt;
+&lt;div class="grid"&gt;
+&lt;div class="card c"&gt;&lt;div class="tag"&gt;CANCEL (int)&lt;/div&gt;&lt;b&gt;ยกเลิกในวัน&lt;/b&gt;&lt;br&gt;ของยังอยู่ในบริษัท ไม่เคยออกไปข้างนอก&lt;ul&gt;&lt;li&gt;ก่อนหยิบ&lt;/li&gt;&lt;li&gt;ก่อนแพ็ค&lt;/li&gt;&lt;li&gt;กด Out แล้ว แต่ของยังไม่ถูกส่งออก&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+&lt;div class="card r"&gt;&lt;div class="tag"&gt;RETURN (RT)&lt;/div&gt;&lt;b&gt;กลับมาจากข้างนอก&lt;/b&gt;&lt;br&gt;ของถูกส่งออกไปแล้ว แล้วกลับมาที่บริษัท&lt;ul&gt;&lt;li&gt;ลูกค้าปฏิเสธรับ&lt;/li&gt;&lt;li&gt;ขนส่งตีกลับ&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="card c" style="margin-top:10px"&gt;&lt;b&gt;กรณีมีใบ Out แล้ว แต่ของยังไม่ส่งให้ขนส่ง:&lt;/b&gt; ให้ทำ Return &lt;u&gt;ในใบ Out นั้น&lt;/u&gt; แต่ที่ช่อง &lt;b&gt;Return Reason&lt;/b&gt; ต้อง Fil เป็น &lt;b&gt;"ยกเลิกในวัน"&lt;/b&gt; และใส่เหตุผลใน &lt;b&gt;Log note&lt;/b&gt; เช่น "ลูกค้ายกเลิก"&lt;/div&gt;
+
+&lt;h2&gt;3. Flow การตัดสินใจ: ดูว่าของอยู่ขั้นไหน&lt;/h2&gt;
+&lt;svg viewBox="0 72 740 1142" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="แผนผังการทำใบ Cancel และ Return" style="border-radius:10px;border:1px solid #dcd9d0;width:100%;height:auto;display:block;font-family:'Noto Sans Thai','Sarabun','Loma',Tahoma,sans-serif"&gt;&lt;defs&gt;&lt;marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"&gt;&lt;path d="M0 0L10 5L0 10z" fill="#444"/&gt;&lt;/marker&gt;&lt;/defs&gt;&lt;rect width="740" height="1214" fill="#fff"/&gt;&lt;rect x="34" y="76" width="672" height="42" rx="10" fill="#fdecea" stroke="#b42318" stroke-width="2"/&gt;&lt;text x="370.0" y="102.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;หมายเหตุ: ทุกสถานการณ์ ต้องกด Cancel ก่อน แล้วจึงทำขั้นตอนต่อไป&lt;/text&gt;&lt;rect x="220" y="136" width="300" height="40" rx="10" fill="#f1f1ee" stroke="#555" stroke-width="2"/&gt;&lt;text x="370.0" y="161.0" text-anchor="middle" font-size="16" font-weight="400" fill="#1f2328"&gt;ออเดอร์มีปัญหา / ลูกค้ายกเลิก&lt;/text&gt;&lt;path d="M370 176V204" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="220" y="204" width="300" height="44" rx="10" fill="#fff3bf" stroke="#b58900" stroke-width="2"/&gt;&lt;text x="370.0" y="231.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ตอนนี้ของอยู่ขั้นไหน?&lt;/text&gt;&lt;path d="M220 226H22V788" fill="none" stroke="#444" stroke-width="2"/&gt;&lt;path d="M22 324.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="274" width="290" height="100" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="329.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;A. ยังไม่ถูกหยิบ&lt;/text&gt;&lt;path d="M324 324.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="274" width="322" height="100" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="296.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;กด Cancel ในระบบ&lt;/text&gt;&lt;text x="545.0" y="318.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ก่อนกด Cancel ให้ดูใน BATCH ก่อนว่า&lt;/text&gt;&lt;text x="545.0" y="340.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ของกำลังถูกหยิบหรือยัง&lt;/text&gt;&lt;text x="545.0" y="362.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;หากขึ้นว่ากำลังหยิบ ไม่สามารถกด Cancel ได้&lt;/text&gt;&lt;path d="M22 426.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="394" width="290" height="64" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="431.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;B. หยิบแล้ว แต่ยังไม่แพ็ค&lt;/text&gt;&lt;path d="M324 426.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="394" width="322" height="64" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="431.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ทำ Return จากใบ Pick&lt;/text&gt;&lt;path d="M22 520.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="478" width="290" height="84" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="525.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;C. แพ็คแล้ว แต่ยังไม่กด Out&lt;/text&gt;&lt;path d="M324 520.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="478" width="322" height="84" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="503.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;กด Cancel order (ใบ Out จะถูกยกเลิกให้)&lt;/text&gt;&lt;text x="545.0" y="525.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ทำ Return ในใบ Pack&lt;/text&gt;&lt;text x="545.0" y="547.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Return Reason: Fil “ยกเลิกในวัน”&lt;/text&gt;&lt;path d="M22 647.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="582" width="290" height="130" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="630.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;D. แพ็คแล้ว สถานะ Out แล้ว&lt;/text&gt;&lt;text x="179.0" y="652.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;แต่ของยังไม่ถูกส่งออกไป&lt;/text&gt;&lt;text x="179.0" y="674.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;นอกบริษัท&lt;/text&gt;&lt;path d="M324 647.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="582" width="322" height="130" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="630.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ทำ Return ในใบ Out นั้น&lt;/text&gt;&lt;text x="545.0" y="652.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Return Reason: Fil “ยกเลิกในวัน”&lt;/text&gt;&lt;text x="545.0" y="674.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Note: ใส่เหตุผล เช่น “ลูกค้ายกเลิก”&lt;/text&gt;&lt;path d="M22 788.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="732" width="290" height="112" rx="10" fill="#fff" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="179.0" y="782.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;E. ของถูกส่งออกไปนอกบริษัท&lt;/text&gt;&lt;text x="179.0" y="804.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;แล้วกลับมา&lt;/text&gt;&lt;path d="M324 788.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="732" width="322" height="112" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="545.0" y="760.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ทำใบ Return (RT) ปกติ&lt;/text&gt;&lt;text x="545.0" y="782.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ย้ายไป Location WH300/Good/RT03&lt;/text&gt;&lt;text x="545.0" y="804.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ต้องถ่ายคลิปสินค้าที่กลับมาจากข้างนอก&lt;/text&gt;&lt;text x="545.0" y="826.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;และใส่ไว้ใน Log Note ทุกครั้ง&lt;/text&gt;&lt;path d="M545 844V860" fill="none" stroke="#1565c0" stroke-width="2"/&gt;&lt;path d="M545 860H179V884" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="884" width="290" height="56" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="179.0" y="906.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ไม่เกิน 7 วัน&lt;/text&gt;&lt;text x="179.0" y="928.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ใช้ WH300/Good/RT03 ตามข้างบน&lt;/text&gt;&lt;path d="M545 860V884" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="884" width="322" height="56" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="545.0" y="917.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;เกิน 7 วัน&lt;/text&gt;&lt;path d="M545 940V978" fill="none" stroke="#1565c0" stroke-width="2"/&gt;&lt;path d="M545 978H179V998" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;path d="M545 978V998" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="998" width="290" height="70" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="179.0" y="1016.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ชา&lt;/text&gt;&lt;text x="179.0" y="1038.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ย้ายไป&lt;/text&gt;&lt;text x="179.0" y="1060.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Fac 16/Quarantine/QaLab&lt;/text&gt;&lt;rect x="384" y="998" width="322" height="44" rx="10" fill="#fff3bf" stroke="#b58900" stroke-width="2"/&gt;&lt;text x="545.0" y="1025.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;อุปกรณ์ ชำรุดหรือไม่?&lt;/text&gt;&lt;path d="M545 1042V1062" fill="none" stroke="#1565c0" stroke-width="2"/&gt;&lt;path d="M545 1062H462V1082" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;path d="M545 1062H628V1082" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="1082" width="156" height="84" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="462.0" y="1107.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ชำรุด&lt;/text&gt;&lt;text x="462.0" y="1129.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;ย้ายไป&lt;/text&gt;&lt;text x="462.0" y="1151.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;WH300/Quarantine/Qz01&lt;/text&gt;&lt;rect x="550" y="1082" width="156" height="84" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="628.0" y="1107.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ไม่ชำรุด&lt;/text&gt;&lt;text x="628.0" y="1129.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;ย้ายเข้า&lt;/text&gt;&lt;text x="628.0" y="1151.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;WH300/Good/RT03&lt;/text&gt;&lt;rect x="34" y="1188" width="18" height="18" rx="3" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="60" y="1203" font-size="14" fill="#1f2328"&gt;Cancel / ยกเลิกในวัน&lt;/text&gt;&lt;rect x="270" y="1188" width="18" height="18" rx="3" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="296" y="1203" font-size="14" fill="#1f2328"&gt;Return (RT)&lt;/text&gt;&lt;/svg&gt;
+
+&lt;h2&gt;4. ตัวอย่างกรณี&lt;/h2&gt;
+&lt;div class="card"&gt;&lt;table&gt;
+&lt;tr&gt;&lt;th&gt;สถานการณ์&lt;/th&gt;&lt;th&gt;ทำอย่างไร&lt;/th&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;ลูกค้ายกเลิก ของยังไม่ถูกหยิบ&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;กด Cancel ในระบบ (ดู BATCH ก่อนว่ากำลังหยิบหรือยัง)&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;ของถูกหยิบแล้ว ยังไม่แพ็ค แล้วลูกค้ายกเลิก&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;ทำ Return ในใบ Pick&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;แพ็คแล้ว แต่ยังไม่กด Out แล้วลูกค้ายกเลิก&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;กด Cancel order → ทำ Return ในใบ Pack → Return Reason Fil “ยกเลิกในวัน”&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;แพ็คเสร็จ ระบบขึ้น Out แล้ว ของยังไม่ออกจากบริษัท ลูกค้ายกเลิก&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;Return ในใบ Out → Return Reason "ยกเลิกในวัน" + Note "ลูกค้ายกเลิก"&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;ของออกไปนอกบริษัทแล้ว ลูกค้าปฏิเสธ ของตีกลับ (ไม่เกิน 7 วัน)&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--blue)"&gt;Return (RT) ปกติ → ย้ายไป WH300/Good/RT03 + ถ่ายคลิปใส่ Log Note ทุกครั้ง&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;ของส่งออกไปเกิน 7 วันแล้วกลับมา&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--blue)"&gt;Return (RT) + ย้ายไป QA: ชา → Fac 16/Quarantine/QaLab, อุปกรณ์ที่ชำรุด → WH300/Quarantine/Qz01 (ไม่ชำรุด → WH300/Good/RT03) + ถ่ายคลิปใส่ Log Note ทุกครั้ง&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;/div&gt;
+
+&lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</template>
 <template id="sopDoc">&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;th&quot;&gt;
 &lt;head&gt;
