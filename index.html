@@ -736,10 +736,6 @@ body.cap .wrap{height:auto;overflow:visible;padding:0}#vKPI .shpfc #shpfcReload{
 .side-foot{padding:20px 28px 26px;font-size:20.5px;color:#8AA9A7;
   border-top:1px solid rgba(255,255,255,.10)}
 /* เส้นคั่นก่อนเมนูเดี่ยวบรรทัดสุดท้าย (Forecast) — ไม่ได้อยู่ใต้หัวข้อไหน */
-/* หัวข้อย่อยในกลุ่มเมนู (เช่น Mini SOP ใต้ วิธีการปฏิบัติงาน) */
-.sidenav .subgrp{font-size:19px;font-weight:700;letter-spacing:.06em;color:#B9D3D1;margin:14px 0 4px 20px;padding-left:12px;border-left:2px solid rgba(255,255,255,.22);white-space:nowrap}
-.sidenav button.sub{padding-left:46px}
-.sidenav button.sub:hover{padding-left:52px}
 .sidenav .nav-sep{height:1px;background:rgba(255,255,255,.13);margin:22px 22px 14px}
 .main{flex:1;min-width:0}
 .side-toggle{display:none;position:fixed;top:12px;left:12px;z-index:80;
@@ -1042,6 +1038,187 @@ body.mobile .side .brand{padding-left:112px;padding-right:16px}body.mobile .side
   text-transform:uppercase;text-shadow:0 2px 10px color-mix(in srgb,var(--dc) 60%,transparent)}
 #vKPI h2.sec.dept em{color:color-mix(in srgb,#fff 75%,var(--dc))}
 #vKPI h2.sec.dept span{height:2px;background:linear-gradient(90deg,var(--dc),transparent)}
+
+/* ================= v-ov2: ดีไซน์ใหม่หน้า "ภาพรวม KPI ทุกแผนก" ================= */
+.sidenav button{display:flex;align-items:center;gap:18px}
+.sidenav button .nic{flex:none;width:38px;height:38px;display:inline-flex;opacity:.85}
+.sidenav button .nic svg{width:100%;height:100%}
+.sidenav button.on .nic{opacity:1}
+.sidenav button .ntx{min-width:0;overflow:hidden;text-overflow:ellipsis}
+#vKPI #ovBox{--ok:#22C59A;--okd:#0E9C76;--ng:#F2545B;--pan:rgba(255,255,255,.035);--pl:rgba(255,255,255,.09);--pt:#ECE9FF;--pm:#A9A3CF}
+#vKPI #ovBox .dsp{flex:1}
+/* การ์ดบนสุด */
+#vKPI .ovtop{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;margin:6px 0 30px}
+#vKPI .otc{display:flex;gap:26px;align-items:flex-start;padding:34px 34px;border-radius:24px;color:#fff;
+  border:1px solid var(--pl);background:#1A1640;box-shadow:0 10px 30px rgba(0,0,0,.25);min-width:0}
+#vKPI .otc.a{background:linear-gradient(135deg,#14A08C 0%,#0B6B61 100%);border-color:transparent}
+#vKPI .otc.b{background:linear-gradient(135deg,#7A55F0 0%,#4A2BB5 100%);border-color:transparent}
+#vKPI .otc.d.hot .oti{background:rgba(242,170,40,.18);color:#F5B53F}
+#vKPI .otc .oti{flex:none;width:88px;height:88px;border-radius:22px;background:rgba(255,255,255,.16);
+  display:flex;align-items:center;justify-content:center;color:#fff}
+#vKPI .otc.c .oti{background:rgba(155,123,255,.18);color:#C5B4FF}
+#vKPI .otc .oti svg{width:52px;height:52px}
+#vKPI .otb{min-width:0;flex:1}
+#vKPI .otc .l{font-size:32px;opacity:.92;font-weight:600}
+#vKPI .otc .v{font-size:86px;font-weight:800;letter-spacing:-1px;line-height:1.1;margin:4px 0 6px}
+#vKPI .otc .v small{font-size:.55em;opacity:.75;font-weight:700}
+#vKPI .otc.d.hot .v{color:#FF7A80}
+#vKPI .otc .n{font-size:26px}
+#vKPI .otc .tn.up{color:#B9FFE6;font-weight:700} #vKPI .otc .tn.down{color:#FFD0D2;font-weight:700}
+#vKPI .otc.c .tn,#vKPI .otc.d .tn{color:var(--pm)}
+#vKPI .otc .tm{opacity:.78}
+#vKPI .pbar{position:relative;display:flex;align-items:center;gap:16px;margin:10px 0 6px}
+#vKPI .pbar::before{content:"";flex:1;height:14px;border-radius:8px;background:rgba(255,255,255,.12)}
+#vKPI .pbar i{position:absolute;left:0;top:50%;transform:translateY(-50%);height:14px;border-radius:8px;
+  background:linear-gradient(90deg,#22C59A,#5BE3BC);max-width:calc(100% - 90px)}
+#vKPI .pbar span{font-size:26px;color:var(--pm);width:74px;text-align:right}
+/* แผงแผนก */
+#vKPI .dpanel{background:var(--pan);border:1px solid var(--pl);border-radius:28px;padding:30px 30px 34px;margin-bottom:26px}
+#vKPI .dhead{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+#vKPI .dhead .dic{width:76px;height:76px;border-radius:20px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.07);color:#fff}
+#vKPI .dhead .dic svg{width:46px;height:46px}
+#vKPI .dhead .dname{font-size:52px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:#fff}
+#vKPI .dhead em{font-style:normal;font-size:27px;color:var(--pm)}
+#vKPI .dscore{font-size:30px;color:var(--pm);font-weight:600}
+#vKPI .dscore b{font-size:48px;margin-right:6px}
+#vKPI .dscore b.ok{color:var(--ok)} #vKPI .dscore b.warn{color:#F5B53F} #vKPI .dscore .none{color:var(--pm)}
+#vKPI .dgo{display:inline-flex;align-items:center;gap:12px;font:inherit;font-size:27px;font-weight:700;color:#fff;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.28);border-radius:16px;padding:14px 24px;cursor:pointer}
+#vKPI .dgo svg{width:28px;height:28px}
+#vKPI .dgo:hover{background:rgba(255,255,255,.12)}
+#vKPI .dpair{display:grid;grid-template-columns:1fr;gap:0}   /* Delivery แถวหนึ่ง · Admin แถวถัดลงมา */
+#vKPI .dpair .dpanel{margin-bottom:26px}
+#vKPI .kgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+#vKPI .kgrid.one{grid-template-columns:1fr}
+/* การ์ด KPI */
+#vKPI .kpi2{display:flex;gap:24px;height:100%;padding:32px 30px;border-radius:22px;background:#F1FBF7;color:#18233A;
+  border:1px solid #D4F1E5;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+#vKPI .kpi2.fail{background:#FFF1F1;border-color:#F8C9CB}
+#vKPI .kpi2.wait{background:#F3F1FA;border-color:#E2DEF2}
+#vKPI .kpi2.info{background:#F1F5FD;border-color:#D6E1F6}
+#vKPI .kpi2.info .kic{background:#DCE6FA;color:#3D63B8}
+#vKPI .kbadge.info{background:#DCE6FA;color:#3D63B8}
+#vKPI .kpi2 .kic{flex:none;width:80px;height:80px;border-radius:20px;display:flex;align-items:center;justify-content:center;
+  background:#D3F2E6;color:var(--okd)}
+#vKPI .kpi2.fail .kic{background:#FFDCDD;color:#E5484D}
+#vKPI .kpi2.wait .kic{background:#E6E2F5;color:#7D75A8}
+#vKPI .kpi2 .kic svg{width:46px;height:46px}
+#vKPI .kpi2 .kbody{min-width:0;flex:1}
+#vKPI .kpi2 .kt{font-size:36px;font-weight:800;line-height:1.25}
+#vKPI .kpi2 .ktg{font-size:26px;color:#5D6478;margin-top:2px}
+#vKPI .kpi2 .kv{display:flex;align-items:center;flex-wrap:wrap;gap:12px 18px;margin:18px 0 10px}
+#vKPI .kpi2 .v{font-size:78px;font-weight:800;letter-spacing:-1px;line-height:1}
+#vKPI .kpi2.fail .v{color:#E5484D}
+#vKPI .kpi2.wait .v{color:#A29CC4}
+#vKPI .kbadge{display:inline-flex;align-items:center;gap:8px;font-size:25px;font-weight:700;padding:7px 18px;border-radius:999px}
+#vKPI .kbadge svg{width:26px;height:26px}
+#vKPI .kbadge.pass{background:#CFF3E3;color:var(--okd)}
+#vKPI .kbadge.fail{background:#FFD5D7;color:#D93C42}
+#vKPI .kbadge.wait{background:#E4E0F4;color:#6E6799}
+#vKPI .kpi2 .delta{display:block;font-size:27px;margin:0;line-height:1.5}
+#vKPI .kpi2 .delta em{display:inline;margin-left:10px;font-size:24px;color:#6B7286;font-weight:normal}
+#vKPI .kpi2 .delta.up{color:var(--okd)} #vKPI .kpi2 .delta.down{color:#E5484D}
+#vKPI .kpi2 .kbase,#vKPI .kpi2 .knote{font-size:22px;color:#6B7286;margin-top:10px;line-height:1.5}
+/* แนวโน้ม */
+#vKPI .ovtrend{background:var(--pan);border:1px solid var(--pl);border-radius:28px;padding:28px 30px 26px;margin-bottom:26px}
+#vKPI .othead{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+#vKPI .othead b{font-size:38px;color:#fff}
+#vKPI .othead em{font-style:normal;font-size:25px;color:var(--pm)}
+#vKPI .otsel{display:flex;align-items:center;border:1px solid var(--pl);border-radius:14px;overflow:hidden}
+#vKPI .otsel span{font-size:24px;color:var(--pm);padding:12px 18px;border-right:1px solid var(--pl)}
+#vKPI .otsel select{font:inherit;font-size:25px;color:#fff;background:#1A1640;border:0;padding:12px 18px;min-width:520px}
+#vKPI .otsel option{color:#fff;background:#1A1640}
+#vKPI .otbox{height:430px;position:relative}
+/* แถวล่าง */
+#vKPI .ovbot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+#vKPI .opanel{background:var(--pan);border:1px solid var(--pl);border-radius:24px;padding:26px 26px 22px;min-width:0}
+#vKPI .opanel h3{margin:0 0 18px;font-size:34px;color:#fff}
+#vKPI .sumrow{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+#vKPI .donut{width:220px;height:220px;flex:none}
+#vKPI .donut .dn{fill:#fff;font-size:40px;font-weight:800}
+#vKPI .donut .dl{fill:var(--pm);font-size:20px}
+#vKPI .leg{list-style:none;margin:0;padding:0;flex:1;min-width:220px}
+#vKPI .leg li{display:flex;align-items:center;gap:14px;font-size:26px;color:var(--pt);padding:9px 0}
+#vKPI .leg li i{width:20px;height:20px;border-radius:50%;flex:none}
+#vKPI .leg li b{margin-left:auto;font-weight:600;color:var(--pm)}
+#vKPI table.ovt{width:100%;border-collapse:collapse;font-size:24px;color:var(--pt)}
+#vKPI table.ovt th{font-size:21px;font-weight:600;color:var(--pm);text-align:left;padding:12px 12px;background:rgba(255,255,255,.05)}
+#vKPI table.ovt td{padding:14px 12px;border-top:1px solid rgba(255,255,255,.07)}
+#vKPI table.ovt .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+#vKPI table.ovt .pos{color:var(--ok)} #vKPI table.ovt .neg{color:var(--ng)}
+#vKPI table.ovt td.sp{width:120px}
+#vKPI .spark{width:110px;height:34px;display:block}
+#vKPI .spark polyline{fill:none;stroke-width:2.6;vector-effect:non-scaling-stroke}
+#vKPI .spark.ok polyline{stroke:var(--ok)} #vKPI .spark.bad polyline{stroke:var(--ng)}
+#vKPI .ovempty{font-size:26px;color:var(--pm);padding:30px 0}
+@media(max-width:1500px){#vKPI .ovtop,#vKPI .kgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #vKPI .ovbot{grid-template-columns:1fr}}
+@media(max-width:1000px){#vKPI .ovtop,#vKPI .kgrid,#vKPI .dpair{grid-template-columns:1fr}}
+body.present #vKPI .kpi2 .v{font-size:96px}
+body.present #vKPI .otc .v{font-size:100px}
+
+/* v-ov5: ตารางแถวล่าง (ต่ำกว่าเกณฑ์ / ผ่านเกณฑ์) ตัวใหญ่ขึ้น อ่านง่าย */
+#vKPI .opanel{padding:32px 32px 26px}
+#vKPI .opanel h3{font-size:44px;margin-bottom:22px}
+#vKPI table.ovt{font-size:34px}
+#vKPI table.ovt th{font-size:28px;padding:16px 16px}
+#vKPI table.ovt td{padding:20px 16px}
+#vKPI table.ovt td:first-child{font-weight:600}
+#vKPI table.ovt td.sp{width:170px}
+#vKPI .spark{width:150px;height:46px}
+#vKPI .ovempty{font-size:32px}
+
+/* ================= v-skin1: ปรับหน้าตาหน้าย่อยทุกหน้าให้เข้าชุดกับหน้าภาพรวม =================
+   แก้เฉพาะ "หน้าตา" (สี มุม เงา ตัวอักษร) — ไม่แตะวิธีคิด ลำดับการแสดงผล หรือเงื่อนไขการแสดงผลใดๆ */
+#vKPI #detail{--sk-ok:#0E9C76;--sk-ng:#E5484D;--sk-pm:#A9A3CF}
+/* หัวข้อแต่ละส่วน: มีแถบสีนำหน้า ตัวหนาขึ้น */
+#vKPI #detail h2.sec{margin:44px 0 18px;font-weight:800;color:#fff;letter-spacing:.01em}
+#vKPI #detail h2.sec::before{content:"";flex:none;width:10px;align-self:stretch;min-height:1.05em;border-radius:6px;
+  background:linear-gradient(180deg,#22C59A,#7A55F0)}
+#vKPI #detail h2.sec em{color:var(--sk-pm)}
+#vKPI #detail h2.sec span{height:2px;background:linear-gradient(90deg,rgba(155,123,255,.55),transparent)}
+/* วงแหวนสรุป: ไล่สีแบบการ์ดบนสุดของหน้าภาพรวม */
+#vKPI #detail .ring{background:linear-gradient(135deg,#14A08C 0%,#0E7F72 45%,#0B5F57 100%);border-radius:30px;
+  box-shadow:0 14px 40px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.08)}
+#vKPI #detail .ring.miss{background:linear-gradient(135deg,#D9505A 0%,#A8333D 50%,#7A2430 100%)}
+#vKPI #detail .ring .fl{stroke:#B9FFE6}
+#vKPI #detail .ring .fl.miss{stroke:#FFD0D2}
+#vKPI #detail .ringwrap b.miss{color:#fff}   /* ตัวเลขบนวงแดงต้องเป็นสีขาว ไม่งั้นจมหาย */
+#vKPI #detail .ring .cap .tag{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.35)}
+/* การ์ดตัวเลข: พื้นอ่อนตามสีของค่า (เขียว/แดง/ม่วง/ส้ม) แบบการ์ด KPI หน้าภาพรวม */
+#vKPI #detail .scard{border-radius:24px;border:1px solid #D4F1E5;background:#F1FBF7;
+  box-shadow:0 10px 28px rgba(0,0,0,.22);padding:28px 24px;position:relative;overflow:hidden}
+#vKPI #detail .scard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;background:#22C59A}
+#vKPI #detail .scard .sl{color:#5D6478;font-weight:600;letter-spacing:.01em}
+#vKPI #detail .scard:has(>.sv.rose),#vKPI #detail .scard:has(>.sv .bad){background:#FFF1F1;border-color:#F8C9CB}
+#vKPI #detail .scard:has(>.sv.rose)::before,#vKPI #detail .scard:has(>.sv .bad)::before{background:#F2545B}
+#vKPI #detail .scard:has(>.sv.plum){background:#F4F1FF;border-color:#DDD3FB}
+#vKPI #detail .scard:has(>.sv.plum)::before{background:#7A55F0}
+#vKPI #detail .scard:has(>.sv.amber){background:#FFF8EC;border-color:#F6DFB5}
+#vKPI #detail .scard:has(>.sv.amber)::before{background:#F5B53F}
+#vKPI #detail .scard:has(>.sv.shp-min){background:#FFF8D6;border-color:#F2D14B}
+#vKPI #detail .scard:has(>.sv.shp-max){background:#FDECEC;border-color:#F3A5A5}
+/* กล่องกราฟ / กล่องเนื้อหา */
+#vKPI #detail .cpanel{border-radius:26px;border:1px solid #E6E0F4;background:#FFFDF8;
+  box-shadow:0 12px 32px rgba(0,0,0,.24);padding:30px 30px}
+#vKPI #detail .chname2{font-weight:800}
+/* ตาราง */
+#vKPI #detail table.dt{border-radius:24px;border:1px solid #E6E0F4;box-shadow:0 12px 32px rgba(0,0,0,.24)}
+#vKPI #detail table.dt th{background:#EFEBFA;color:#5B5486;font-weight:700}
+#vKPI #detail table.dt tr:hover td{background:#F6F3FD}
+/* ปุ่มกรองย่อย */
+#vKPI #detail .fbar button{border-color:#DCD6EE;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+#vKPI #detail .fbar button:hover{background:#F1EDFC}
+#vKPI #detail .fbar button.on{background:linear-gradient(135deg,#14A08C,#0B6B61);border-color:transparent;
+  box-shadow:0 4px 14px rgba(20,160,140,.45)}
+/* ข้อความอธิบายที่วางบนพื้นเข้ม ให้อ่านออก */
+#vKPI #detail>.chint,#vKPI #detail>div>.chint{color:var(--sk-pm)}
+#vKPI #detail .empty2{border-radius:22px}
+/* หัวหน้า: เส้นใต้ไล่สี */
+#vKPI #kShot>header{border-bottom:0;position:relative}
+#vKPI #kShot>header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,#22C59A,#7A55F0 60%,transparent)}
 </style>
 <style id="hlegV17">
 /* v-hleg: ป้ายสีกราฟแบบ HTML ของหน้า Packing — นำกลับมาจากเวอร์ชัน (17) */
@@ -1127,6 +1304,373 @@ body.mobile .side .brand{padding-left:112px;padding-right:16px}body.mobile .side
 #vKPI .hleg button{font-size:31px}
 #vKPI .hleg.hleg-row button{font-size:23px}
 #vKPI .hleg.hleg-mini button{font-size:25px}
+#vKPI #sopcrFrame{width:100%}
+#vRPT .toolbar .kf,#vRPT #clear{display:none!important}
+</style>
+<style id="rptDesign">
+/* ===== v-rptdesign: หน้ารายงานประจำวัน (ทุกทีม) — ดีไซน์ใหม่ทั้งบนจอและตอนบันทึกเป็นรูป
+   เปลี่ยนแค่หน้าตา ตัวเลข/การคำนวณ/รายการที่แสดงเหมือนเดิมทุกอย่าง ===== */
+#vRPT{--rp-card:rgba(255,255,255,.035);--rp-line:rgba(255,255,255,.09);--rp-ink:#F3EFFB;--rp-mute:#B7AEDE}
+#vRPT #shot.cap-slide,#vRPT #shot.cap-full{
+  background:radial-gradient(ellipse 70% 40% at 85% 0%,rgba(59,74,160,.38),rgba(16,13,38,0) 70%),#100D26}
+
+/* ---- หัวรายงาน ---- */
+#vRPT header{border-bottom:0;padding-bottom:0;margin-bottom:30px;display:flex;justify-content:space-between;
+  align-items:center;gap:24px 36px}
+#vRPT .rttl{display:flex;align-items:center;gap:30px;min-width:0}
+#vRPT .rico{flex:none;width:150px;height:150px;border-radius:32px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,#137C78,#0B4A52);border:1px solid rgba(45,212,191,.35);
+  box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#vRPT .rico svg{width:78px;height:78px}
+#vRPT .rtx{border-left:7px solid #2DD4BF;padding-left:28px;min-width:0}
+#vRPT h1{border-left:0;padding-left:0;margin:0;font-size:84px;line-height:1.15;font-weight:700;color:var(--rp-ink);letter-spacing:-.5px}
+#vRPT .sub{margin:8px 0 0;font-size:36px;color:#B9B0F0;line-height:1.35}
+#vRPT .period{flex:none;text-align:right;background:rgba(255,255,255,.05);border:1px solid var(--rp-line);
+  border-radius:26px;padding:20px 32px 24px;color:var(--rp-mute);font-size:26px;line-height:1.3}
+#vRPT .period small{display:block;font-size:26px;color:var(--rp-mute)}
+#vRPT .prow{display:flex;align-items:center;gap:22px;margin-top:8px}
+#vRPT .pcal{display:inline-flex;width:56px;height:56px}
+#vRPT .pcal svg{width:56px;height:56px}
+#vRPT .period b{display:inline;color:var(--rp-ink);font-size:44px;font-weight:500;white-space:nowrap}
+#vRPT .chip{margin:0;background:linear-gradient(120deg,#7C3AED,#6D4BD8);color:#fff;font-weight:700;
+  font-size:26px;padding:6px 20px;border-radius:14px;white-space:nowrap}
+
+/* ---- การ์ดตัวเลข ---- */
+#vRPT .kpis{gap:22px;margin-bottom:30px}
+#vRPT .kpi,#vRPT .kpi.c0,#vRPT .kpi.c1,#vRPT .kpi.c2,#vRPT .kpi.c3,#vRPT .kpi.c4,
+#vRPT .kpi.rose,#vRPT .kpi.ok,#vRPT .kpi.ink{
+  position:relative;overflow:hidden;display:flex;flex-direction:row;align-items:flex-start;gap:30px;
+  text-align:left;padding:34px 32px 34px;border-radius:26px;color:#fff;
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 30px rgba(0,0,0,.28)}
+#vRPT .kpi.c0,#vRPT .kpi.ok{background:linear-gradient(135deg,#0F857C 0%,#0A5A5F 100%);border-color:rgba(45,212,191,.45)}
+#vRPT .kpi.c1{background:linear-gradient(135deg,#1F55B5 0%,#163777 100%);border-color:rgba(96,165,250,.45)}
+#vRPT .kpi.c2{background:linear-gradient(135deg,#6343D2 0%,#3B2690 100%);border-color:rgba(167,139,250,.5)}
+#vRPT .kpi.c3{background:linear-gradient(135deg,#4F46E5 0%,#2E2A8C 100%);border-color:rgba(129,140,248,.5)}
+#vRPT .kpi.c4{background:linear-gradient(135deg,#C2690C 0%,#7C3A06 100%);border-color:rgba(251,191,36,.45)}
+#vRPT .kpi.rose{background:linear-gradient(135deg,#C02848 0%,#7A1636 100%);border-color:rgba(251,113,133,.5)}
+#vRPT .kpi.ink{background:linear-gradient(135deg,#3A4B78 0%,#232F52 100%);border-color:rgba(148,163,184,.45)}
+#vRPT .kpi.pending{position:relative;overflow:hidden;display:flex;flex-direction:row;align-items:flex-start;gap:30px;
+  text-align:left;padding:34px 32px;border-radius:26px;background:var(--rp-card);color:var(--rp-mute);
+  border:2px dashed var(--rp-line);box-shadow:none}
+#vRPT .kpi .kic{flex:none;position:relative;z-index:1;width:116px;height:116px;border-radius:26px;display:flex;
+  align-items:center;justify-content:center;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22)}
+#vRPT .kpi .kic svg{width:62px;height:62px}
+#vRPT .kpi.pending .kic{background:rgba(255,255,255,.06)}
+#vRPT .kpi .kbody{position:relative;z-index:1;min-width:0;display:flex;flex-direction:column}
+#vRPT .kpi .l{font-size:34px;color:#fff;opacity:.95;letter-spacing:0;line-height:1.3;font-weight:500}
+#vRPT .kpi .v,#vRPT .kpis.many .kpi .v,#vRPT .kpi.c0 .v,#vRPT .kpi.c1 .v,#vRPT .kpi.c2 .v,#vRPT .kpi.c3 .v,
+#vRPT .kpi.c4 .v,#vRPT .kpi.ok .v,#vRPT .kpi.rose .v,#vRPT .kpi.ink .v{
+  color:#fff;font-size:104px;font-weight:700;line-height:1.05;letter-spacing:-1px;margin:6px 0 4px}
+#vRPT .kpi .n{font-size:31px;color:#fff;opacity:.9;line-height:1.3}
+#vRPT .kpi.pending .l,#vRPT .kpi.pending .n{color:var(--rp-mute)}
+#vRPT .kpi.pending .v{font-size:44px;color:var(--rp-mute);padding-top:10px}
+#vRPT .kpi .kdeco{position:absolute;right:-18px;top:50%;transform:translateY(-50%);width:190px;height:190px;
+  opacity:.13;pointer-events:none}
+#vRPT .kpi .kdeco svg{width:190px;height:190px}
+
+/* ---- กล่องรายการ ---- */
+#vRPT .panels{gap:30px}
+#vRPT .panel{background:var(--rp-card);border:1px solid var(--rp-line);border-radius:30px;padding:0 24px 24px;
+  overflow:visible;min-height:0}
+#vRPT .panel .hd,#vRPT .panel .hd.a,#vRPT .panel .hd.b,#vRPT .panel .hd.c,#vRPT .panel .hd.d{
+  display:flex;align-items:center;gap:26px;padding:26px 6px 24px;background:transparent;border:0;flex:none}
+#vRPT .panel .pic{flex:none;width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 20px rgba(0,0,0,.3)}
+#vRPT .panel .pic svg{width:50px;height:50px}
+#vRPT .hd.a .pic{background:linear-gradient(145deg,#14A394,#0B6A66)}
+#vRPT .hd.b .pic{background:linear-gradient(145deg,#7C5BE6,#4A2DA8)}
+#vRPT .hd.c .pic{background:linear-gradient(145deg,#B97B45,#6E4122)}
+#vRPT .hd.d .pic{background:linear-gradient(145deg,#D2405C,#86203A)}
+#vRPT .panel h2.sec{flex:1;min-width:0;margin:0;font-size:56px;font-weight:700;color:var(--rp-ink);
+  display:flex;align-items:baseline;gap:22px;white-space:nowrap}
+#vRPT .panel h2.sec em{font-size:34px;color:var(--rp-mute);font-weight:400;overflow:hidden;text-overflow:ellipsis}
+#vRPT .panel .pdoc{flex:none;width:76px;height:76px;border-radius:20px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.06);border:1px solid var(--rp-line)}
+#vRPT .panel .pdoc svg{width:38px;height:38px}
+#vRPT .panel .scroll{background:var(--card);border:0;border-radius:22px;box-shadow:0 6px 18px rgba(0,0,0,.22)}
+#vRPT th{background:#EFEDEA;color:#4A4466;font-weight:600;box-shadow:inset 0 -1px 0 var(--line)}
+#vRPT td.d{color:#4A4466;border-right:1px solid var(--line)}
+#vRPT thead th:first-child{border-right:1px solid var(--line)}
+#vRPT tr.newday td{border-top:1px solid var(--line)}
+#vRPT tbody td{border-top:1px solid #EEE9DF}
+#vRPT tfoot td{font-weight:700;border-top:1px solid var(--line)}
+#vRPT .p-a tfoot td{background:#E2F3EE;color:#0F4F4A}
+#vRPT .p-a tfoot .num{color:#0F766E}
+#vRPT .p-b tfoot td{background:#ECE6FB;color:#4C2E9E}
+#vRPT .p-b tfoot .num{color:#5B3FC4}
+#vRPT .p-c tfoot td{background:#FCE6E8;color:#B4233C}
+#vRPT .p-d tfoot td{background:#FCE6E8;color:#B4233C}
+#vRPT .tag{display:inline-flex;align-items:center;gap:12px;background:#CFEFE8;border:0;color:#0F5F59;
+  border-radius:12px;padding:6px 20px;margin-bottom:10px;line-height:1.3}
+#vRPT .tag .tgi{display:inline-flex;font-style:normal}
+#vRPT .tag .tgi svg{width:1em;height:1em}
+#vRPT .tag.pend{background:var(--rose);color:#fff}
+#vRPT .empty b{color:var(--mute)}
+
+/* ---- ท้ายรายงาน ---- */
+#vRPT .foot{margin-top:30px;padding:24px 32px;border:1px solid var(--rp-line);border-radius:26px;background:var(--rp-card);
+  display:flex;align-items:center;justify-content:space-between;gap:20px 30px;color:var(--rp-mute);font-size:27px;line-height:1.45}
+#vRPT .foot .fsrc{display:flex;align-items:center;gap:26px;min-width:0}
+#vRPT .foot .fsrc b{color:var(--rp-ink);font-weight:500}
+#vRPT .foot .fic{flex:none;width:84px;height:84px;border-radius:22px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.07);border:1px solid var(--rp-line)}
+#vRPT .foot .fic svg{width:44px;height:44px}
+#vRPT .foot .fts{flex:none;display:flex;align-items:center;gap:20px;padding-left:34px;border-left:1px solid var(--rp-line);
+  white-space:nowrap;color:var(--rp-ink)}
+#vRPT .foot .fic2 svg{width:52px;height:52px;display:block}
+
+/* ---- จอแคบ / มือถือ ---- */
+@media(max-width:1400px){#vRPT .kpi .kdeco{display:none}}
+body.mobile #vRPT .rico{width:110px;height:110px;border-radius:26px}
+body.mobile #vRPT .rico svg{width:58px;height:58px}
+body.mobile #vRPT .period{text-align:left;width:100%}
+body.mobile #vRPT .foot{flex-direction:column;align-items:flex-start}
+body.mobile #vRPT .foot .fts{border-left:0;padding-left:0}
+body.mobile #vRPT .panel h2.sec{white-space:normal;flex-wrap:wrap}
+body.mobile #vRPT .kpi .kdeco{display:none}
+#vRPT header,#vRPT #shot.cap-tall header{flex-wrap:nowrap}
+#vRPT .rttl{flex:1 1 auto}
+#vRPT .foot .fsrc{flex:1 1 auto}
+#vRPT thead th{white-space:nowrap}
+body.mobile #vRPT header{flex-wrap:wrap}
+#vRPT h1{font-size:76px;white-space:nowrap}
+#vRPT .rttl{flex:0 1 auto;gap:26px}
+#vRPT .rico{width:132px;height:132px;border-radius:30px}
+#vRPT .rico svg{width:70px;height:70px}
+#vRPT .rtx{padding-left:24px}
+#vRPT .sub{font-size:33px}
+#vRPT .period{flex:0 1 auto;min-width:0;padding:18px 28px 22px}
+#vRPT .prow{gap:16px;justify-content:flex-end}
+#vRPT .pcal,#vRPT .pcal svg{width:46px;height:46px;flex:none}
+#vRPT .period b{font-size:38px}
+#vRPT .chip{font-size:24px;padding:5px 16px}
+#vRPT .foot .fsrc{flex:1 1 0}
+body.mobile #vRPT h1{white-space:normal}
+#vRPT header,#vRPT #shot.cap-tall header{flex-wrap:wrap}
+#vRPT .period{margin-left:auto}
+#vRPT h1{font-size:72px}
+#vRPT .period b{font-size:36px}
+#vRPT .ptop{display:flex;align-items:center;justify-content:flex-end;gap:14px}
+#vRPT .ptop small{display:inline}
+#vRPT header{gap:24px 28px}
+/* 4 การ์ดขึ้นไป (รายงาน Admin) — การ์ดแคบลง ย่อไอคอนให้ตัวเลขมีที่พอ */
+#vRPT .kpis:has(>.kpi:nth-child(4)) .kpi{gap:20px;padding:28px 24px}
+#vRPT .kpis:has(>.kpi:nth-child(4)) .kpi .kic{width:86px;height:86px;border-radius:22px}
+#vRPT .kpis:has(>.kpi:nth-child(4)) .kpi .kic svg{width:46px;height:46px}
+#vRPT .kpis:has(>.kpi:nth-child(4)) .kpi .l{font-size:31px}
+#vRPT .kpis:has(>.kpi:nth-child(4)) .kpi .kdeco,#vRPT .kpis:has(>.kpi:nth-child(4)) .kpi .kdeco svg{width:150px;height:150px}
+
+
+/* ===== v-rptrange: ตัวกรองช่วงเวลา (หน้ารายงานประจำวัน) ===== */
+#vRPT .rf{display:flex;align-items:center;gap:16px 22px;flex-wrap:wrap;flex:1 1 auto;min-width:0}
+#vRPT .rf-modes{display:flex;gap:6px;background:var(--soft);padding:6px;border-radius:16px;border:1px solid var(--line);flex-wrap:wrap}
+#vRPT .rf-modes button{background:none;border:0;font-family:inherit;font-size:27px;color:var(--mute);
+  padding:11px 26px;border-radius:11px;cursor:pointer;white-space:nowrap;transition:background .14s ease,color .14s ease}
+#vRPT .rf-modes button:hover:not(.on){background:var(--card);color:var(--ink)}
+#vRPT .rf-modes button.on{background:linear-gradient(100deg,var(--teal-d),#14B8A6);color:#fff;font-weight:bold;
+  box-shadow:0 4px 14px rgba(15,118,110,.32)}
+#vRPT .rf-modes button:focus-visible,#vRPT .rf-ar:focus-visible{outline:2px solid var(--plum);outline-offset:2px}
+#vRPT .rf-nav{display:flex;align-items:center;gap:10px;flex:1 1 520px;min-width:0;max-width:820px}
+#vRPT .rf-ar{flex:none;width:62px;height:62px;border-radius:12px;border:1.5px solid var(--line);background:var(--soft);
+  color:var(--ink);font-family:inherit;font-size:40px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 0 4px}
+#vRPT .rf-ar:hover:not(:disabled){border-color:var(--teal);background:var(--card);color:var(--teal-d)}
+#vRPT .rf-ar:disabled{opacity:.35;cursor:default}
+#vRPT #rfSel{flex:1;min-width:0;text-align:center;text-align-last:center;font-weight:bold;font-size:28px;
+  padding:13px 18px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink)}
+#vRPT #rfSel:disabled{opacity:.55}
+#vRPT .toolbar{align-items:center}
+body.mobile #vRPT .rf-modes{width:100%}
+body.mobile #vRPT .rf-modes button{flex:1 1 30%;font-size:32px;padding:16px 10px}
+body.mobile #vRPT .rf-nav{flex:1 1 100%;max-width:none}
+body.mobile #vRPT .rf-ar{width:80px;height:80px}
+body.mobile #vRPT #rfSel{font-size:36px;padding:18px}
+
+/* ===== v-rfk: ตัวกรองช่วงเวลา (หน้า KPI / หน้าอื่น) ===== */
+#vKPI .rf{display:flex;align-items:center;gap:16px 22px;flex-wrap:wrap;flex:1 1 auto;min-width:0}
+#vKPI .rf-modes{display:flex;gap:6px;background:var(--soft);padding:6px;border-radius:16px;border:1px solid var(--line);flex-wrap:wrap}
+#vKPI .rf-modes button{background:none;border:0;font-family:inherit;font-size:27px;color:var(--mute);
+  padding:11px 26px;border-radius:11px;cursor:pointer;white-space:nowrap;transition:background .14s ease,color .14s ease}
+#vKPI .rf-modes button:hover:not(.on){background:var(--card);color:var(--ink)}
+#vKPI .rf-modes button.on{background:linear-gradient(100deg,var(--teal-d),#14B8A6);color:#fff;font-weight:bold;
+  box-shadow:0 4px 14px rgba(15,118,110,.32)}
+#vKPI .rf-modes button:focus-visible,#vKPI .rf-ar:focus-visible{outline:2px solid var(--plum);outline-offset:2px}
+#vKPI .rf-nav{display:flex;align-items:center;gap:10px;flex:1 1 520px;min-width:0;max-width:820px}
+#vKPI .rf-ar{flex:none;width:62px;height:62px;border-radius:12px;border:1.5px solid var(--line);background:var(--soft);
+  color:var(--ink);font-family:inherit;font-size:40px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 0 4px}
+#vKPI .rf-ar:hover:not(:disabled){border-color:var(--teal);background:var(--card);color:var(--teal-d)}
+#vKPI .rf-ar:disabled{opacity:.35;cursor:default}
+#vKPI #rfkSel{flex:1;min-width:0;text-align:center;text-align-last:center;font-weight:bold;font-size:28px;
+  padding:13px 18px;border:1.5px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink)}
+#vKPI #rfkSel:disabled{opacity:.55}
+#vKPI .toolbar{align-items:center}
+body.mobile #vKPI .rf-modes{width:100%}
+body.mobile #vKPI .rf-modes button{flex:1 1 30%;font-size:32px;padding:16px 10px}
+body.mobile #vKPI .rf-nav{flex:1 1 100%;max-width:none}
+body.mobile #vKPI .rf-ar{width:80px;height:80px}
+body.mobile #vKPI #rfkSel{font-size:36px;padding:18px}
+#vKPI .toolbar>.kf,#vKPI #kClear{display:none!important}
+/* ===== v-rf2: ตัวกรองช่วงเวลา ตัวใหญ่ขึ้น + ปุ่มแยกกันชัดเจน (หน้ารายงาน + หน้า KPI) ===== */
+#vRPT .rf,#vKPI .rf{gap:18px 28px}
+#vRPT .rf-modes,#vKPI .rf-modes{background:none;border:0;padding:0;gap:14px}
+#vRPT .rf-modes button,#vKPI .rf-modes button{font-size:38px;font-weight:600;color:var(--ink);
+  background:var(--card);border:2.5px solid var(--line);border-radius:16px;padding:16px 36px;
+  box-shadow:0 2px 6px rgba(20,24,40,.08)}
+#vRPT .rf-modes button:hover:not(.on),#vKPI .rf-modes button:hover:not(.on){border-color:var(--teal);color:var(--teal-d);background:#F1FAF8}
+#vRPT .rf-modes button.on,#vKPI .rf-modes button.on{border-color:var(--teal-d);color:#fff;font-weight:bold;
+  background:linear-gradient(100deg,var(--teal-d),#14B8A6);box-shadow:0 6px 16px rgba(15,118,110,.35)}
+#vRPT .rf-nav,#vKPI .rf-nav{gap:14px;max-width:1000px;flex-basis:640px}
+#vRPT .rf-ar,#vKPI .rf-ar{width:84px;height:84px;font-size:56px;border:2.5px solid var(--line);border-radius:16px;
+  background:var(--card);font-weight:bold}
+#vRPT #rfSel,#vKPI #rfkSel{height:84px;font-size:38px;border:2.5px solid var(--line);border-radius:16px;
+  background:var(--card);padding:0 24px}
+#vRPT #rfSel:focus,#vKPI #rfkSel:focus{outline:none;border-color:var(--teal-d);box-shadow:0 0 0 4px rgba(13,148,136,.18)}
+body.mobile #vRPT .rf-modes button,body.mobile #vKPI .rf-modes button{flex:1 1 30%;font-size:40px;padding:20px 10px}
+body.mobile #vRPT .rf-ar,body.mobile #vKPI .rf-ar{width:96px;height:96px}
+body.mobile #vRPT #rfSel,body.mobile #vKPI #rfkSel{height:96px;font-size:40px}
+
+/* ===== v-kdark: หน้าย่อย KPI (ยกเว้น ภาพรวม / รายงานประจำวัน / หน้าเอกสารที่ฝัง) — หัวหน้า แถบวงแหวน การ์ด ชิป แบบภาพตัวอย่าง
+   เปลี่ยนเฉพาะหน้าตา ไม่แตะข้อมูล วิธีคำนวณ หรือสิ่งที่แสดง ===== */
+/* หัวหน้า */
+body.kdark #vKPI #kShot>header{border-bottom:0;padding-bottom:0;margin-bottom:22px;align-items:center}
+body.kdark #vKPI #kShot>header>.khd{display:flex;align-items:center;gap:28px;min-width:0}
+#vKPI .kico{display:none}
+body.kdark #vKPI .kico{flex:none;width:128px;height:128px;border-radius:30px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,#137C78,#0B4A52);border:1px solid rgba(45,212,191,.35);box-shadow:0 10px 26px rgba(0,0,0,.35)}
+body.kdark #vKPI .kico svg{width:66px;height:66px}
+body.kdark #vKPI #kShot>header h1{border-left:0;padding-left:0}
+body.kdark #vKPI #kShot>header .sub{margin-left:0;color:#B9B0F0}
+body.kdark #vKPI #kShot>header .period{background:rgba(255,255,255,.05) url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2252%22%20height%3D%2252%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23E9E4FF%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%224.5%22%20width%3D%2218%22%20height%3D%2217%22%20rx%3D%222.5%22/%3E%3Cpath%20d%3D%22M16%202.5v4M8%202.5v4M3%2010h18%22/%3E%3C/svg%3E") no-repeat 30px 50%/52px 52px;
+  border:1px solid rgba(255,255,255,.10);border-radius:24px;padding:18px 30px 20px 104px;line-height:1.35}
+body.kdark #vKPI #kShot>header .period b{font-weight:600}
+body.kdark #vKPI .kchip{background:linear-gradient(120deg,#7C3AED,#6D4BD8);font-weight:bold;border-radius:12px}
+/* ตัวกรองย่อย (ชิป) */
+body.kdark #vKPI #detail .fbar button{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.16);color:#EEEAFB;
+  border-radius:16px;padding:10px 28px}
+body.kdark #vKPI #detail .fbar button:hover{background:rgba(45,212,191,.10);border-color:#2DD4BF}
+body.kdark #vKPI #detail .fbar button.on{background:linear-gradient(100deg,#0F766E,#14B8A6);border-color:#14B8A6;color:#fff;
+  box-shadow:0 6px 16px rgba(20,184,166,.28)}
+body.kdark #vKPI #detail .fbar button.on.rose{background:linear-gradient(100deg,#BE123C,#E11D48);border-color:#E11D48}
+body.kdark #vKPI #detail .fbar button.on.amber{background:linear-gradient(100deg,#B45309,#D97706);border-color:#D97706}
+body.kdark #vKPI #detail .fbar button .ck{border-color:rgba(255,255,255,.35);background:transparent}
+body.kdark #vKPI #detail .fbar button.on .ck{background:#fff;border-color:#fff;color:#0F766E}
+/* วงแหวน = แถบไฮไลต์แนวนอน */
+body.kdark #vKPI #detail .ring{flex-direction:row;justify-content:center;gap:70px;text-align:left;padding:46px 60px;
+  background:linear-gradient(120deg,#0E5E63 0%,#0D3E5C 45%,#1A2560 100%);
+  border:1px solid rgba(45,212,191,.40);box-shadow:0 14px 34px rgba(0,0,0,.35)}
+body.kdark #vKPI #detail .ring.miss{background:linear-gradient(120deg,#6B1A33 0%,#4A1838 45%,#24204F 100%);border-color:rgba(251,113,133,.45)}
+body.kdark #vKPI #detail .ring svg{width:380px;height:380px}
+body.kdark #vKPI #detail .ring .tr{stroke:rgba(255,255,255,.12);stroke-width:15}
+body.kdark #vKPI #detail .ring .fl{stroke:#2DD4BF;stroke-width:15}
+body.kdark #vKPI #detail .ring .fl.miss{stroke:#FB7185}
+body.kdark #vKPI #detail .ringwrap b{font-size:84px}
+body.kdark #vKPI #detail .ringwrap b.miss{color:#FFD1D9}
+body.kdark #vKPI #detail .ring .cap{align-items:flex-start;max-width:900px;font-size:34px}
+body.kdark #vKPI #detail .ring .cap .tag{font-size:32px;padding:16px 30px 16px 84px;border-radius:20px;margin-bottom:14px;
+  background:rgba(13,148,136,.32) url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2242%22%20height%3D%2242%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229.5%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%225.5%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221.5%22/%3E%3C/svg%3E") no-repeat 26px 50%/42px 42px;border:1px solid rgba(45,212,191,.55)}
+body.kdark #vKPI #detail .ring .cap .tag.miss{background-color:rgba(225,29,72,.30);border-color:rgba(251,113,133,.6)}
+/* การ์ดตัวเลข: ไอคอนในกรอบทางซ้าย · สีการ์ดตามความหมายเดิม (เขียว = ผ่าน · แดง = ไม่ผ่าน) */
+body.kdark #vKPI #detail .scard{position:relative;overflow:hidden;display:grid;grid-template-columns:auto minmax(0,1fr);grid-auto-rows:auto;column-gap:26px;row-gap:2px;
+  align-content:center;text-align:left;padding:28px 30px;border-radius:24px;
+  background:linear-gradient(135deg,#1A3170 0%,#16224E 100%);border:1px solid rgba(96,165,250,.40);box-shadow:0 10px 26px rgba(0,0,0,.28)}
+body.kdark #vKPI #detail .scard::before{content:"";position:static;grid-row:1 / span 6;align-self:center;width:104px;height:104px;border-radius:24px;
+  background:rgba(96,165,250,.20) url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2254%22%20height%3D%2254%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%208l-9-5-9%205v8l9%205%209-5z%22/%3E%3Cpath%20d%3D%22M3%208l9%205%209-5%22/%3E%3Cpath%20d%3D%22M12%2013v8%22/%3E%3C/svg%3E") no-repeat center/54px 54px;border:1px solid rgba(255,255,255,.18)}
+body.kdark #vKPI #detail .scard>*{grid-column:2}
+body.kdark #vKPI #detail .scard .sl{color:#DCD7F7;letter-spacing:0}
+body.kdark #vKPI #detail .scard .sv{color:#fff}
+body.kdark #vKPI #detail .scard:nth-child(4n)::before{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2254%22%20height%3D%2254%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M14%202H6a2%202%200%200%200-2%202v16a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2V8z%22/%3E%3Cpath%20d%3D%22M14%202v6h6%22/%3E%3Cpath%20d%3D%22M8%2013h8M8%2017h8%22/%3E%3C/svg%3E")}
+body.kdark #vKPI #detail .scard:has(>.sv.teal){background:linear-gradient(135deg,#0F6E68 0%,#0B4650 100%);border-color:rgba(45,212,191,.45)}
+body.kdark #vKPI #detail .scard:has(>.sv.teal)::before{background-color:rgba(45,212,191,.22);background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2254%22%20height%3D%2254%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229.5%22/%3E%3Cpath%20d%3D%22M8%2012.5l2.8%202.8L16.5%209.5%22/%3E%3C/svg%3E")}
+body.kdark #vKPI #detail .scard:has(>.sv .bad),body.kdark #vKPI #detail .scard:has(>.sv.rose){background:linear-gradient(135deg,#6A1D35 0%,#40173A 100%);border-color:rgba(251,113,133,.45)}
+body.kdark #vKPI #detail .scard:has(>.sv .bad)::before,body.kdark #vKPI #detail .scard:has(>.sv.rose)::before{background-color:rgba(251,113,133,.24);background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2254%22%20height%3D%2254%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229.5%22/%3E%3Cpath%20d%3D%22M12%207v5l3.5%202%22/%3E%3C/svg%3E")}
+body.kdark #vKPI #detail .scard:has(>.sv .bad) .sv,body.kdark #vKPI #detail .scard:has(>.sv.rose) .sv{color:#FF8FA3}
+body.kdark #vKPI #detail .scard:has(>.sv.amber){background:linear-gradient(135deg,#6B4510 0%,#3F2B16 100%);border-color:rgba(251,191,36,.45)}
+body.kdark #vKPI #detail .scard:has(>.sv.amber)::before{background-color:rgba(251,191,36,.22);background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2254%22%20height%3D%2254%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.3%203.9L1.8%2018a2%202%200%200%200%201.7%203h17a2%202%200%200%200%201.7-3L13.7%203.9a2%202%200%200%200-3.4%200z%22/%3E%3Cpath%20d%3D%22M12%209v4%22/%3E%3Cpath%20d%3D%22M12%2017h.01%22/%3E%3C/svg%3E")}
+body.kdark #vKPI #detail .scard:has(>.sv.amber) .sv{color:#FCD34D}
+body.kdark #vKPI #detail .scard:has(>.sv.plum){background:linear-gradient(135deg,#3B2A86 0%,#251D5C 100%);border-color:rgba(167,139,250,.5)}
+body.kdark #vKPI #detail .scard:has(>.sv.plum)::before{background-color:rgba(167,139,250,.24);background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2254%22%20height%3D%2254%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2020V10M10%2020V4M16%2020v-7M22%2020H2%22/%3E%3C/svg%3E")}
+body.kdark #vKPI #detail .scard:has(>.sv.mute){background:linear-gradient(135deg,#232A55 0%,#1A1F45 100%);border-color:rgba(255,255,255,.14)}
+body.kdark #vKPI #detail .scard:has(>.sv.mute) .sv{color:#C9C3EA}
+body.kdark #vKPI #detail .scard:has(>.sv.shp-min){background:linear-gradient(135deg,#6B5410 0%,#3F3216 100%);border-color:rgba(242,209,75,.5)}
+body.kdark #vKPI #detail .scard:has(>.sv.shp-max){background:linear-gradient(135deg,#6A1D35 0%,#40173A 100%);border-color:rgba(243,165,165,.5)}
+body.kdark #vKPI #detail .scard[class]::before{background-repeat:no-repeat;background-position:center;background-size:54px 54px}
+body.kdark #vKPI #detail .scard:has(>.sv)::before{background-repeat:no-repeat;background-position:center;background-size:54px 54px}
+/* หัวข้อ + แผงกราฟ */
+body.kdark #vKPI #detail h2.sec{color:#F3EFFB}
+body.kdark #vKPI #detail h2.sec::before{content:"";flex:none;width:12px;height:1.05em;border-radius:6px;
+  background:linear-gradient(180deg,#2DD4BF,#7C5BE6)}
+body.kdark #vKPI #detail h2.sec span{background:rgba(255,255,255,.10)}
+/* html2canvas วาดเงาเบลอของกล่องใหญ่เพี้ยน (เป็นแถบสี่เหลี่ยมทึบ) ตอนบันทึกรูป → ใช้กรอบแทนเงา */
+body.kdark #vKPI #detail .cpanel,body.kdark #vKPI #detail .ring,body.kdark #vKPI #detail .scard,
+body.kdark #vKPI #detail .fcacc,body.kdark #vKPI #detail .fcacc-panel{box-shadow:none}
+body.kdark #vKPI #detail .ring::after{display:none}
+/* v-kdark2: กล่องข้อมูลกลับเป็นพื้นสว่างอ่านง่าย (โทนเดียวกับการ์ดหน้าภาพรวม) — ตาราง/กราฟใช้สไตล์สว่างเดิม
+   การ์ดตัวเลข: พื้นอ่อนตามความหมายของค่า + ไอคอนในกรอบสีทึบ */
+body.kdark #vKPI #detail .scard{background:#F4F7FE;border:1px solid #D6E0F7}
+body.kdark #vKPI #detail .scard .sl{color:#4A4F66;font-weight:600}
+body.kdark #vKPI #detail .scard .sv{color:#1E1B33}
+body.kdark #vKPI #detail .scard::before{background-color:#3B6FD8;border:0}
+body.kdark #vKPI #detail .scard:has(>.sv.teal){background:#EEFAF5;border-color:#BFE9D7}
+body.kdark #vKPI #detail .scard:has(>.sv.teal)::before{background-color:#13A07C}
+body.kdark #vKPI #detail .scard:has(>.sv.teal) .sv{color:#0E8A6B}
+body.kdark #vKPI #detail .scard:has(>.sv .bad),body.kdark #vKPI #detail .scard:has(>.sv.rose){background:#FFF1F2;border-color:#F8C9CF}
+body.kdark #vKPI #detail .scard:has(>.sv .bad)::before,body.kdark #vKPI #detail .scard:has(>.sv.rose)::before{background-color:#E5484D}
+body.kdark #vKPI #detail .scard:has(>.sv .bad) .sv,body.kdark #vKPI #detail .scard:has(>.sv.rose) .sv{color:#D63340}
+body.kdark #vKPI #detail .scard:has(>.sv.amber){background:#FFF8EA;border-color:#F4DDAE}
+body.kdark #vKPI #detail .scard:has(>.sv.amber)::before{background-color:#E39B17}
+body.kdark #vKPI #detail .scard:has(>.sv.amber) .sv{color:#B7790A}
+body.kdark #vKPI #detail .scard:has(>.sv.plum){background:#F4F1FF;border-color:#DDD3FB}
+body.kdark #vKPI #detail .scard:has(>.sv.plum)::before{background-color:#7A55F0}
+body.kdark #vKPI #detail .scard:has(>.sv.plum) .sv{color:#6A43E0}
+body.kdark #vKPI #detail .scard:has(>.sv.mute){background:#F3F2F8;border-color:#DEDCEA}
+body.kdark #vKPI #detail .scard:has(>.sv.mute)::before{background-color:#8A85A8}
+body.kdark #vKPI #detail .scard:has(>.sv.mute) .sv{color:#6B6485}
+body.kdark #vKPI #detail .scard:has(>.sv.shp-min){background:#FFF8D6;border-color:#F2D14B}
+body.kdark #vKPI #detail .scard:has(>.sv.shp-max){background:#FDECEC;border-color:#F3A5A5}
+@media(max-width:1100px){body.kdark #vKPI #detail .ring{flex-direction:column;text-align:center}
+  body.kdark #vKPI #detail .ring .cap{align-items:center}}
+
+/* v-dockpres: โหมดพรีเซนต์ — ตาราง "รายละเอียดรายการ" หน้า Dock To Stock พอดีความกว้างจอ ไม่ต้องเลื่อนข้าง
+   (เดิมล็อกความกว้างขั้นต่ำ 2100px) · ตัดบรรทัดในช่องแทนการล้นออกขวา · ข้อมูลครบทุกคอลัมน์เหมือนเดิม */
+body.present #vKPI .tscroll:has(>table.dt.dock-dt){overflow-x:hidden!important}
+body.present #vKPI table.dt.dock-dt{min-width:0!important;width:100%!important;table-layout:fixed}
+body.present #vKPI table.dt.dock-dt th{white-space:normal!important;overflow-wrap:anywhere;line-height:1.25;padding:14px 10px;vertical-align:bottom}
+body.present #vKPI table.dt.dock-dt td{padding:14px 10px;white-space:normal!important;overflow-wrap:anywhere}
+body.present #vKPI table.dt.dock-dt td:nth-child(1),body.present #vKPI table.dt.dock-dt td:nth-child(n+5):nth-child(-n+11){overflow-wrap:normal;word-break:keep-all}
+body.present #vKPI table.dt.dock-dt .why{padding:4px 10px;overflow-wrap:normal;word-break:keep-all}
+body.present #vKPI table.dt.dock-dt th:nth-child(1){width:6%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(2){width:7%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(3){width:11%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(4){width:9%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(5){width:10%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(6){width:9%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(7){width:9%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(8){width:9%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(9){width:6%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(10){width:6%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(11){width:7%!important}
+body.present #vKPI table.dt.dock-dt th:nth-child(12){width:11%!important}
+
+/* v-rptfill2: เลือกช่วงเวลาแล้ว (กางทุกแถว) กล่องยังยืดลงจนสุดจอ ไม่เหลือพื้นที่ว่างด้านล่าง
+   รายการยาวกว่าจอ → หน้าเลื่อนลงตามปกติ (ไม่มีแถบเลื่อนในกล่อง) */
+body.rptfull:not(.cap):not(.mobile) #vRPT .wrap{min-height:calc(100vh / var(--z,1))!important;display:flex!important;flex-direction:column}
+body.rptfull:not(.cap):not(.mobile) #vRPT #shot{flex:1 0 auto!important;display:flex!important;flex-direction:column}
+body.rptfull:not(.cap):not(.mobile) #vRPT .panels{flex:1 0 auto!important;align-items:stretch!important}
+body.rptfull:not(.cap):not(.mobile) #vRPT .panel{display:flex!important;flex-direction:column}
+body.rptfull:not(.cap):not(.mobile) #vRPT .panel .scroll{flex:1 0 auto!important}
+
+/* v-rptround: มุมกล่องตารางรายงานประจำวันโค้งมนทุกมุม (เดิมหัวตาราง/แถวรวมเป็นสี่เหลี่ยมทับมุมโค้งของกล่อง) */
+#vRPT .panel .scroll{border-radius:22px}
+#vRPT .panel .scroll>table{border-collapse:separate;border-spacing:0}
+#vRPT .panel .scroll>table thead tr:first-child>th:first-child{border-top-left-radius:22px}
+#vRPT .panel .scroll>table thead tr:first-child>th:last-child{border-top-right-radius:22px}
+#vRPT .panel .scroll>.empty{border-radius:22px}
+/* กล่องตัดมุมตามขอบโค้ง (กล่องสูงเท่าเนื้อหาเสมอเวลากางทุกแถว จึงไม่มีอะไรถูกตัดหาย) */
+body.rptfull #vRPT .panel .scroll,#vRPT #shot.cap-full .panel .scroll{overflow:hidden!important}
+
+/* v-grtype: ป้ายประเภทสินค้า (รับสินค้าเข้าระบบ) */
+#vRPT .tag.t-rm{background:#D7F2E4;color:#0E6B4C}
+#vRPT .tag.t-pk{background:#FDEBD3;color:#9A5A0C}
+#vRPT .tag.t-fg{background:#E6E0FB;color:#5338B8}
 </style>
 </head>
 <body>
@@ -1160,8 +1704,7 @@ body.mobile .side .brand{padding-left:112px;padding-right:16px}body.mobile .side
 
       <div class="grp">วิธีการปฏิบัติงาน</div>
       <button data-view="kpi" data-sec="sop">เงื่อนไขการส่งสินค้าแต่ละ Platform</button>
-      <div class="subgrp">Mini SOP</div>
-      <button data-view="kpi" data-sec="msop" class="sub">Cancel และใบ Return</button>
+      <button data-view="kpi" data-sec="sopcr">Cancel และใบ Return</button>
 
       <div class="nav-sep"></div>
       <button data-view="kpi" data-sec="fc">Forecast</button>
@@ -1173,6 +1716,21 @@ body.mobile .side .brand{padding-left:112px;padding-right:16px}body.mobile .side
 <div class="wrap">
 
 <div class="toolbar">
+  <div class="rf" id="rfk">
+    <div class="rf-modes" role="tablist" aria-label="ช่วงเวลา">
+      <button type="button" role="tab" data-m="all">ดูทั้งหมด</button>
+      <button type="button" role="tab" data-m="year">รายปี</button>
+      <button type="button" role="tab" data-m="q">ไตรมาส</button>
+      <button type="button" role="tab" data-m="month">รายเดือน</button>
+      <button type="button" role="tab" data-m="week">รายสัปดาห์</button>
+      <button type="button" role="tab" data-m="day">รายวัน</button>
+    </div>
+    <div class="rf-nav">
+      <button type="button" class="rf-ar" id="rfkPrev" aria-label="ช่วงก่อนหน้า">&#8249;</button>
+      <select id="rfkSel" autocomplete="off" aria-label="เลือกช่วงเวลา"></select>
+      <button type="button" class="rf-ar" id="rfkNext" aria-label="ช่วงถัดไป">&#8250;</button>
+    </div>
+  </div>
   <div class="kf"><label>YEAR</label>
     <select id="kY" autocomplete="off"><option value="">All</option></select></div>
   <div class="kf"><label>MONTH</label>
@@ -1209,25 +1767,56 @@ body.mobile .side .brand{padding-left:112px;padding-right:16px}body.mobile .side
 
 <div id="kShot">
   <header>
-    <div>
+    <div class="khd"><span class="kico" id="kIco" aria-hidden="true"></span><div>
       <h1 id="kTitle">ภาพรวม KPI ทุกแผนก</h1>
       <div class="sub" id="kSub">Warehouse · Delivery · Admin</div>
-    </div>
+    </div></div>
     <div class="period">ข้อมูลของวันที่<b id="kPeriod">—</b><span class="kchip" id="kChip" style="display:none"></span>
       <div id="cmpNote" style="font-size:17px;margin-top:4px">เทียบกับเดือนก่อน</div></div>
   </header>
 
   <div id="ovBox">
-  <div class="top" id="top"></div>
+  <div class="ovtop" id="top"></div>
 
-  <h2 class="sec dept dept-wh"><b class="dept-name">Warehouse</b> <em id="whNote"></em><span></span></h2>
-  <div class="kpis" id="wh"></div>
+  <section class="dpanel dp-wh">
+    <div class="dhead"><span class="dic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg></span><b class="dname">Warehouse</b><em id="whNote"></em>
+      <span class="dsp"></span><span class="dscore" id="whScore"></span>
+      <button type="button" class="dgo" data-go="oos">ดูรายละเอียด <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+    <div class="kgrid" id="wh"></div>
+  </section>
 
-  <h2 class="sec dept dept-dl"><b class="dept-name">Delivery</b><span></span></h2>
-  <div class="kpis" id="dl"></div>
+  <div class="dpair">
+  <section class="dpanel dp-dl">
+    <div class="dhead"><span class="dic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h12v10H2z"/><path d="M14 9h4l4 4v3h-8"/><circle cx="6.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span><b class="dname">Delivery</b><em>Packing · Human Error</em>
+      <span class="dsp"></span><span class="dscore" id="dlScore"></span>
+      <button type="button" class="dgo" data-go="pack">ดูรายละเอียด <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+    <div class="kgrid one" id="dl"></div>
+  </section>
+  <section class="dpanel dp-ad">
+    <div class="dhead"><span class="dic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></span><b class="dname">Admin</b><em>การจัดส่ง (Shipping)</em>
+      <span class="dsp"></span><span class="dscore" id="adScore"></span>
+      <button type="button" class="dgo" data-go="ship">ดูรายละเอียด <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+    <div class="kgrid one" id="ad"></div>
+  </section>
+  </div>
 
-  <h2 class="sec dept dept-ad"><b class="dept-name">Admin</b><span></span></h2>
-  <div class="kpis" id="ad"></div>
+  <section class="ovtrend">
+    <div class="othead"><b>แนวโน้มรายสัปดาห์</b><em id="ovTrendNote"></em><span class="dsp"></span>
+      <label class="otsel"><span>เลือก KPI</span><select id="ovTrendSel" autocomplete="off">
+        <!-- ไม่ใช้ optgroup: หัวกลุ่มของ dropdown บน Mac แสดงเป็นตัวจางๆ ดูเหมือนบั๊ก → ใส่ชื่อแผนกนำหน้าแทน -->
+        <option value="dock">Warehouse · On-Time รวม (รับเข้า+จัดเก็บ)</option>
+        <option value="oos">Warehouse · Out of Stock</option>
+        <option value="sv">Warehouse · Stock Variance</option>
+        <option value="perr">Warehouse · Human Error On Picking</option>
+        <option value="ship">Admin · การจัดส่ง (Shipping)</option>
+      </select></label></div>
+    <div class="otbox"><canvas id="c_ovTrend"></canvas></div>
+  </section>
+
+  <div class="ovbot">
+    <section class="opanel" id="ovFail"></section>
+    <section class="opanel" id="ovPass"></section>
+  </div>
 
   </div><!-- /ovBox -->
   <div id="detail" hidden></div>
@@ -1248,6 +1837,21 @@ body.mobile .side .brand{padding-left:112px;padding-right:16px}body.mobile .side
 <button class="btn ghost exit" id="kExitPresent">ออกจากโหมดพรีเซนต์ (Esc)</button>
 
 <div class="toolbar">
+  <div class="rf" id="rf">
+    <div class="rf-modes" role="tablist" aria-label="ช่วงเวลา">
+      <button type="button" role="tab" data-m="all">ดูทั้งหมด</button>
+      <button type="button" role="tab" data-m="year">รายปี</button>
+      <button type="button" role="tab" data-m="q">ไตรมาส</button>
+      <button type="button" role="tab" data-m="month">รายเดือน</button>
+      <button type="button" role="tab" data-m="week">รายสัปดาห์</button>
+      <button type="button" role="tab" data-m="day">รายวัน</button>
+    </div>
+    <div class="rf-nav">
+      <button type="button" class="rf-ar" id="rfPrev" aria-label="ช่วงก่อนหน้า">&#8249;</button>
+      <select id="rfSel" autocomplete="off" aria-label="เลือกช่วงเวลา"></select>
+      <button type="button" class="rf-ar" id="rfNext" aria-label="ช่วงถัดไป">&#8250;</button>
+    </div>
+  </div>
   <div class="kf"><label>YEAR</label>
     <select id="fy" autocomplete="off"><option value="">All</option></select></div>
   <div class="kf"><label>MONTH</label>
@@ -1286,16 +1890,21 @@ body.mobile .side .brand{padding-left:112px;padding-right:16px}body.mobile .side
 
 <div id="shot">
   <header>
-    <div>
-      <h1 id="title">รายงานทีม Delivery</h1>
-      <div class="sub" id="subtitle"></div>
+    <div class="rttl">
+      <span class="rico" id="rIco" aria-hidden="true"></span>
+      <div class="rtx">
+        <h1 id="title">รายงานทีม Delivery</h1>
+        <div class="sub" id="subtitle"></div>
+      </div>
     </div>
-    <div class="period">ข้อมูลของวันที่<b id="period">—</b><span class="chip" id="chip" style="display:none"></span></div>
+    <div class="period"><div class="ptop"><small>ข้อมูลของวันที่</small><span class="chip" id="chip" style="display:none"></span></div>
+      <div class="prow"><span class="pcal" id="rCal" aria-hidden="true"></span><b id="period">—</b></div></div>
   </header>
   <div class="kpis" id="kpis"></div>
   <div class="panels" id="panels"></div>
   <div class="foot">
-    <span id="source"></span><span id="ts">—</span>
+    <div class="fsrc"><span class="fic" id="rDb" aria-hidden="true"></span><span id="source"></span></div>
+    <div class="fts"><span class="fic2" id="rClk" aria-hidden="true"></span><span id="ts">—</span></div>
   </div>
 </div>
 
@@ -1720,17 +2329,21 @@ function kpiCard(o){
   /* v-2col: ห่อหัว+การ์ดไว้ใน .kcell เพื่อวางบรรทัดละ 2 KPI */
   return `<div class="kcell">${kpiCardInner(o)}</div>`;
 }
+/* v-ov2: การ์ด KPI แบบใหม่ (ไอคอน · ชื่อ · Target · ค่า + ป้าย · เทียบช่วงก่อน · ฐานการคำนวณ) */
+const OVI={"box": "<path d=\"M21 8l-9-5-9 5 9 5 9-5z\"/><path d=\"M3 8v8l9 5 9-5V8\"/><path d=\"M12 13v8\"/>", "cube": "<path d=\"M12 2l9 5v10l-9 5-9-5V7z\"/><path d=\"M3 7l9 5 9-5\"/><path d=\"M12 12v10\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "list": "<rect x=\"5\" y=\"3\" width=\"14\" height=\"18\" rx=\"2\"/><path d=\"M9 8h6M9 12h6M9 16h4\"/>", "truck": "<path d=\"M2 6h12v10H2z\"/><path d=\"M14 9h4l4 4v3h-8\"/><circle cx=\"6.5\" cy=\"18\" r=\"2\"/><circle cx=\"17.5\" cy=\"18\" r=\"2\"/>", "alert": "<path d=\"M12 3l10 18H2z\"/><path d=\"M12 10v4.5M12 17.6v.1\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4 3.6-6 8-6s8 2 8 6\"/>", "wh": "<path d=\"M3 21V9l9-5 9 5v12\"/><path d=\"M7 21v-8h10v8\"/><path d=\"M7 17h10\"/>", "bars": "<path d=\"M5 20V11M11 20V5M17 20v-6M3 20h18\"/>", "cal": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M3 10h18M8 3v4M16 3v4\"/>", "hand": "<path d=\"M7 11V5.5a1.5 1.5 0 0 1 3 0V11M10 10V4a1.5 1.5 0 0 1 3 0v6M13 10V5.5a1.5 1.5 0 0 1 3 0V12M16 9.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2.6-4.4a1.5 1.5 0 0 1 2.6-1.5L7 14\"/>", "refresh": "<path d=\"M20 11a8 8 0 0 0-14.3-4.4L4 8\"/><path d=\"M4 3v5h5\"/><path d=\"M4 13a8 8 0 0 0 14.3 4.4L20 16\"/><path d=\"M20 21v-5h-5\"/>", "pack": "<path d=\"M3 7l9-4 9 4v10l-9 4-9-4z\"/><path d=\"M7.5 5l9 4v4\"/>", "send": "<path d=\"M22 2L11 13\"/><path d=\"M22 2l-7 20-4-9-9-4z\"/>", "ret": "<path d=\"M9 14L4 9l5-5\"/><path d=\"M4 9h11a5 5 0 0 1 0 10h-3\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "trend": "<path d=\"M3 17l6-6 4 4 8-8\"/><path d=\"M15 7h6v6\"/>", "check": "<path d=\"M5 12.5l4.5 4.5L19 7\"/>", "grid": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "err": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7.5v5.5M12 16.4v.1\"/>", "arrow": "<path d=\"M5 12h14M13 6l6 6-6 6\"/>"};
+const ovIcon=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${OVI[k]||OVI.bars}</svg>`;
 function kpiCardInner(o){
-  const num=o.n!=null?`<span class="no">${o.n}</span>`:'';
-  const head=`<div class="kpi-head">${num}<b>${o.l}</b><span>${o.t}</span></div>`;
-  if(o.wait)return head+`<div class="kpi wait">
-    <div class="row"><span class="waitstat">รอข้อมูล</span><span class="badge wait">ยังไม่ได้เชื่อมชีต</span></div>
-    ${o.note?`<div class="note-corner">${esc(o.note)}</div>`:''}</div>`;
-  const ok=o.pass;
-  return head+`<div class="kpi ${ok?'pass':'fail'}">
-    <div class="row"><div class="v">${o.disp}</div></div>
-    <span class="badge ${ok?'pass':'fail'}">${ok?'ผ่านเกณฑ์':'ต่ำกว่าเกณฑ์'}</span>
-    ${o.delta||''}</div>`;
+  const st=o.wait?'wait':o.info?'info':(o.pass?'pass':'fail');
+  const badge=o.wait?'<span class="kbadge wait">รอข้อมูล</span>'
+    :o.info?'<span class="kbadge info">ยังไม่มีเป้า KPI</span>'
+    :o.pass?`<span class="kbadge pass">${ovIcon('check')}ผ่านเกณฑ์</span>`
+           :`<span class="kbadge fail">${ovIcon('alert')}ต่ำกว่าเกณฑ์</span>`;
+  return `<div class="kpi2 ${st}"><div class="kic">${ovIcon(o.ic)}</div><div class="kbody">
+    <div class="kt">${esc(o.l)}</div><div class="ktg">${esc(o.t)}</div>
+    ${o.wait
+      ?`<div class="kv"><span class="v">—</span>${badge}</div>${o.note?`<div class="knote">${esc(o.note)}</div>`:''}`
+      :`<div class="kv"><span class="v">${o.disp}</span>${badge}</div>${o.delta||''}${o.base?`<div class="kbase">${o.base}</div>`:''}`}
+  </div></div>`;
 }
 
 /* ---------- หน้าย่อยของ Warehouse ---------- */
@@ -1738,6 +2351,9 @@ const S_REPL='1QenNK8fW03G5bfQYStkufPa8RybxuK-W9d0ktz-mr4Y';
 const CH={};
 let CFZ=1.6;                     /* ตัวคูณขนาดฟอนต์ในกราฟ (โหมดพรีเซนต์ = 1.6) */
 const cf=n=>Math.round(n*CFZ);
+/* v-lbl: ตัวเลขบนกราฟ (ป้ายบนแท่ง/จุด) เล็กลง ไม่ให้ล้นข้ามเส้นแกนตั้ง-แกนนอน — ปรับตัวเลขนี้ตัวเดียวถ้าอยากใหญ่/เล็กลง */
+const LBLK=0.72;
+const cfl=n=>Math.round(n*CFZ*LBLK);
 const C={teal:'#0D9488',tealD:'#0F766E',plum:'#6366F1',plumD:'#4F46E5',
          amber:'#D89A2E',rose:'#EF4444',good:'#10B981',mute:'#64748B'};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1827,7 +2443,7 @@ const barPct={id:'barPct',
       x.beginPath();x.moveTo(ch.chartArea.left,y);x.lineTo(ch.chartArea.right,y);x.stroke();
       x.setLineDash([]);
     }
-    x.font="bold "+cf(op.size||29)+"px 'Baloo 2'";x.fillStyle='#1E1B33';x.textAlign='center';x.textBaseline='bottom';
+    x.font="bold "+cfl(op.size||29)+"px 'Baloo 2'";x.fillStyle='#1E1B33';x.textAlign='center';x.textBaseline='bottom';
     ch.data.datasets.forEach((ds,di)=>{
       const m=ch.getDatasetMeta(di); if(m.hidden)return;
       let lastR=-1e9;                       /* ขอบขวาของป้ายก่อนหน้า — กันตัวเลขทับกัน */
@@ -1851,7 +2467,7 @@ const linePt={id:'linePt',
     if(!op||!op.display)return;
     const x=ch.ctx, area=ch.chartArea;
     x.save();
-    x.font='bold '+cf(30)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
+    x.font='bold '+cfl(30)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='bottom';
     ch.data.datasets.forEach((ds,di)=>{
       const m=ch.getDatasetMeta(di); if(m.hidden)return;
       /* แสดงทุกจุด — จุดที่เลขจะทับกัน ให้สลับไปวางใต้จุดแทน */
@@ -1868,13 +2484,56 @@ const linePt={id:'linePt',
         }
         placed.push({x:pt.x,y,w});
         x.lineJoin='round'; x.lineWidth=5; x.strokeStyle='rgba(255,255,255,.95)';
-        x.strokeText(t,pt.x,y);
-        x.fillStyle='#1E1B33'; x.fillText(t,pt.x,y);
+        const lx=Math.min(area.right-w/2-2,Math.max(area.left+w/2+4,pt.x));   /* ป้ายอยู่ในกรอบกราฟเสมอ ไม่ทับแกน */
+        x.strokeText(t,lx,y);
+        x.fillStyle='#1E1B33'; x.fillText(t,lx,y);
       });
     });
     x.restore();
   }};
 if(window.Chart&&!Chart.registry.plugins.get('barPct'))Chart.register(barPct);
+/* ===== v-pal1: โทนสีกราฟของหน้าย่อยให้เข้าชุดกับหน้า "ภาพรวม KPI ทุกแผนก" =====
+   เปลี่ยนเฉพาะ "สี" ของเส้น/แท่ง/จุด ตอนสร้างกราฟ — ไม่แตะข้อมูล วิธีคิด ค่าเป้า หรือจำนวนสิ่งที่แสดง
+   ความหมายของสีคงเดิม: เขียว = ผ่าน/ปกติ · แดง = ไม่ผ่าน · ม่วง = ข้อมูลรอง · ส้ม = เตือน
+   ใช้เฉพาะกราฟในหน้า KPI (#vKPI) — หน้า "รายงานประจำวัน" คงสีเดิม */
+const OV_PAL=(()=>{
+  const RGB={'13,148,136':'34,197,154','15,118,110':'14,156,118','16,185,129':'34,197,154',
+             '99,102,241':'139,108,255','79,70,229':'122,85,240',
+             '239,68,68':'242,84,91','220,38,38':'229,72,77',
+             '216,154,46':'245,181,63','180,83,9':'226,140,40'};
+  const LINE='155,123,255';                       /* ม่วงของกราฟแนวโน้มหน้าภาพรวม */
+  const TEAL=new Set(['13,148,136','15,118,110']); /* เส้นหลักสีเขียวอมฟ้าเดิม (teal / tealD) → ม่วง */
+  const hex2=h=>{h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16)).join(',');};
+  const toHex=t=>'#'+t.split(',').map(n=>(+n).toString(16).padStart(2,'0')).join('').toUpperCase();
+  const mapStr=(v,line)=>{
+    if(typeof v!=='string')return v;
+    const t=v.trim();
+    let m=t.match(/^#([0-9a-f]{6})$/i);
+    if(m){const k=hex2(t); const r=(line&&TEAL.has(k))?LINE:RGB[k]; return r?toHex(r):v;}
+    m=t.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/i);
+    if(m){const k=m[1]+','+m[2]+','+m[3]; const r=(line&&TEAL.has(k))?LINE:RGB[k];
+      return r?(m[4]!=null?`rgba(${r},${m[4]})`:`rgb(${r})`):v;}
+    return v;
+  };
+  const mapAny=(v,line)=>Array.isArray(v)?v.map(x=>mapStr(x,line))
+    :(typeof v==='function'?function(){return mapAny(v.apply(this,arguments),line);}:mapStr(v,line));
+  const KEYS_LINE=['borderColor','backgroundColor','pointBackgroundColor','pointBorderColor']; /* เส้น พื้นใต้เส้น จุด (เฉพาะสีเดียวทั้งเส้น — ถ้าเป็นรายจุด ผ่าน/ไม่ผ่าน ยังคงเขียว/แดง) */
+  const KEYS=['backgroundColor','borderColor','pointBackgroundColor','pointBorderColor',
+              'hoverBackgroundColor','hoverBorderColor','pointHoverBackgroundColor'];
+  return {id:'ovPal',beforeInit(ch){
+    try{
+      if(!ch.canvas||!ch.canvas.closest||!ch.canvas.closest('#vKPI #detail'))return;
+      const baseType=ch.config.type;
+      (ch.config.data.datasets||[]).forEach(ds=>{
+        const isLine=(ds.type||baseType)==='line';
+        KEYS.forEach(k=>{ if(ds[k]==null)return;
+          const lineMain=isLine&&KEYS_LINE.includes(k)&&!Array.isArray(ds[k]);
+          ds[k]=mapAny(ds[k],lineMain); });
+      });
+    }catch(e){}
+  }};
+})();
+if(window.Chart&&!Chart.registry.plugins.get('ovPal'))Chart.register(OV_PAL);
 /* ยอดรวมของแต่ละแท่งในโหมดซ้อน — วางไว้เหนือแท่งบนสุด */
 const stackTot={id:'stackTot',
   beforeLayout(ch,a,op){ if(!op||!op.display)return;
@@ -1884,7 +2543,7 @@ const stackTot={id:'stackTot',
   afterDatasetsDraw(ch,a,op){
     if(!op||!op.display)return;
     const x=ch.ctx; x.save();
-    x.font='bold '+cf(op.size||26)+'px "Baloo 2"'; x.fillStyle='#1E1B33';
+    x.font='bold '+cfl(op.size||26)+'px "Baloo 2"'; x.fillStyle='#1E1B33';
     x.textAlign='center'; x.textBaseline='bottom';
     let lastR=-1e9;
     (ch.data.labels||[]).forEach((_,i)=>{
@@ -1936,7 +2595,7 @@ const pieLbl={id:'pieLbl',
     const ds=ch.data.datasets[0]; if(!ds)return;
     const m=ch.getDatasetMeta(0), x=ch.ctx;
     x.save();
-    x.font='bold '+cf(op.size||30)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='middle';
+    x.font='bold '+cfl(op.size||30)+'px "Baloo 2"'; x.textAlign='center'; x.textBaseline='middle';
     m.data.forEach((arc,i)=>{
       const v=Number(ds.data[i]);
       if(!Number.isFinite(v)||v<min||arc.hidden)return;
@@ -1961,6 +2620,28 @@ const pieLbl={id:'pieLbl',
   }};
 if(window.Chart&&!Chart.registry.plugins.get('linePt'))Chart.register(linePt);
 if(window.Chart&&!Chart.registry.plugins.get('pieLbl'))Chart.register(pieLbl);
+
+/* ===== v-kdark: กราฟในหน้าย่อยธีมเข้ม — เปลี่ยนเฉพาะสีตัวหนังสือ/เส้นตาราง ให้อ่านออกบนพื้นเข้ม ไม่แตะข้อมูล ===== */
+const KD_TXT={'#1e1b33':'#EEEAFB','#64748b':'#B7B0E0','#475569':'#C9C3EA','#6b6485':'#B7B0E0','#22252c':'#EEEAFB'};
+const kdCv=cv=>false;   /* v-kdark2: แผงกราฟกลับเป็นพื้นสว่าง → ใช้สีตัวหนังสือเดิมของกราฟ */
+const kdOn=ch=>kdCv(ch&&ch.canvas);
+const kDark={id:'kDark',
+  beforeInit(ch){ const x=ch.ctx; if(!x||x.__kd)return; x.__kd=1; const f=x.fillText;
+    x.fillText=function(...a){ const fs=String(this.fillStyle).toLowerCase(), m=KD_TXT[fs];
+      if(m&&kdCv(this.canvas)){ this.fillStyle=m; f.apply(this,a); this.fillStyle=fs; } else f.apply(this,a); };
+    const fr=x.fillRect;   /* พื้นขาวรองตัวเลขบนกราฟ → พื้นเข้ม */
+    x.fillRect=function(...a){ const fs=String(this.fillStyle).toLowerCase();
+      if(kdCv(this.canvas)&&/^(#ffffff|rgba\(255, 255, 255)/.test(fs)){ this.fillStyle='rgba(18,24,57,.92)'; fr.apply(this,a); this.fillStyle=fs; }
+      else fr.apply(this,a); };
+    const st=x.strokeText;   /* ขอบขาวรอบตัวเลขบนกราฟ → ขอบสีพื้นเข้ม */
+    x.strokeText=function(...a){ const ss=String(this.strokeStyle).toLowerCase();
+      if(kdCv(this.canvas)&&/^(#ffffff|rgba\(255, 255, 255)/.test(ss)){ this.strokeStyle='rgba(18,24,57,.92)'; st.apply(this,a); this.strokeStyle=ss; }
+      else st.apply(this,a); }; },
+  beforeUpdate(ch){ if(!kdOn(ch))return; const sc=(ch.config.options&&ch.config.options.scales)||{};
+    Object.values(sc).forEach(s=>{ if(!s)return; s.grid=s.grid||{};
+      if(typeof s.grid.color!=='function')s.grid.color='rgba(255,255,255,.08)';
+      s.border=Object.assign({},s.border||{},{color:'rgba(255,255,255,.14)'}); }); }};
+if(window.Chart&&!Chart.registry.plugins.get('kDark'))Chart.register(kDark);
 
 function ringHTML(pct_,target,caption){
   const CIRC=565.48;
@@ -2260,6 +2941,7 @@ function clkHandle(ch,key,i){
     renderKPI(); return;
   }
   /* แกนเวลา */
+  QSEL='';
   let m;
   if((m=lbl.match(/^W(\d+)$/))){
     const w=String(parseInt(m[1]));
@@ -2280,7 +2962,7 @@ function clkHandle(ch,key,i){
 const clickF={id:'clickF',
   afterEvent(ch,args){
     const e=args.event; if(!e||(e.type!=='click'&&e.type!=='mousemove'))return;
-    if(SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='fc'||SEC==='sop'||SEC==='msop'||!document.getElementById('vKPI')||ch.options.onClick)return;
+    if(SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='fc'||SEC==='sop'||SEC==='sopcr'||!document.getElementById('vKPI')||ch.options.onClick)return;
     if(ch.canvas&&!ch.canvas.closest('#vKPI'))return;
     /* v-clk2: แท่ง/เส้น = คลิกตรงคอลัมน์ไหนก็ได้ (แท่งเตี้ยๆ อย่าง 0.05% ก็กดได้) · วงกลม = ต้องโดนชิ้น */
     const round=/pie|doughnut/.test(ch.config.type);
@@ -2475,6 +3157,7 @@ function secDiff(){
   const all0=DIFF.filter(r=>{
     if(!r.date)return false;
     if(fYear()&&r.date.slice(0,4)!==fYear())return false;
+    if(!qOK(r.date))return false;
     if(DAYSEL)return r.date===DAYSEL;
     if(!weekOK(r.week))return false;
     if(fMonth()&&midx(r.date)!==MONTH_ORDER.indexOf(fMonth()))return false;
@@ -2608,9 +3291,10 @@ const diffLineLbl={id:'diffLineLbl',
       const y=cands.find(yy=>yy-fs>=topLim&&yy<=ar.bottom&&!hit({x1:pt.x-w/2-3,x2:pt.x+w/2+3,y1:yy-fs,y2:yy}));
       if(y==null)return;      /* ไม่มีที่ว่างจริงๆ ข้ามป้ายนั้น (ดูค่าได้จาก tooltip/ตารางด้านล่าง) */
       boxes.push({x1:pt.x-w/2-3,x2:pt.x+w/2+3,y1:y-fs,y2:y});
-      x.lineJoin='round'; x.lineWidth=4; x.strokeStyle='rgba(255,255,255,.95)'; x.strokeText(t,pt.x,y);
+      const lx=Math.min(ar.right-w/2-2,Math.max(ar.left+w/2+4,pt.x));   /* v-lbl: ไม่ทับแกนตั้ง */
+      x.lineJoin='round'; x.lineWidth=4; x.strokeStyle='rgba(255,255,255,.95)'; x.strokeText(t,lx,y);
       x.fillStyle=v>=(op.target||98)?'#0F766E':'#DC2626';
-      x.fillText(t,pt.x,y);
+      x.fillText(t,lx,y);
     });
     x.restore();
   }};
@@ -2722,6 +3406,7 @@ function secDock(){
     const ym=dockWkYM(r);
     if(!ym)return !fYear();
     if(fYear()&&ym.slice(0,4)!==fYear())return false;
+    if(!qOK(ym))return false;
     const selYM=fYear()&&fMonth()?fYear()+'-'+String(MONTH_ORDER.indexOf(fMonth())+1).padStart(2,'0'):'';
     if(selYM&&ym!==selYM)return false;
     return true;
@@ -3283,9 +3968,10 @@ function secForecast(){
   const lastData=yrRows.reduce((m,r)=>r.date>m?r.date:m,'');
   let asOf='';
   if(DAYSEL)asOf=DAYSEL;
-  else if(WKSEL.length||fMonth()){
+  else if(WKSEL.length||fMonth()||QSEL){
     const mi=fMonth()?MONTH_ORDER.indexOf(fMonth()):-1;
     yrRows.forEach(r=>{
+      if(!qOK(r.date))return;
       if(WKSEL.length&&!weekOK(r.week))return;
       if(mi>=0&&+r.date.slice(5,7)-1!==mi)return;
       if(r.date>asOf)asOf=r.date;
@@ -3660,7 +4346,7 @@ const fcPtLbl={id:'fcPtLbl',
     if(!op||!op.display)return;
     const x=ch.ctx, m=ch.getDatasetMeta(1); if(!m||m.hidden)return;
     const ds=ch.data.datasets[1];
-    x.font='bold '+cf(24)+'px "Baloo 2"'; x.textBaseline='bottom';
+    x.font='bold '+cfl(24)+'px "Baloo 2"'; x.textBaseline='bottom';
     const step=Math.round(28*CFZ);
     const lastIdx=m.data.length-1;
     let placed=[];   /* กันป้ายทับกัน — จุดพยากรณ์ชิดกันตอนดูรายวัน เลยไล่ซ้อนขึ้นเป็นชั้นแทนวางระดับเดียวกันหมด */
@@ -4010,28 +4696,38 @@ function drawSOP(){
   f.dataset.ready='1';
 }
 
-/* ================= วิธีการปฏิบัติงาน · Mini SOP: Cancel และใบ Return =================
-   ฝังไฟล์ Mini SOP ผ่าน iframe แบบเดียวกับหน้า Return/Cancel (คนละ CSS scope)
-   ไฟล์ต้นฉบับออกแบบไว้อ่านบนมือถือ/พิมพ์ A5 จึงขยายด้วย zoom ฝั่งแดชบอร์ด ไม่แก้ไฟล์เอง
-   ความสูง iframe ปรับตามเนื้อหาจริงอัตโนมัติ */
-const MSOP_ZOOM=1.9;   /* ย่อ/ขยายทั้งหน้า Mini SOP ที่ตัวเลขนี้ตัวเดียว */
-function secMSOP(){
-  return '<div class="sopwrap"><iframe id="msopFrame" class="sopframe" title="Mini SOP: Cancel และใบ Return"></iframe></div>';
+/* ================= วิธีการปฏิบัติงาน · Mini SOP: การ Cancel และใบ Return (ไฟล์แยก ฝังผ่าน iframe) =================
+   ไฟล์ต้นฉบับล็อกความกว้างไว้ 760px (main) → ปลดออกให้เนื้อหากินเต็มความกว้างของพื้นที่ ไม่เหลือที่ว่างด้านข้าง
+   ความสูงกรอบปรับตามเนื้อหาจริงเสมอ (ResizeObserver) เลื่อนดูทั้งหน้าได้ ไม่มีแถบเลื่อนซ้อนในกรอบ */
+const SOPCR_TEXT=0.0092;   /* v-sopcr3: ขยายกลับขึ้น ~23% (0.0075 เล็กไป · 0.011 ใหญ่ไป) */ //   /* ขนาดตัวหนังสือ = สัดส่วนของความกว้างกรอบ (ตัวหนังสือโตตามจอ) — ปรับตัวเลขนี้ตัวเดียวถ้าอยากใหญ่/เล็กลง */
+function secSopCR(){
+  return '<div class="sopwrap"><iframe id="sopcrFrame" class="sopframe" title="Mini SOP: การ Cancel และใบ Return" scrolling="no"></iframe></div>';
 }
-function drawMSOP(){
-  const f=document.getElementById('msopFrame'), t=document.getElementById('msopDoc');
+function drawSopCR(){
+  const f=document.getElementById('sopcrFrame'), t=document.getElementById('sopcrDoc');
   if(!f||!t)return;
   const fit=()=>{ try{
     const d=f.contentDocument; if(!d||!d.body)return;
-    f.style.height=Math.ceil(d.documentElement.scrollHeight)+'px';
+    const px=Math.max(18,SOPCR_TEXT*f.clientWidth).toFixed(1)+'px';
+    if(d.documentElement.style.fontSize!==px)d.documentElement.style.setProperty('font-size',px,'important');
+    f.style.setProperty('height',Math.ceil(d.documentElement.scrollHeight)+'px','important');
   }catch(e){} };
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
-  doc=doc.replace('</head>','<style>main{max-width:1100px!important;zoom:'+MSOP_ZOOM+'}</style></head>');
+  doc=doc.replace('</head>','<style id="sopcrFill">'
+    +'html{overflow:hidden!important}'
+    +'body{overflow:hidden!important}'
+    +'main{max-width:none!important;width:100%!important;margin:0!important;padding:28px 2.2% 48px!important;box-sizing:border-box}'
+    +'.grid,.fork{gap:18px!important}'
+    /* แผนผัง Flow โตตามความกว้างจอจนตัวใหญ่เกิน → จำกัดให้ตัวหนังสือในแผนผังพอ ๆ กับเนื้อหา แล้ววางกลาง */
+    +'main>svg{max-width:62em!important;margin-left:auto!important;margin-right:auto!important}'
+    +'table{font-size:.95rem!important}'
+    +'</style></head>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800);
     try{ const d=f.contentDocument; if(d&&window.ResizeObserver) new ResizeObserver(fit).observe(d.body); }catch(e){}
   });
+  window.addEventListener('resize',fit);
   f.srcdoc=doc;
   f.dataset.ready='1';
 }
@@ -4277,6 +4973,7 @@ function secShip(){
   const shipDateOK=r=>{
     if(!r.day)return false;
     if(fYear()&&r.day.slice(0,4)!==fYear())return false;
+    if(!qOK(r.day))return false;
     if(DAYSEL)return r.day===DAYSEL;
     if(WKSEL.length&&!weekOK(isoWeek(r.day)))return false;
     if(shipYM&&r.day.slice(0,7)!==shipYM)return false;
@@ -4630,6 +5327,7 @@ function secPack(){
   const packDateOK=r=>{
     if(!r.d||!r.d.fd)return false;
     if(fYear()&&r.d.y!==fYear())return false;
+    if(!qOK(r.d.fd))return false;
     if(DAYSEL)return r.d.fd===DAYSEL;
     if(WKSEL.length&&!weekOK(isoWeek(r.d.fd)))return false;
     if(packYM&&r.d.m!==packYM)return false;
@@ -4911,6 +5609,7 @@ function secPick(){
   const pickDateOK=d=>{
     if(!d)return false;
     if(fYear()&&d.slice(0,4)!==fYear())return false;
+    if(!qOK(d))return false;
     if(DAYSEL)return d===DAYSEL;
     if(WKSEL.length&&!weekOK(isoWeek(d)))return false;
     if(pickYM&&d.slice(0,7)!==pickYM)return false;
@@ -5276,7 +5975,7 @@ const barEnd={id:'barEnd',
     if(!op||!op.display)return;
     const x=ch.ctx, m=ch.getDatasetMeta(0);
     x.save(); x.textAlign='left'; x.textBaseline='middle';
-    x.font='bold '+cf(24)+'px "Baloo 2"';
+    x.font='bold '+cfl(24)+'px "Baloo 2"';
     m.data.forEach((bar,i)=>{
       const t=op.pctOnly?op.pcts[i]+'%':fmt(op.vals[i])+'  ·  '+op.pcts[i]+'%';
       x.fillStyle='#1E1B33';
@@ -5388,10 +6087,11 @@ function secReturn(){
   const retYM=fYear()&&getMonthNumRet()?fYear()+'-'+getMonthNumRet():'';
   const retDateKey=v=>{const ms=dparse(v); return isNaN(ms)?'':new Date(ms).toISOString().slice(0,10);};
   const retDateOK=r=>{
-    if(!fYear()&&!fMonth()&&!DAYSEL)return true;   /* ไม่ได้กรองวันที่ = ผ่านหมด เหมือนเดิม */
+    if(!fYear()&&!fMonth()&&!DAYSEL&&!QSEL)return true;   /* ไม่ได้กรองวันที่ = ผ่านหมด เหมือนเดิม */
     const dk=retDateKey(r.d);
     if(!dk)return false;
     if(fYear()&&dk.slice(0,4)!==fYear())return false;
+    if(!qOK(dk))return false;
     if(DAYSEL)return dk===DAYSEL;
     if(retYM&&dk.slice(0,7)!==retYM)return false;
     return true;
@@ -5632,6 +6332,7 @@ function secPickErr(){
   const dOK=d=>{
     if(!d)return false;
     if(fYear()&&d.slice(0,4)!==fYear())return false;
+    if(!qOK(d))return false;
     if(DAYSEL)return d===DAYSEL;
     if(WKSEL.length&&!weekOK(isoWeek(d)))return false;
     if(ym&&d.slice(0,7)!==ym)return false;
@@ -5973,7 +6674,7 @@ el('detail').addEventListener('click',async e=>{
   }
   if(k==='__w'){                       /* ชิปสัปดาห์ในหน้า Return — กดซ้ำเพื่อยกเลิก */
     WKSEL=WKSEL.includes(v)?WKSEL.filter(x=>x!==v):[...WKSEL,v];
-    DAYSEL=''; calYM=null; fillFiltersKPI(); renderKPI(); return;
+    QSEL=''; DAYSEL=''; calYM=null; fillFiltersKPI(); renderKPI(); return;
   }
   SUBF[k]=v;
   if(k==='ret_t'){                     /* เปลี่ยนหัวข้อ = อาจต้องโหลดแท็บใหม่ */
@@ -5989,6 +6690,7 @@ el('detail').addEventListener('click',async e=>{
 /* v-full: เลือกฟิลเตอร์ใดๆ = ตารางแสดงครบทุกแถว ไม่มีสกรอลล์ · ภาพรวม = สูง 10 แถวแล้วค่อยเลื่อน (นำกลับมาจากเวอร์ชัน 17) */
 function kpiFiltered(){
   if(tGrp()!=='month')return true;
+  if(QSEL)return true;   /* v-rfk: เลือกไตรมาส = เลือกตัวกรอง → กางทุกแถว */
   if(Object.keys(catF()).length)return true;   /* คลิกกราฟเพื่อกรอง */
   const box=el('detail'); if(!box)return false;
   if(box.querySelector('button[data-sf][data-multi].on:not([data-v=""])'))return true;
@@ -5996,7 +6698,7 @@ function kpiFiltered(){
   return false;
 }
 function fitScrolls(){
-  if(SEC==='fc'||SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='msop')return;
+  if(SEC==='fc'||SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='sopcr')return;
   const full=kpiFiltered();
   document.querySelectorAll('#detail .tscroll').forEach(d=>{
     const rows=d.querySelectorAll(':scope > table > tbody > tr');
@@ -6030,7 +6732,7 @@ function renderKPI(){
                pick:['Picking','Warehouse · ภาพรวมการหยิบสินค้ารายคน ผลงาน และเวลาหนาแน่น'],
                perr:['KPI Human Error On Picking <0.05%','Warehouse · หยิบผิด ÷ จำนวนที่หยิบทั้งหมด · เป้า < 0.05%'],
                pack:['Packing','Delivery · ผลงานพนักงานแพ็ค สถานี และเวลาหนาแน่น'],
-               msop:['Mini SOP: Cancel และใบ Return','วิธีการปฏิบัติงาน · แยกเคส Cancel / Return และขั้นตอนทำใบ Return'],
+               sopcr:['Mini SOP: การ Cancel และใบ Return','วิธีการปฏิบัติงาน · Cancel (int) และ Return (RT)'],
                sop:['เงื่อนไขการส่งสินค้าแต่ละ Platform','วิธีการปฏิบัติงาน · รอบตัดคำสั่งซื้อ Shopee · Lazada · TikTok'],
                ship:['การจัดส่ง (Shipping)','Admin · ปริมาณจัดส่ง ค้างส่ง ช่องทาง และขนส่ง'],
                ret:['Return','Delivery · งานตีคืน ยกเลิก และเคสค้าง'],
@@ -6039,10 +6741,14 @@ function renderKPI(){
   const tt=TITLE[SEC]||TITLE.overview;
   el('kTitle').textContent=tt[0];
   el('kSub').textContent=tt[1];
-  document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='msop'||SEC==='ret'||SEC==='can'||SEC==='cr');
+  document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='sopcr'||SEC==='ret'||SEC==='can'||SEC==='cr');
   document.body.classList.toggle('crmode', SEC==='cr');
+  /* v-kdark: ธีมเข้มของหน้าย่อย KPI (ไม่ใช้กับหน้าภาพรวม และหน้าเอกสาร/หน้าที่ฝังไฟล์แยก) */
+  document.body.classList.toggle('kdark', !['overview','sop','sopcr','cr','ret','can'].includes(SEC));
+  try{ const nb=document.querySelector('.sidenav button.on .nic');
+    el('kIco').innerHTML=nb?nb.innerHTML.replace(/currentColor/g,'#fff'):''; }catch(e){}
   if(!isOv){
-    el('detail').innerHTML = ((SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='msop'||SEC==='fc')?'':catBar())
+    el('detail').innerHTML = ((SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='sopcr'||SEC==='fc')?'':catBar())
                            + (SEC==='ontime'?secOnTime() : SEC==='oos'?secOOS()
                            : SEC==='diff'?secDiff() : SEC==='dock'?secDock()
                            : SEC==='fc'?secForecast()
@@ -6051,7 +6757,7 @@ function renderKPI(){
                            : SEC==='pack'?secPack()
                            : SEC==='ship'?secShip()
                            : SEC==='sop'?secSOP()
-                           : SEC==='msop'?secMSOP()
+                           : SEC==='sopcr'?secSopCR()
                            : SEC==='ret'?secRetEmbed()
                            : SEC==='can'?secCanEmbed()
                            : SEC==='cr'?secCREmbed() : secRepl());
@@ -6066,7 +6772,7 @@ function renderKPI(){
            else if(SEC==='pack')drawPack();
            else if(SEC==='ship')drawShip();
            else if(SEC==='sop')drawSOP();
-           else if(SEC==='msop')drawMSOP();
+           else if(SEC==='sopcr')drawSopCR();
            else if(SEC==='ret')drawRetEmbed();
            else if(SEC==='can')drawRetEmbed('canFrame','canDoc');
            else if(SEC==='cr')drawCREmbed(); else drawRepl(); }
@@ -6087,19 +6793,14 @@ function renderKPI(){
 
   const bits=[];
   if(fYear())bits.push(fYear());
+  if(QSEL)bits.push('ไตรมาส '+QSEL);
   if(fMonth())bits.push(MONTH_EN[MONTH_ORDER.indexOf(fMonth())]);
   if(fWeekLabel())bits.push(fWeekLabel());
   if(DAYSEL)bits.push(showD(DAYSEL));
   el('kChip').style.display=bits.length?'inline-block':'none';
   el('kChip').textContent=bits.join(' · ');
 
-  el('top').innerHTML=`
-    <div class="big a"><div class="l">จำนวนออเดอร์</div>
-      <div class="v">${cur?fmt(cur.orders):'—'}</div>
-      <div class="n">${cur&&prev?`ช่วงก่อน ${fmt(prev.orders)} · ${cur.orders>=prev.orders?'▲':'▼'} ${fmt(Math.abs(cur.orders-prev.orders))} (${((cur.orders-prev.orders)/(prev.orders||1)*100).toFixed(1)}%)`:'ไม่มีข้อมูลเทียบ'}</div></div>
-    <div class="big b"><div class="l">จำนวนสินค้า (ชิ้น)</div>
-      <div class="v">${cur?fmt(cur.items):'—'}</div>
-      <div class="n">${cur&&prev?`ช่วงก่อน ${fmt(prev.items)} · ${cur.items>=prev.items?'▲':'▼'} ${fmt(Math.abs(cur.items-prev.items))} (${((cur.items-prev.items)/(prev.items||1)*100).toFixed(1)}%)`:'ไม่มีข้อมูลเทียบ'}</div></div>`;
+  /* การ์ดบนสุดวาดทีหลัง (ต้องรู้ผล KPI ทุกตัวก่อน) — ดูท้ายส่วนภาพรวม */
 
   /* ---- Stock Diff: กรองด้วยเงื่อนไขเดียวกับ KPI ตัวอื่น ---- */
   const monthIdxOf=k=>k?+k.slice(5,7)-1:-1;
@@ -6107,6 +6808,7 @@ function renderKPI(){
     if(!r.date)return false;
     if(fYear()&&r.date.slice(0,4)!==fYear())return false;
     if(dayOverride!==undefined)return r.date===dayOverride;
+    if(!qOK(r.date))return false;
     if(DAYSEL)return r.date===DAYSEL;
     if(!weekOK(r.week))return false;
     if(fMonth()&&monthIdxOf(r.date)!==MONTH_ORDER.indexOf(fMonth()))return false;
@@ -6153,54 +6855,187 @@ function renderKPI(){
   const allP=(inP!=null&&stP!=null)?(inP+stP)/2:null;
   const dayV=kNow&&kNow.dn?kNow.days/kNow.dn:null, dayP=kPrev&&kPrev.dn?kPrev.days/kPrev.dn:null;
 
-  el('whNote').textContent=`On-Time · Out of Stock · Stock Variance = ตามตัวกรอง`
+  el('whNote').textContent=`Out of Stock · Stock Variance · Human Error On Picking = ตามตัวกรอง`
     +(wkSel?` · Dock to Stock = รายสัปดาห์ (Week ${wkSel})`:'');
 
   const sub=(n,title,note)=>`<div class="subsec"><span class="no">${n}</span>${title}`
     +(note?` <em>${note}</em>`:'')+`<span class="line"></span></div>`;
 
-  el('wh').innerHTML=[
-    cur?kpiCard({n:1,l:'On-Time Performance',t:'Target ≥ 98%',
-      disp:pct(cur.otp),v:cur.otp,pass:cur.otp>=98,
-      delta:deltaHTML(cur.otp,prev?prev.otp:null,true),
-      base:`${fmt(cur.onTimeOrders)} จาก ${fmt(cur.denom)} ออเดอร์ที่ระบุสถานะได้ · ทั้งหมด ${fmt(cur.orders)}`}):
-      kpiCard({n:1,l:'On-Time Performance',t:'Target ≥ 98%',wait:true,note:'ไม่มีข้อมูลในช่วงที่เลือก'}),
-    cur?kpiCard({n:2,l:'Out of Stock',t:'Target ≥ 99%',
+  /* ===== v-ov2: รวบรวมผล KPI ทุกตัวไว้ในที่เดียว แล้วค่อยวาดการ์ด / สรุป / ตาราง ===== */
+  const ovYM=fYear()&&fMonth()?fYear()+'-'+String(MONTH_ORDER.indexOf(fMonth())+1).padStart(2,'0'):'';
+  const ovDOK=d=>{ if(!d)return false; if(fYear()&&d.slice(0,4)!==fYear())return false; if(!qOK(d))return false;
+    if(DAYSEL)return d===DAYSEL; if(WKSEL.length&&!weekOK(isoWeek(d)))return false;
+    if(ovYM&&d.slice(0,7)!==ovYM)return false; return true; };
+  let ovPerr=null;
+  if(PERR&&PICK){
+    const pMin=PICK.list.map(r=>r.date).filter(Boolean).sort()[0]||'';
+    const qty=PICK.list.filter(r=>ovDOK(r.date)).reduce((a,r)=>a+r.qty,0);
+    const n=PERR.list.filter(r=>r.grp==='pick'&&ovDOK(r.date)&&r.date>=pMin).length;
+    if(qty)ovPerr={rate:n/qty*100,n,qty};
+  }
+  let ovShip=null;
+  if(SHIP){ const L=SHIP.list.filter(r=>ovDOK(r.day)); if(L.length)ovShip=shipStats(L); }
+
+  const KS=[
+    cur?{dept:'wh',key:'oos',n:1,ic:'cube',l:'Out of Stock',t:'Target ≥ 99%',tgt:99,dir:'ge',
       disp:pct(cur.oos),v:cur.oos,pass:cur.oos>=99,
       delta:deltaHTML(cur.oos,prev?prev.oos:null,true),
-      base:`${fmt(cur.okQty)} จาก ${fmt(cur.items)} ชิ้น`}):
-      kpiCard({n:2,l:'Out of Stock',t:'Target ≥ 99%',wait:true,note:'ไม่มีข้อมูลในช่วงที่เลือก'}),
-
-    diffV!=null?kpiCard({n:3,l:'Stock Variance',t:'Target < 2%',
-      disp:pct(diffV),v:diffV,bar:diffV*10,pass:diffV<2,
+      base:`${fmt(cur.okQty)} จาก ${fmt(cur.items)} ชิ้น`}
+      :{dept:'wh',key:'oos',n:1,ic:'cube',l:'Out of Stock',t:'Target ≥ 99%',wait:true,
+        note:OTP_ERR?('อ่านชีตไม่ได้ — '+OTP_ERR):OTP_LOADING?'กำลังโหลดข้อมูล… (ชีต On-Time/Out of Stock ไฟล์ใหญ่ ใช้เวลาสักครู่)':'ไม่มีข้อมูลในช่วงที่เลือก'},
+    diffV!=null?{dept:'wh',key:'sv',n:2,ic:'list',l:'Stock Variance',t:'Target < 2%',tgt:2,dir:'lt',
+      disp:pct(diffV),v:diffV,pass:diffV<2,
       delta:deltaHTML(diffV,diffP,false),
       base:(dNow.weighted
-          ? `ไม่ตรง ${fmt(dNow.bad)} จาก ${fmt(dNow.n)} (ถ่วงน้ำหนักด้วยคอลัมน์ “เกณฑ์” แบบตาราง Pivot)`
-            +` · ${fmt(dNow.badRows)} จาก ${fmt(dNow.rows)} แถว`
-          : `ไม่ตรง ${fmt(dNow.bad)} จาก ${fmt(dNow.n)} รายการที่นับ`)
-        +(lo?` · ช่วง ${showD(lo)} – ${showD(hi)}`:'')}):
-      kpiCard({n:3,l:'Stock Variance',t:'Target < 2%',wait:true,
-        note:STATIC_ERR.diff?('อ่านชีตไม่ได้ — '+STATIC_ERR.diff):'ไม่มีรายการนับสต็อกในช่วงที่เลือก'}),
-
-    allV!=null?kpiCard({n:4,l:'ON-TIME รวม (รับเข้า+จัดเก็บ)',
-      t:'Target ไม่ผ่านเกณฑ์ < 10%',
+          ? `ไม่ตรง ${fmt(dNow.bad)} จาก ${fmt(dNow.n)} (ถ่วงน้ำหนักด้วยคอลัมน์ “เกณฑ์”) · ${fmt(dNow.badRows)} จาก ${fmt(dNow.rows)} แถว`
+          : `ไม่ตรง ${fmt(dNow.bad)} จาก ${fmt(dNow.n)} รายการที่นับ`)}
+      :{dept:'wh',key:'sv',n:2,ic:'list',l:'Stock Variance',t:'Target < 2%',wait:true,
+        note:STATIC_ERR.diff?('อ่านชีตไม่ได้ — '+STATIC_ERR.diff):'ไม่มีรายการนับสต็อกในช่วงที่เลือก'},
+    allV!=null?{dept:'wh',key:'dock',n:3,ic:'truck',l:'On-Time รวม (รับเข้า+จัดเก็บ)',
+      t:'Target ไม่ผ่านเกณฑ์ < 10%',tgt:90,dir:'ge',
       disp:pct1(allV),v:allV,pass:(100-allV)<10,
       delta:deltaHTML(allV,allP,true),
-      base:`ไม่ผ่านเกณฑ์ ${pct1(100-allV)} (เป้า < 10%)`
-        +` · ค่าเฉลี่ยของ ${pct1(inV)} (รับเข้า) และ ${pct1(stV)} (จัดเก็บ) · ${fmt(kNow.n)} ใบรับเข้า`}):
-      kpiCard({n:4,l:'ON-TIME รวม (รับเข้า+จัดเก็บ)',t:'Dock to Stock · รายสัปดาห์',wait:true,
-        note:STATIC_ERR.dock?('อ่านชีตไม่ได้ — '+STATIC_ERR.dock):'ยังไม่มีข้อมูลของสัปดาห์นี้'}),
+      base:`ไม่ผ่านเกณฑ์ ${pct1(100-allV)} · รับเข้า ${pct1(inV)} · จัดเก็บ ${pct1(stV)} · ${fmt(kNow.n)} ใบรับเข้า (Week ${wkSel})`}
+      :{dept:'wh',key:'dock',n:3,ic:'truck',l:'On-Time รวม (รับเข้า+จัดเก็บ)',t:'Dock to Stock · รายสัปดาห์',wait:true,
+        note:STATIC_ERR.dock?('อ่านชีตไม่ได้ — '+STATIC_ERR.dock):'ยังไม่มีข้อมูลของสัปดาห์นี้'},
+    /* Human Error On Picking — คิดแบบเดียวกับหน้า KPI Human Error On Picking (เคส ÷ ชิ้นที่หยิบ) */
+    ovPerr?{dept:'wh',key:'perr',n:4,ic:'hand',l:'Human Error On Picking',t:'Target < 0.05%',tgt:PERR_TARGET,dir:'lt',
+      disp:ovPerr.rate.toFixed(ovPerr.rate>=0.1?2:3)+'%',v:ovPerr.rate,pass:ovPerr.rate<PERR_TARGET,
+      base:`หยิบผิด ${fmt(ovPerr.n)} เคส จาก ${fmt(ovPerr.qty)} ชิ้นที่หยิบ`}
+      :{dept:'wh',key:'perr',n:4,ic:'hand',l:'Human Error On Picking',t:'Target < 0.05%',wait:true,
+        note:(PERR_ERR||PICK_ERR)?('อ่านชีตไม่ได้ — '+(PERR_ERR||PICK_ERR)):(!PERR||!PICK)?'กำลังโหลดข้อมูล…':'ไม่มีข้อมูลการหยิบในช่วงที่เลือก'},
+    {dept:'dl',key:'dlhe',n:1,ic:'user',l:'Human Error',t:'Target 0 เคส/เดือน',wait:true,
+      note:'ยังไม่ได้ระบุชีตต้นทาง'},
+    /* Admin = การจัดส่ง (Shipping) — หน้า Shipping ยังไม่มีเป้า KPI จึงแสดงค่าอย่างเดียว ไม่ตัดสินผ่าน/ไม่ผ่าน */
+    ovShip?{dept:'ad',key:'ship',n:1,ic:'send',l:'การจัดส่ง (Shipping)',t:'จัดส่งตรงตามเกณฑ์ในชีต',info:true,
+      /* v-shipov: เดิมปัดทศนิยม 1 ตำแหน่ง → 99.95% กลายเป็น "100%" ทั้งที่ยังมีรายการไม่ตรงเกณฑ์
+       ใช้รูปแบบเดียวกับวงแหวนหน้า Shipping: ทศนิยม 2 ตำแหน่ง และเพิ่มให้ถ้ายังไม่ถึง 100% จริง (ค่าที่คำนวณเหมือนเดิม) */
+    disp:ovShip.critPct!=null?(v=>{let d=2;while(d<4&&v<100&&+v.toFixed(d)>=100)d++;return v.toFixed(d)+'%';})(ovShip.critPct):'—',
+      base:`${fmt(ovShip.orders)} ออเดอร์ · ค้างส่ง ${fmt(ovShip.pending)}`+(ovShip.critBad?` · ไม่ตรงเกณฑ์ ${fmt(ovShip.critBad)} รายการ`:'')}
+      :{dept:'ad',key:'ship',n:1,ic:'send',l:'การจัดส่ง (Shipping)',t:'จัดส่งตรงตามเกณฑ์ในชีต',wait:true,
+        note:SHIP_ERR?('อ่านชีตไม่ได้ — '+SHIP_ERR):!SHIP?'กำลังโหลดข้อมูล…':'ไม่มีข้อมูลในช่วงที่เลือก'}
+  ];
+  const cardsOf=d=>KS.filter(k=>k.dept===d).map(kpiCard).join('');
+  el('wh').innerHTML=cardsOf('wh');
+  el('dl').innerHTML=cardsOf('dl');
+  el('ad').innerHTML=cardsOf('ad');
+  const scoreOf=d=>{const h=KS.filter(k=>k.dept===d&&!k.wait&&!k.info),p=h.filter(k=>k.pass).length;
+    if(h.length)return `<b class="${p===h.length?'ok':'warn'}">${p} / ${h.length}</b> KPI ผ่านเกณฑ์`;
+    return KS.some(k=>k.dept===d&&k.info)?'<span class="none">ยังไม่มีเป้า KPI</span>':'<span class="none">รอข้อมูล</span>';};
+  el('whScore').innerHTML=scoreOf('wh');
+  el('dlScore').innerHTML=scoreOf('dl');
+  el('adScore').innerHTML=scoreOf('ad');
 
-    /* v122: KPI ใหม่ — ยังไม่มีคอลัมน์ "หยิบผิด" ในชีต Picking จึงยังคำนวณไม่ได้
-       เตรียมช่องไว้แบบเดียวกับการ์ด Human Error ของฝั่ง Delivery */
-    kpiCard({n:5,l:'Human Error On Picking',t:'Target < 0.05%',wait:true,
-      note:'ยังไม่มีคอลัมน์บันทึกการหยิบผิดในชีต — เตรียมช่องไว้แล้ว'})
-  ].join('');
+  const have=KS.filter(k=>!k.wait&&!k.info), passN=have.filter(k=>k.pass).length,
+        failN=have.length-passN, waitN=KS.filter(k=>k.wait).length;
 
-  el('dl').innerHTML=kpiCard({n:1,l:'Human Error',t:'Target 0 เคส/เดือน',wait:true,
-    note:'ยังไม่ได้ระบุชีตต้นทาง — เตรียมช่องไว้แล้ว'});
-  el('ad').innerHTML=kpiCard({n:1,l:'Admin On-Time',t:'Target ≥ 85%',wait:true,
-    note:'ยังไม่ได้ระบุชีตต้นทาง — เตรียมช่องไว้แล้ว'});
+  /* ---- การ์ดบนสุด 4 ใบ ---- */
+  const chg=(a,b)=>{ if(a==null||b==null||!b)return '<span class="tn">ไม่มีข้อมูลเทียบ</span>';
+    const r=(a-b)/b*100;
+    return `<span class="tn ${r>=0?'up':'down'}">${r>=0?'▲':'▼'} ${r>=0?'+':'−'}${Math.abs(r).toFixed(1)}%</span> <span class="tm">จากช่วงก่อนหน้า</span>`;};
+  const passPct=have.length?Math.round(passN/have.length*100):0;
+  el('top').innerHTML=`
+    <div class="otc a"><div class="oti">${ovIcon('cube')}</div><div class="otb">
+      <div class="l">จำนวนออเดอร์</div><div class="v">${cur?fmt(cur.orders):'—'}</div>
+      <div class="n">${chg(cur&&cur.orders,prev&&prev.orders)}</div></div></div>
+    <div class="otc b"><div class="oti">${ovIcon('box')}</div><div class="otb">
+      <div class="l">จำนวนสินค้า (ชิ้น)</div><div class="v">${cur?fmt(cur.items):'—'}</div>
+      <div class="n">${chg(cur&&cur.items,prev&&prev.items)}</div></div></div>
+    <div class="otc c"><div class="oti">${ovIcon('target')}</div><div class="otb">
+      <div class="l">KPI ผ่านเกณฑ์</div><div class="v">${passN} <small>/ ${have.length}</small></div>
+      <div class="pbar"><i style="width:${passPct}%"></i><span>${passPct}%</span></div>
+      ${waitN?`<div class="n"><span class="tm">รอข้อมูลอีก ${waitN} KPI</span></div>`:''}</div></div>
+    <div class="otc d ${failN?'hot':''}"><div class="oti">${ovIcon('alert')}</div><div class="otb">
+      <div class="l">KPI ต้องดูแล</div><div class="v">${failN}</div>
+      <div class="n"><span class="tm">จาก ${have.length} KPI ที่มีข้อมูล</span></div></div></div>`;
+
+  /* ---- แนวโน้มรายสัปดาห์ (ของจริงจากชีต · 12 สัปดาห์ล่าสุดของปีที่เลือก) ---- */
+  const tYear=fYear()||(DATES.length?DATES[DATES.length-1].slice(0,4):'');
+  const wkOf=r=>parseInt(r.week)||(r.date?isoWeek(r.date):0);
+  const memoKey=tYear+'|'+RAW.length+'|'+(DIFF?DIFF.length:0)+'|'+(DOCK?Object.keys(DOCK).length:0)
+    +'|'+(PICK?PICK.list.length:0)+'|'+(PERR?PERR.list.length:0)+'|'+(SHIP?SHIP.list.length:0);
+  if(!window.OV_TR||window.OV_TR.k!==memoKey){
+    const g={};
+    RAW.forEach(r=>{ if(!r.date||r.date.slice(0,4)!==tYear)return; const w=wkOf(r); if(!w)return; (g[w]=g[w]||[]).push(r); });
+    const otp={},oos={};
+    Object.keys(g).forEach(w=>{const s2=statsOf(g[w]); if(s2){otp[w]=s2.otp;oos[w]=s2.oos;}});
+    const sv={};
+    if(DIFF){const gd={};
+      DIFF.forEach(r=>{ if(!r.date||r.date.slice(0,4)!==tYear)return; const w=wkOf(r); if(!w)return; (gd[w]=gd[w]||[]).push(r); });
+      Object.keys(gd).forEach(w=>{const d=diffStat(gd[w]); if(d)sv[w]=d.pct;});}
+    const dock={};
+    if(DOCK)Object.keys(DOCK).forEach(w=>{const o=DOCK[w]; if(o&&o.n)dock[w]=(o.inOk+o.stOk)/(2*o.n)*100;});
+    /* Human Error On Picking รายสัปดาห์ = เคส ÷ ชิ้นที่หยิบ (นับเฉพาะช่วงที่ชีต Picking มีข้อมูล เหมือนหน้า KPI) */
+    const perr={};
+    if(PERR&&PICK){
+      const pMin=PICK.list.map(r=>r.date).filter(Boolean).sort()[0]||'';
+      const q={},e={};
+      PICK.list.forEach(r=>{ if(!r.date||r.date.slice(0,4)!==tYear)return; const w=isoWeek(r.date); q[w]=(q[w]||0)+r.qty; });
+      PERR.list.forEach(r=>{ if(r.grp!=='pick'||!r.date||r.date<pMin||r.date.slice(0,4)!==tYear)return; const w=isoWeek(r.date); e[w]=(e[w]||0)+1; });
+      Object.keys(q).forEach(w=>{ if(q[w]>0)perr[w]=(e[w]||0)/q[w]*100; });
+    }
+    /* Shipping รายสัปดาห์ = % จัดส่งตรงตามเกณฑ์ในชีต */
+    const ship={};
+    if(SHIP){const gs={};
+      SHIP.list.forEach(r=>{ if(!r.day||r.day.slice(0,4)!==tYear)return; const w=isoWeek(r.day); (gs[w]=gs[w]||[]).push(r); });
+      Object.keys(gs).forEach(w=>{const st=shipStats(gs[w]); if(st&&st.critPct!=null)ship[w]=st.critPct;});}
+    window.OV_TR={k:memoKey,otp,oos,sv,dock,perr,ship};
+  }
+  const TR=window.OV_TR;
+  const last=(m,n)=>Object.keys(m).map(Number).filter(Boolean).sort((a,b)=>a-b).slice(-n).map(w=>({w,v:m[w]}));
+  const spark=(key,ok)=>{const pts=TR[key]?last(TR[key],8):[];
+    if(pts.length<2)return '<span class="tm">—</span>';
+    const vs=pts.map(p=>p.v),mn=Math.min(...vs),mx=Math.max(...vs),rg=(mx-mn)||1;
+    const d=pts.map((p,i)=>`${(i/(pts.length-1)*96+2).toFixed(1)},${(30-(p.v-mn)/rg*26).toFixed(1)}`).join(' ');
+    return `<svg class="spark ${ok?'ok':'bad'}" viewBox="0 0 100 32" preserveAspectRatio="none"><polyline points="${d}"/></svg>`;};
+
+  /* ---- ตาราง: ต่ำกว่าเกณฑ์ / ผ่านเกณฑ์ (ความต่าง = ห่างจากเป้ากี่จุด) ---- */
+  const gap=k=>k.dir==='ge'?k.v-k.tgt:k.tgt-k.v;
+  const tgtTxt=k=>k.dir==='ge'?`≥ ${k.tgt}%`:`< ${k.tgt}%`;
+  const row=k=>{const g2=gap(k);
+    return `<tr><td>${esc(k.l)}</td><td class="num">${k.disp}</td><td class="num">${k.key==='dock'?'ไม่ผ่าน < 10%':tgtTxt(k)}</td>
+      <td class="num ${g2>=0?'pos':'neg'}">${g2>=0?'+':'−'}${Math.abs(g2).toFixed(2)} จุด</td><td class="sp">${spark(k.key,k.pass)}</td></tr>`;};
+  const tbl=(title,list,empty)=>`<h3>${title}</h3>${list.length
+    ?`<table class="ovt"><thead><tr><th>KPI</th><th class="num">ค่า</th><th class="num">Target</th><th class="num">ห่างจากเป้า</th><th>แนวโน้ม</th></tr></thead>
+      <tbody>${list.map(row).join('')}</tbody></table>`
+    :`<div class="ovempty">${empty}</div>`}`;
+  el('ovFail').innerHTML=tbl('KPI ที่ต่ำกว่าเกณฑ์',have.filter(k=>!k.pass),'ไม่มี KPI ที่ต่ำกว่าเกณฑ์ 🎉');
+  el('ovPass').innerHTML=tbl('KPI ที่ผ่านเกณฑ์',have.filter(k=>k.pass),'ยังไม่มี KPI ที่ผ่านเกณฑ์');
+
+  /* ---- กราฟแนวโน้ม ---- */
+  if(isOv){
+    const sel=el('ovTrendSel'), key=sel.value;
+    const META={dock:{t:90,lbl:'On-Time รวม (รับเข้า+จัดเก็บ)',tl:'เป้า 90%'},
+                oos:{t:99,lbl:'Out of Stock',tl:'เป้า 99%'},
+                sv:{t:2,lbl:'Stock Variance',tl:'เป้า < 2%',low:true},
+                perr:{t:PERR_TARGET,lbl:'Human Error On Picking',tl:'เป้า < '+PERR_TARGET+'%',low:true,dp:3},
+                ship:{t:null,lbl:'การจัดส่ง (Shipping) · ตรงตามเกณฑ์',tl:''}}[key]||{t:null,lbl:key,tl:''};
+    const dp=META.dp||2;
+    const pts=last(TR[key]||{},12);
+    const loadingTr=(key==='perr'&&(!PERR||!PICK)&&!(PERR_ERR||PICK_ERR))||(key==='ship'&&!SHIP&&!SHIP_ERR);
+    el('ovTrendNote').textContent=pts.length?`${META.lbl} · ${pts.length} สัปดาห์ล่าสุด${tYear?' · ปี '+tYear:''}${META.t==null?' · ยังไม่มีเป้า KPI':''}`
+      :loadingTr?'กำลังโหลดข้อมูล…':'ยังไม่มีข้อมูลรายสัปดาห์';
+    requestAnimationFrame(()=>{
+      destroy('ovTrend');
+      const cv=document.getElementById('c_ovTrend'); if(!cv||!pts.length)return;
+      const gc=cv.getContext('2d'), grd=gc.createLinearGradient(0,0,0,cv.clientHeight||400);
+      grd.addColorStop(0,'rgba(139,108,255,.35)'); grd.addColorStop(1,'rgba(139,108,255,0)');
+      CH.ovTrend=new Chart(cv,{type:'line',
+        data:{labels:pts.map(p=>'W'+p.w),datasets:[
+          {label:META.lbl,data:pts.map(p=>+p.v.toFixed(dp)),borderColor:'#9B7BFF',backgroundColor:grd,fill:true,
+           tension:.35,borderWidth:cf(4),pointRadius:cf(5),pointBackgroundColor:'#fff',pointBorderColor:'#9B7BFF',pointBorderWidth:cf(2)},
+          ...(META.t!=null?[{label:META.tl,data:pts.map(()=>META.t),borderColor:'rgba(242,84,91,.75)',borderDash:[8,6],borderWidth:cf(2),pointRadius:0,fill:false}]:[])]},
+        options:{responsive:true,maintainAspectRatio:false,animation:false,
+          plugins:{legend:{display:true,labels:{color:'#C9C3EA',font:{size:cf(20)},boxWidth:cf(28)}},
+            tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y.toFixed(dp)}%`},titleFont:{size:cf(20)},bodyFont:{size:cf(19)}}},
+          scales:{x:{ticks:{color:'#A9A3CF',font:{size:cf(19)}},grid:{display:false}},
+            y:(()=>{const vs=pts.map(p=>p.v).concat(META.t!=null?[META.t]:[]);
+              const ax={ticks:{color:'#A9A3CF',font:{size:cf(19)},callback:v=>+(+v).toFixed(dp)+'%'},grid:{color:'rgba(255,255,255,.07)'}};
+              if(META.low){ax.min=0;ax.suggestedMax=Math.max(...vs)*1.25;}      /* ค่ายิ่งต่ำยิ่งดี เริ่มจาก 0 */
+              else{ax.suggestedMin=Math.max(0,Math.min(...vs)-5);ax.max=100;}
+              return ax;})()}}});
+    });
+  }
 
   el('src').innerHTML='ชีต: On-Time/Out of Stock <b>'+SHEET_STATE.otp+'</b>'
     +' · Stock Variance <b>'+SHEET_STATE.diff+'</b>'
@@ -6257,9 +7092,15 @@ const fWeek=()=>WKSEL.length===1?WKSEL[0]:'';
 const fWeekLabel=()=>!WKSEL.length?''
   :WKSEL.length===1?'Week '+WKSEL[0]:WKSEL.length+' สัปดาห์';
 const fYear=()=>{const e=el('kY');return e?e.value:'';};
+/* v-rfk: ไตรมาส (1–4) ของปีที่เลือก · ว่าง = ไม่กรองไตรมาส · ใช้คู่กับ YEAR เสมอ */
+let QSEL='';
+const qOK=k=>!QSEL||(!!k&&String(Math.floor((+String(k).slice(5,7)-1)/3)+1)===QSEL);
+/* ค่าที่ตัวกรองช่วงเวลาสั่งเลือก — ให้เลือกได้แม้ช่วงนั้นยังไม่มีข้อมูล (เช่น วันนี้ / สัปดาห์นี้) */
+let RFK_Y='', RFK_M='', RFK_W='', RFK_D='';
 const yrOf=r=>String(r&&r.date||'').slice(0,4);
 function matchRow(r){
   if(fYear() && yrOf(r)!==fYear()) return false;
+  if(QSEL && !qOK(r.date)) return false;
   if(DAYSEL) return r.date===DAYSEL;   /* แถวที่วันที่อ่านไม่ออกจะไม่เข้าเมื่อกรองรายวัน */
   if(!weekOK(r.week)) return false;
   if(fMonth() && r.month!==fMonth()) return false;
@@ -6345,7 +7186,7 @@ function fillFiltersKPI(){
   /* ปีมาจากทั้งชีต On-Time และชีตนับสต็อก (ชีตนับสต็อกมีข้อมูลย้อนหลังหลายปี) */
   const years=[...new Set([...filterBase(),...(DIFF||[])].map(yrOf).filter(y=>y&&y.length===4))]
     .sort((a,b)=>b.localeCompare(a));
-  opts(el('kY'),years,v=>v,'All');
+  opts(el('kY'),(RFK_Y&&!years.includes(RFK_Y))?[...years,RFK_Y].sort((a,b)=>b.localeCompare(a)):years,v=>v,'All');
   /* ตั้งต้นที่ "ปีปัจจุบัน" เสมอ — เปิดแดชบอร์ดปีไหนก็เห็นผลของปีนั้น
      ข้อมูลปีก่อนๆ จะไม่ขึ้น จนกว่าจะเลือกตัวกรอง YEAR เอง
      ถ้าปีปัจจุบันยังไม่มีข้อมูลเลย ค่อยถอยไปใช้ปีล่าสุดที่มี */
@@ -6357,7 +7198,7 @@ function fillFiltersKPI(){
     }
   }
   const byY=filterBase().filter(r=>!fYear()||yrOf(r)===fYear());
-  const months=MONTH_ORDER.filter(m=>byY.some(r=>r.month===m));
+  const months=MONTH_ORDER.filter(m=>m===RFK_M||byY.some(r=>r.month===m));
   opts(el('kM'),months,v=>MONTH_EN[MONTH_ORDER.indexOf(v)]||v,'All');
   const byM=byY.filter(r=>!fMonth()||r.month===fMonth());
   const weeks=[...new Set(byM.map(r=>String(r.week)).filter(w=>w&&w!=='undefined'))]
@@ -6365,13 +7206,102 @@ function fillFiltersKPI(){
   const wkCnt={}; byM.forEach(r=>{const w=String(parseInt(r.week)||'');
     if(w)wkCnt[w]=(wkCnt[w]||0)+1;});
   WK_OPTS=weeks.map(w=>[String(parseInt(w)||w),wkCnt[String(parseInt(w)||w)]||0]);
-  WKSEL=WKSEL.filter(w=>WK_OPTS.some(o=>o[0]===w));   /* ตัดสัปดาห์ที่ไม่มีในชุดนี้ */
+  WKSEL=WKSEL.filter(w=>w===RFK_W||WK_OPTS.some(o=>o[0]===w));   /* ตัดสัปดาห์ที่ไม่มีในชุดนี้ */
   buildWeekPop();
   const byW=byM.filter(r=>weekOK(r.week));
   CAL_DAYS=new Set(byW.map(r=>r.date).filter(Boolean));
-  if(DAYSEL&&!CAL_DAYS.has(DAYSEL))DAYSEL='';
+  if(DAYSEL&&!CAL_DAYS.has(DAYSEL)&&DAYSEL!==RFK_D)DAYSEL='';
   drawCal();
+  buildRFK();
 }
+
+/* ================= v-rfk: ตัวกรองช่วงเวลา (ดูทั้งหมด / รายปี / ไตรมาส / รายเดือน / รายสัปดาห์ / รายวัน)
+   แบบเดียวกับหน้ารายงานประจำวัน · เป็นแค่ปุ่มสั่งตัวกรองเดิม (YEAR / MONTH / WEEK / DAY) จึงไม่เปลี่ยน
+   วิธีคำนวณของหน้าใดเลย — โหมดที่แสดงอ่านกลับจากตัวกรองเดิมเสมอ (คลิกกราฟเลือกสัปดาห์/วัน ปุ่มก็ขยับตาม) ===== */
+const RFK_MSR=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const rfkToday=()=>{const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+function rfkISO(k){const [y,m,d]=k.split('-').map(Number);const t=new Date(Date.UTC(y,m-1,d));
+  t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));return t.getUTCFullYear()+'-W'+String(isoWeek(k)).padStart(2,'0');}
+function rfkKey(m,k){ if(!k||k.length<10)return '';
+  if(m==='year')return k.slice(0,4);
+  if(m==='q')return k.slice(0,4)+'-Q'+(Math.floor((+k.slice(5,7)-1)/3)+1);
+  if(m==='month')return k.slice(0,7);
+  if(m==='week')return rfkISO(k);
+  if(m==='day')return k;
+  return 'all'; }
+function rfkLabel(m,v){
+  if(m==='all')return 'ทุกช่วงเวลา';
+  if(m==='year')return 'ปี '+v;
+  if(m==='q')return `ไตรมาส ${v.slice(-1)} / ${v.slice(0,4)}`;
+  if(m==='month')return MONTH_ORDER[+v.slice(5,7)-1]+' '+v.slice(0,4);
+  if(m==='week'){const y=+v.slice(0,4),w=+v.slice(6);const a=new Date(Date.UTC(y,0,4));
+    a.setUTCDate(a.getUTCDate()-((a.getUTCDay()+6)%7)+(w-1)*7);const b=new Date(a);b.setUTCDate(a.getUTCDate()+6);
+    const f=d=>`${d.getUTCDate()} ${RFK_MSR[d.getUTCMonth()]}`;
+    return `สัปดาห์ ${w} · ${f(a)} – ${f(b)} ${b.getUTCFullYear()}`;}
+  const[y,mo,d]=v.split('-');return `${d}/${mo}/${y}`; }
+/* อ่านโหมด/ค่าปัจจุบันจากตัวกรองเดิม */
+function rfkCur(){
+  const y=fYear()||String(new Date().getFullYear());
+  if(DAYSEL)return ['day',DAYSEL];
+  if(WKSEL.length)return ['week',y+'-W'+String(+WKSEL[0]).padStart(2,'0')];
+  if(QSEL)return ['q',y+'-Q'+QSEL];
+  if(fMonth())return ['month',y+'-'+String(MONTH_ORDER.indexOf(fMonth())+1).padStart(2,'0')];
+  if(fYear())return ['year',fYear()];
+  return ['all','all'];
+}
+/* ชุดวันที่ที่มีข้อมูลของทุกชีต (ใช้ทำรายการให้เลือก) + วันนี้ */
+function rfkDates(){
+  const s=new Set([rfkToday()]);
+  const add=a=>{ if(a)for(const x of a){ if(x&&x.length>=10)s.add(x.slice(0,10)); } };
+  add(filterBase().map(r=>r.date));
+  if(DIFF)add(DIFF.map(r=>r.date));
+  try{ if(PICK&&PICK.list)add(PICK.list.map(r=>r.date)); }catch(e){}
+  try{ if(SHIP&&SHIP.list)add(SHIP.list.map(r=>r.day)); }catch(e){}
+  try{ if(PACK&&PACK.list)add(PACK.list.map(r=>r.d&&r.d.fd)); }catch(e){}
+  return s;
+}
+let RFK_OPTS=[];
+function buildRFK(){
+  const box=el('rfk'); if(!box)return;
+  const [m,v]=rfkCur();
+  const keys=new Set([...rfkDates()].map(k=>rfkKey(m,k)).filter(Boolean));
+  if(m!=='all')keys.add(v);
+  RFK_OPTS=[...keys].sort();
+  const sel=el('rfkSel');
+  sel.innerHTML=RFK_OPTS.slice().reverse().map(x=>`<option value="${x}">${rfkLabel(m,x)}</option>`).join('');
+  sel.value=v; sel.disabled=m==='all';
+  const i=RFK_OPTS.indexOf(v);
+  el('rfkPrev').disabled=m==='all'||i<=0;
+  el('rfkNext').disabled=m==='all'||i>=RFK_OPTS.length-1;
+  box.querySelectorAll('.rf-modes button').forEach(b=>{
+    const on=b.dataset.m===m; b.classList.toggle('on',on); b.setAttribute('aria-selected',on);});
+}
+/* สั่งตัวกรองเดิมตามช่วงที่เลือก */
+function rfkApply(m,v){
+  el('kM').value=''; WKSEL=[]; DAYSEL=''; QSEL=''; calYM=null;
+  RFK_Y=RFK_M=RFK_W=RFK_D='';
+  const setY=y=>{ RFK_Y=y; const s=el('kY');
+    if(![...s.options].some(o=>o.value===y)){const o=document.createElement('option');o.value=o.textContent=y;s.appendChild(o);}
+    s.value=y; };
+  if(m==='all'){ el('kY').value=''; }
+  else if(m==='year'){ setY(v); }
+  else if(m==='q'){ setY(v.slice(0,4)); QSEL=v.slice(-1); }
+  else if(m==='month'){ setY(v.slice(0,4)); RFK_M=MONTH_ORDER[+v.slice(5,7)-1];
+    fillFiltersKPI(); el('kM').value=RFK_M; }
+  else if(m==='week'){ setY(v.slice(0,4)); RFK_W=String(+v.slice(6)); WKSEL=[RFK_W]; }
+  else if(m==='day'){ setY(v.slice(0,4)); RFK_D=v; DAYSEL=v; }
+  fillFiltersKPI(); renderKPI();
+}
+el('rfk').querySelectorAll('.rf-modes button').forEach(b=>b.addEventListener('click',()=>{
+  const m=b.dataset.m; if(m===rfkCur()[0])return;
+  rfkApply(m, m==='all'?'all':rfkKey(m,rfkToday()));
+}));
+el('rfkSel').addEventListener('change',e=>rfkApply(rfkCur()[0],e.target.value));
+const rfkStep=d=>{const [m,v]=rfkCur();const i=RFK_OPTS.indexOf(v)+d;
+  if(i<0||i>=RFK_OPTS.length)return; rfkApply(m,RFK_OPTS[i]);};
+el('rfkPrev').addEventListener('click',()=>rfkStep(-1));
+el('rfkNext').addEventListener('click',()=>rfkStep(1));
 
 /* ---------- ปฏิทิน ---------- */
 const ymOf=k=>k.slice(0,7);
@@ -6422,11 +7352,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')openCal(false);});
 ['kY','kM'].forEach(id=>el(id).addEventListener('change',()=>{
   if(id==='kY'){el('kM').value='';WKSEL=[];}
   if(id==='kM')WKSEL=[];
-  DAYSEL='';calYM=null;fillFiltersKPI();renderKPI();
+  QSEL='';DAYSEL='';calYM=null;fillFiltersKPI();renderKPI();
 }));
 el('kClear').addEventListener('click',()=>{
   Object.keys(CATF).forEach(k=>delete CATF[k]);   /* ล้างตัวกรองจากกราฟด้วย */
-  el('kY').value='';el('kM').value='';WKSEL=[];DAYSEL='';calYM=null;fillFiltersKPI();renderKPI();
+  el('kY').value='';el('kM').value='';WKSEL=[];QSEL='';DAYSEL='';calYM=null;fillFiltersKPI();renderKPI();
 });
 
 async function boot(){
@@ -6435,6 +7365,11 @@ async function boot(){
   /* Stock Diff / Dock to Stock เป็นชีตเล็ก โหลดคู่ขนานไปเลย ไม่ต้องรอชีตใหญ่ */
   const tick=setInterval(()=>{ if(el('src'))renderKPI(); },2500);   /* ให้บรรทัดสถานะขยับตามจริง */
   const staticJob=loadStatic().finally(()=>clearInterval(tick));
+  /* v-ov4: หน้าภาพรวมใช้ Human Error On Picking (ชีต Picking + ชีตแจ้งปัญหา) และ Shipping ด้วย
+     เริ่มโหลดพร้อมกันตั้งแต่ต้น ไม่ต้องรอชีต On-Time/Out of Stock (ไฟล์ใหญ่ 80+ MB) โหลดเสร็จก่อน
+     เสร็จตัวไหนก็วาดหน้าภาพรวมใหม่ทันที */
+  Promise.all([loadPerr(),loadPick()]).then(()=>{ if(SEC==='overview')renderKPI(); });
+  loadShip().then(()=>{ if(SEC==='overview')renderKPI(); });
   try{
     const n=await loadOTP();
     OTP_LOADING=false;
@@ -6457,6 +7392,22 @@ async function boot(){
   fillFiltersKPI();     /* ชีตนับสต็อกเพิ่งโหลดเสร็จ — เติมปีที่มีเฉพาะในชีตนั้นเข้า dropdown */
   renderKPI();
 }
+
+/* v-ov2: ปุ่ม "ดูรายละเอียด" ของแต่ละแผนก + ตัวเลือกกราฟแนวโน้ม + ไอคอนเมนูข้าง */
+(function(){
+  document.querySelectorAll('#ovBox .dgo').forEach(b=>b.addEventListener('click',()=>{
+    const t=document.querySelector(`.sidenav button[data-sec="${b.dataset.go}"]`); if(t)t.click();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+  const s=document.getElementById('ovTrendSel'); if(s)s.addEventListener('change',()=>renderKPI());
+  const MAP={overview:'grid',oos:'cube',diff:'list',dock:'truck',pick:'hand',perr:'err',repl:'refresh',
+             pack:'pack',ship:'send',cr:'ret',sop:'link',sopcr:'list',fc:'trend'};
+  document.querySelectorAll('.sidenav button').forEach(b=>{
+    const k=b.dataset.sec?MAP[b.dataset.sec]:(b.dataset.team?'cal':null);
+    if(!k||b.querySelector('.nic'))return;
+    b.innerHTML=`<i class="nic">${ovIcon(k)}</i><span class="ntx">${b.innerHTML}</span>`;
+  });
+})();
 el('kReload').addEventListener('click',()=>{
   /* v-pack3: เดิม boot() ไม่โหลด Packing ใหม่ ข้อมูลค้างจนกว่าจะกด F5 */
   if(PACK||PACK_ERR||SEC==='pack'){
@@ -6475,7 +7426,7 @@ el('kReload').addEventListener('click',()=>{
    layout จึงไม่เปลี่ยน) และสั่งให้กราฟวาดใหม่ที่ความละเอียดเท่ากับภาพที่ถ่าย */
 const SHOT_SLIDE_W=3840, SHOT_SLIDE_H=2160;
 const SHOT_BG='#100D26';
-const SHOT_PANEL_SEL='.big,.kpi,.cpanel,.fcacc-panel,.fcacc-cards,.sgrid,.brkcard,.panel,.kpis>.kpi,.kpis>.kcell';
+const SHOT_PANEL_SEL='.otc,.kgrid>.kcell,.ovtrend,.opanel,.big,.kpi,.cpanel,.fcacc-panel,.fcacc-cards,.sgrid,.brkcard,.panel,.kpis>.kpi,.kpis>.kcell';
 const shotWait=ms=>new Promise(r=>setTimeout(r,ms));
 const shotFrame=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
 async function shotLoadZip(){
@@ -6657,7 +7608,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       const x=out.getContext('2d'); x.fillStyle=bg; x.fillRect(0,0,out.width,out.height);
       x.drawImage(c,M,M);
       x.fillStyle=fg; x.font=`500 ${Math.round(FOOT*0.42)}px "Baloo 2","Mitr",sans-serif`; x.textBaseline='middle';
-      x.textAlign='left'; x.fillText('Logistics Dashboard · '+(title||''),M,out.height-FOOT/2);
+      x.textAlign='left'; x.fillText('Logistics Dashboard  ›  '+(title||''),M,out.height-FOOT/2);
       const a=document.createElement('a'); a.download=name+'-fullpage.png';
       a.href=URL.createObjectURL(await shotBlob(out));
       document.body.appendChild(a); a.click(); a.remove();
@@ -6761,7 +7712,7 @@ function shotMenu(btn,onPick){
 }
 el('kSave').addEventListener('click',()=>{
   shotMenu(el('kSave'),mode=>{
-    const tag=[fYear(), fMonth()&&MONTH_EN[MONTH_ORDER.indexOf(fMonth())],
+    const tag=[fYear(), QSEL&&('Q'+QSEL), fMonth()&&MONTH_EN[MONTH_ORDER.indexOf(fMonth())],
                WKSEL.length&&('W'+WKSEL.join('_')), DAYSEL].filter(Boolean).join('-')||'all';
     shotExport({root:el('kShot'),btn:el('kSave'),zoomEls:[document.body],mode,
       name:`kpi-${SEC}-${tag}`,title:el('kTitle').textContent});
@@ -6882,7 +7833,7 @@ const TEAMS={
        sheet:JOB, gid:'976094805', empty:'ไม่มีการรับสินค้าเข้าในช่วงนี้'},
       /* v139: ปัญหาของ Warehouse ใช้แท็บ Warehouse ของชีตแจ้งปัญหาเอง (ไม่ใช่เคสที่ Delivery แจ้ง) */
       {k:'issue',t:'แจ้งปัญหาประจำวัน', c:'ป้ายสี = ผู้แจ้ง', hd:'c', unit:'เคส',
-       sheet:OPS, gid:WH_GID, noQty:true, cols:['วันที่พบปัญหา','ผู้แจ้ง · รายละเอียด'], empty:'ไม่มีการแจ้งปัญหาในช่วงนี้'}
+       sheet:OPS, gid:WH_GID, noQty:true, tagIco:'person', cols:['วันที่พบปัญหา','ผู้แจ้ง · รายละเอียด'], empty:'ไม่มีการแจ้งปัญหาในช่วงนี้'}
     ]
   },
   admin:{
@@ -6908,6 +7859,32 @@ const TEAMS={
   }
 };
 const SNAP=[{"year": "2026", "month": "มิถุนายน", "wk": 24, "date": "08/06/2026", "item": "ห่อนมข้น", "qty": 75}, {"year": "2026", "month": "มิถุนายน", "wk": 24, "date": "08/06/2026", "item": "coconut ทีโอ", "qty": 5}, {"year": "2026", "month": "มิถุนายน", "wk": 24, "date": "08/06/2026", "item": "startrt kit back", "qty": 15}, {"year": "2026", "month": "มิถุนายน", "wk": 24, "date": "08/06/2026", "item": "startrt kit white", "qty": 25}, {"year": "2026", "month": "มิถุนายน", "wk": 24, "date": "09/06/2026", "item": "ห่อนมข้น", "qty": 358}, {"year": "2026", "month": "มิถุนายน", "wk": 24, "date": "10/06/2026", "item": "ห่อนมข้น", "qty": 250}, {"year": "2026", "month": "มิถุนายน", "wk": 24, "date": "13/06/2026", "item": "ห่อนมข้น", "qty": 221}, {"year": "2026", "month": "มิถุนายน", "wk": 24, "date": "14/06/2026", "item": "ห่อนมข้น", "qty": 146}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "15/06/2026", "item": "matcha latte", "qty": 140}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "16/06/2026", "item": "เซเล", "qty": 128}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "16/06/2026", "item": "อิม", "qty": 160}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "17/06/2026", "item": "เซเล", "qty": 192}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "17/06/2026", "item": "อิม", "qty": 80}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "18/06/2026", "item": "starter white", "qty": 30}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "18/06/2026", "item": "starter Black", "qty": 20}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "19/06/2026", "item": "ไม่มี", "qty": null}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "20/06/2026", "item": "ห่อนมข้น", "qty": 202}, {"year": "2026", "month": "มิถุนายน", "wk": 25, "date": "21/06/2026", "item": "ติดชากิโล", "qty": 8}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "22/06/2026", "item": "ทรีโอ้", "qty": 5}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "22/06/2026", "item": "มัทฉะลาเต้", "qty": 50}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "23/06/2026", "item": "ทรีโอ้", "qty": 5}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "23/06/2026", "item": "อิม", "qty": 80}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "23/06/2026", "item": "เซเล", "qty": 240}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "24/06/2026", "item": "startrt kit white", "qty": 30}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "24/06/2026", "item": "startrt kit back", "qty": 20}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "24/06/2026", "item": "Rootroute50gX3", "qty": 6}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "28/06/2026", "item": "Matcha Grand Reserve 30 g", "qty": 80}, {"year": "2026", "month": "มิถุนายน", "wk": 26, "date": "28/06/2026", "item": "ติดชากิโล 5 ลัง", "qty": null}, {"year": "2026", "month": "มิถุนายน", "wk": 27, "date": "29/06/2026", "item": "ติดบาร์โค้ดชาวาน", "qty": 9}, {"year": "2026", "month": "มิถุนายน", "wk": 27, "date": "29/06/2026", "item": "Exc 3กรัม 2ซอง", "qty": 50}, {"year": "2026", "month": "มิถุนายน", "wk": 27, "date": "30/06/2026", "item": "M3g 2ซอง", "qty": 25}, {"year": "2026", "month": "มิถุนายน", "wk": 27, "date": "30/06/2026", "item": "Matcha Grand Reserve 30 g", "qty": 80}, {"year": "2026", "month": "กรกฎาคม", "wk": 27, "date": "01/07/2026", "item": "ติิดชากิโล", "qty": 5}, {"year": "2026", "month": "กรกฎาคม", "wk": 27, "date": "02/07/2026", "item": "ห่อนมข้น", "qty": 119}, {"year": "2026", "month": "กรกฎาคม", "wk": 27, "date": "04/07/2026", "item": "ห่อนมข้น", "qty": 389}, {"year": "2026", "month": "กรกฎาคม", "wk": 27, "date": "05/07/2026", "item": "ติดสติ้กเกอร์ ชา กก.", "qty": 7}, {"year": "2026", "month": "กรกฎาคม", "wk": 28, "date": "06/07/2026", "item": "ceremonial", "qty": 240}, {"year": "2026", "month": "กรกฎาคม", "wk": 28, "date": "06/07/2026", "item": "Imperial", "qty": 160}, {"year": "2026", "month": "กรกฎาคม", "wk": 28, "date": "08/07/2026", "item": "ห่อนมข้น", "qty": 113}, {"year": "2026", "month": "กรกฎาคม", "wk": 28, "date": "09/07/2026", "item": "Matcha Grand Reserve", "qty": 80}, {"year": "2026", "month": "กรกฎาคม", "wk": 28, "date": "10/07/2026", "item": "starter kit ขาว", "qty": 80}, {"year": "2026", "month": "กรกฎาคม", "wk": 28, "date": "10/07/2026", "item": "starter kit ดำ", "qty": 10}, {"year": "2026", "month": "กรกฎาคม", "wk": 28, "date": "11/07/2026", "item": "ห่อนมข้น", "qty": 392}, {"year": "2026", "month": "กรกฎาคม", "wk": 28, "date": "12/07/2026", "item": "ห่อนมข้น", "qty": 480}, {"year": "2026", "month": "กรกฎาคม", "wk": 28, "date": "12/07/2026", "item": "ติดชากิโล 4 ลัง", "qty": null}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "13/07/2026", "item": "ห่อนมข้น", "qty": 506}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "14/07/2026", "item": "Matcha Grand Reserve", "qty": 80}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "14/07/2026", "item": "Matcha Latte", "qty": 80}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "14/07/2026", "item": "Trio Set", "qty": 5}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "15/07/2026", "item": "ceremonial", "qty": 240}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "17/07/2026", "item": "starter kit ขาว", "qty": 15}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "17/07/2026", "item": "starter kit ดำ", "qty": 10}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "18/07/2026", "item": "Imperial", "qty": 80}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "19/07/2026", "item": "ห่อนมข้น", "qty": 145}, {"year": "2026", "month": "กรกฎาคม", "wk": 29, "date": "19/07/2026", "item": "ติดชากิโล", "qty": null}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "20/07/2026", "item": "Rootroute Young Barley Leaf Powder 50 g x 3", "qty": 6}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "20/07/2026", "item": "Trio Set", "qty": 3}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "20/07/2026", "item": "ceremonial", "qty": 206}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "20/07/2026", "item": "Imperial", "qty": 160}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "21/07/2026", "item": "Matcha Grand Reserve", "qty": 160}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "22/07/2026", "item": "Excellent Rich 95% 3.1g x 2 sachets", "qty": 50}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "22/07/2026", "item": "ห่อ Holder ขาว", "qty": 132}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "22/07/2026", "item": "Matcha Latte", "qty": 80}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "23/07/2026", "item": "startrt kit white", "qty": 10}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "23/07/2026", "item": "ห่อนมข้น", "qty": 150}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "24/07/2026", "item": "Rootroute Wheatgrass ×3", "qty": 4}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "24/07/2026", "item": "ห่อนมข้น", "qty": 380}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "25/07/2026", "item": "ห่อนมข้้น", "qty": 121}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "25/07/2026", "item": "ติดชากิโล", "qty": 4}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "26/07/2026", "item": "ห่อนมข้น", "qty": 101}, {"year": "2026", "month": "กรกฎาคม", "wk": 30, "date": "26/07/2026", "item": "ติดชากิโล", "qty": 14}, {"year": "2026", "month": "กรกฎาคม", "wk": 31, "date": "27/07/2026", "item": "ห่อนมข้น", "qty": 316}, {"year": "2026", "month": "กรกฎาคม", "wk": 31, "date": "27/07/2026", "item": "Matcha Grand Reserve", "qty": 80}, {"year": "2026", "month": "กรกฎาคม", "wk": 31, "date": "27/07/2026", "item": "Matcha Latte", "qty": 50}, {"year": "2026", "month": "กรกฎาคม", "wk": 31, "date": "28/07/2026", "item": "ceremonial", "qty": 160}, {"year": "2026", "month": "กรกฎาคม", "wk": 31, "date": "28/07/2026", "item": "Excellent Rich 95% 3.1g x 2 sachets", "qty": 25}, {"year": "2026", "month": "กรกฎาคม", "wk": 31, "date": "30/07/2026", "item": "Classic Rich 95% 3.1g x 2 sachets", "qty": 20}, {"year": "2026", "month": "กรกฎาคม", "wk": 31, "date": "30/07/2026", "item": "Genmaicha 95% 3.1g x 2 sachets", "qty": 20}, {"year": "2026", "month": "กรกฎาคม", "wk": 31, "date": "30/07/2026", "item": "Houjicha Rich 95% 3.1 x 2 sachets", "qty": 20}, {"year": "2026", "month": "สิงหาคม", "wk": 31, "date": "01/08/2026", "item": "ห่อนมข้น", "qty": 230}, {"year": "2026", "month": "สิงหาคม", "wk": 31, "date": "01/08/2026", "item": "starter white", "qty": 10}, {"year": "2026", "month": "สิงหาคม", "wk": 31, "date": "01/08/2026", "item": "starter Black", "qty": 10}, {"year": "2026", "month": "สิงหาคม", "wk": 31, "date": "02/08/2026", "item": "ติดชากิโล", "qty": 21}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "03/08/2026", "item": "Rootroute Young Barley Leaf Powder 50 g x 3", "qty": 2}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "03/08/2026", "item": "Genmaicha 3 g x 2 Sachets", "qty": 10}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "03/08/2026", "item": "Houjicha Rich 95% 3.1g x 2 sachets", "qty": 10}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "03/08/2026", "item": "Excellent Rich 95% 3.1g x 2 sachets", "qty": 25}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "03/08/2026", "item": "Matcha Trio Set", "qty": 10}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "03/08/2026", "item": "Matcha Latte", "qty": 130}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "04/08/2026", "item": "Ceremonial", "qty": 240}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "04/08/2026", "item": "อิม", "qty": 160}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "04/08/2026", "item": "แกรน", "qty": 160}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "06/08/2026", "item": "ห่อHolder blak", "qty": 7}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "07/08/2026", "item": "Starterkit (black)", "qty": 10}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "07/08/2026", "item": "Starterkit (White)", "qty": 10}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "08/08/2026", "item": "ติดชากิโล 2 ลัง", "qty": null}, {"year": "2026", "month": "สิงหาคม", "wk": 32, "date": "09/08/2026", "item": "ติดชากิโล 4 ลัง", "qty": null}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "10/08/2026", "item": "Rootroute Wheatgrass Powder 50 g x 3", "qty": 6}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "10/08/2026", "item": "Classic Rich 95% 3.1g x 2 sachets", "qty": 10}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "10/08/2026", "item": "Imperial", "qty": 80}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "10/08/2026", "item": "ติดชากิโล", "qty": 14}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "11/08/2026", "item": "Sifter x Chashaku", "qty": 50}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "11/08/2026", "item": "Ceremonial 30 g", "qty": 240}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "12/08/2026", "item": "Starterkit (White)", "qty": 9}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "12/08/2026", "item": "Matcha Grand Reserve", "qty": 80}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "13/08/2026", "item": "Matcha Latte", "qty": 100}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "15/08/2026", "item": "ห่อนมข้น", "qty": 155}, {"year": "2026", "month": "สิงหาคม", "wk": 33, "date": "16/08/2026", "item": "ติดชากิโล 3ลัง / ติด Chasen32ลัง / ติด Chashaku 1ลัง", "qty": null}, {"year": "2026", "month": "สิงหาคม", "wk": 34, "date": "17/08/2026", "item": "ทรีโอ", "qty": 5}, {"year": "2026", "month": "สิงหาคม", "wk": 34, "date": "17/08/2026", "item": "Exc Rich 95% 3.1g x 2 sachets", "qty": 25}, {"year": "2026", "month": "สิงหาคม", "wk": 34, "date": "17/08/2026", "item": "Matcha Grand Reserve", "qty": 80}, {"year": "2026", "month": "สิงหาคม", "wk": 34, "date": "17/08/2026", "item": "ลาเต้", "qty": 50}, {"year": "2026", "month": "สิงหาคม", "wk": 34, "date": "18/08/2026", "item": "Ceremonial 30 g", "qty": 240}, {"year": "2026", "month": "สิงหาคม", "wk": 34, "date": "19/08/2026", "item": "Starterkit (White)", "qty": 20}, {"year": "2026", "month": "สิงหาคม", "wk": 34, "date": "19/08/2026", "item": "Starterkit (black)", "qty": 10}, {"year": "2026", "month": "สิงหาคม", "wk": 34, "date": "2026-08-20", "item": "Imperial 30 g", "qty": 160}];
+
+/* ===== v-rptdesign: ไอคอนของหน้ารายงาน (ใส่สีตรง ๆ ไม่ใช้ currentColor — ให้ html2canvas วาดสีถูกตอนบันทึกรูป) ===== */
+const RI={
+  warehouse:'<path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/>',
+  truck:'<path d="M1 4h14v12H1z"/><path d="M15 8h4l3 3.5V16h-7"/><circle cx="5.5" cy="18" r="2.2"/><circle cx="18" cy="18" r="2.2"/>',
+  clip:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/>',
+  box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/><path d="M7.5 5.5l9 5"/>',
+  boxplus:'<path d="M20 9.5V8l-8-4.5L4 8v8l8 4.5 1.5-.8"/><path d="M4 8l8 4.5L20 8"/><path d="M12 12.5V20"/><circle cx="18" cy="17" r="4.2"/><path d="M18 15v4M16 17h4"/>',
+  warn:'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  docwarn:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h7"/><path d="M14 2v6h6v3"/><path d="M8 9h3M8 13h5"/><path d="M17.5 13.5l-4 7h8z"/><path d="M17.5 16.5v1.5"/>',
+  person:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  users:'<circle cx="9" cy="8" r="4"/><path d="M1.5 21a7.5 7.5 0 0 1 15 0"/><path d="M16 4a4 4 0 0 1 0 8"/><path d="M22.5 21a7.5 7.5 0 0 0-4.5-6.9"/>',
+  clock:'<circle cx="12" cy="12" r="9.5"/><path d="M12 7v5l3.5 2"/>',
+  cal:'<rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/><path d="M7.5 14h.01M12 14h.01M16.5 14h.01M7.5 17.5h.01M12 17.5h.01"/>',
+  db:'<ellipse cx="12" cy="5" rx="8.5" ry="3"/><path d="M3.5 5v14c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3V5"/><path d="M3.5 12c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3"/>',
+  doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8M8 9h2"/>',
+  xcircle:'<circle cx="12" cy="12" r="9.5"/><path d="M15 9l-6 6M9 9l6 6"/>',
+  ret:'<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>'
+};
+const ico=(n,c='#fff',sw=1.9,extra='')=>`<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" ${extra}>${RI[n]||RI.box}</svg>`;
+const TEAM_ICO={warehouse:'warehouse',delivery:'truck',admin:'clip'};
+const PANEL_ICO={gr:'box',issue:'warn',mo:'clip',order:'clock',cancel:'xcircle',ret:'ret'};
+/* ไอคอนการ์ดตัวเลข: [ไอคอนในกรอบ, ไอคอนจาง ๆ ด้านขวา] — เลือกจากชื่อการ์ด (แสดงผลอย่างเดียว ไม่แตะการคำนวณ) */
+const kpiIco=l=>/รับสินค้า/.test(l)?['boxplus','box']:/แจ้งปัญหา/.test(l)?['warn','docwarn']:/พบบ่อย/.test(l)?['person','users']
+  :/ค้างส่ง/.test(l)?['clock','clock']:/MO/.test(l)?['clip','clip']:/ยกเลิก/.test(l)?['xcircle','xcircle']
+  :/ออกไปแล้ว/.test(l)?['ret','ret']:['box','truck'];
 const FD={value:'',options:[]};
 const $=id=> id==='fd' ? FD : document.getElementById(id);
 const el=id=>document.getElementById(id);
@@ -6949,7 +7926,7 @@ function toRows(csv){
   const find=(...p)=>{for(const x of p){const i=H.findIndex(h=>h.includes(x));if(i>=0)return i;}return -1;};
   const iD=find('วันที่พบปัญหา','วันที่จัดทำ','วันที่ได้รับ','วันที่'),iW=find('สัปดาห์'),
         iT=find('รายละเอียด','ปัญหาที่พบ','รายการสินค้า'),iQ=find('จำนวน'),
-        iG=find('เกณฑ์','ประเภทสาเหตุ','ผู้แจ้ง');
+        iG=find('เกณฑ์','ประเภทสาเหตุ','ผู้แจ้ง','ประเภทสินค้า','ประเภท','หมวดสินค้า','หมวด','Category');
   return raw.slice(hi+1).map(r=>{
     const det=(r[iT]||'').trim(),d=toKey(r[iD]);
     if(!det||!d)return null;
@@ -7051,7 +8028,25 @@ async function grab(p){
   if(p.cr)return toCRRows(txt,p.cr);
   if(p.cancel)return toCancelRows(txt);
   if(p.ret)return toReturnRows(txt);
-  if(!p.form)return toRows(txt);
+  if(!p.form){
+    const rows=toRows(txt);
+    /* v-grtype: รับสินค้าเข้าระบบ — ประเภทเดียวกันอยู่ติดกัน (Raw Material → Packaging → Finish Goods → อื่น ๆ)
+       แล้วเรียงชื่อสินค้า · เรียงเฉพาะการแสดงผล ยอดรวม/จำนวนรายการเหมือนเดิม */
+    if(p.k==='gr'){
+      const ord=t=>/raw/i.test(t)?0:/packag/i.test(t)?1:/finish/i.test(t)?2:t?3:4;
+      /* ไซซ์เรียงจากเล็กไปใหญ่ (Box XS → S → M → L → XL → 1XL) ไม่ใช่ตามตัวอักษร */
+      const SZ={XXS:0,XS:1,S:2,M:3,L:4,XL:5,'1XL':6,XXL:7,'2XL':7,'3XL':8,'4XL':9};
+      const szRe=/\b(XXS|XS|S|M|L|XL|XXL|[1-9]XL)\b/i;
+      const key=t=>{t=String(t||'');const m=t.match(szRe);
+        return m?{base:t.replace(szRe,'').replace(/\s+/g,' ').trim(),sz:SZ[m[1].toUpperCase()]}:{base:t,sz:-1};};
+      const cmpName=(x,y)=>{const a1=key(x),b1=key(y);
+        return a1.base.localeCompare(b1.base,'th',{numeric:true})||(a1.sz-b1.sz);};
+      rows.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1
+        :(ord(a.tag)-ord(b.tag))||String(a.tag).localeCompare(String(b.tag))
+        ||cmpName(a.item,b.item));
+    }
+    return rows;
+  }
   return toFormRows(txt)
     .filter(r=>(!p.dept||r.dept===p.dept)&&(!p.notDept||r.dept!==p.notDept))
     .map(r=>({...r,item:r.html}));
@@ -7063,13 +8058,52 @@ const norm=a=>a.map(r=>{const d=r.date.includes('-')?r.date:toKey(r.date);
 let RWK=[], RWK_OPTS=[], RYEAR_INIT=false;   /* WEEK เลือกได้หลายค่า เหมือนหน้า KPI */
 const MONTH_EN_R=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const showLong=k=>{if(!k)return '—';const[y,m,d]=k.split('-');return `${d} ${MONTHS[+m-1]} ${y}`;};
-const match=r=>{const y=$('fy').value,m=$('fm').value,d=FD.value;
-  if(y&&r.y!==y)return false;
-  if(d)return r.date===d;
-  return (!m||r.m===m)&&(!RWK.length||RWK.includes(String(r.wk)));};
+/* v-rptrange: ตัวกรองช่วงเวลา ดูทั้งหมด / รายปี / ไตรมาส / รายเดือน / รายสัปดาห์ / รายวัน + ลูกศรเลื่อนช่วง
+   เปิดหน้ามาครั้งแรก = รายวัน · วันนี้ (ผลลัพธ์ ณ ปัจจุบัน) · สัปดาห์ = ISO (จันทร์–อาทิตย์) */
+const todayKey=()=>{const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+const MON_SR=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const RMODE_NAME={all:'ดูทั้งหมด',year:'รายปี',q:'ไตรมาส',month:'รายเดือน',week:'รายสัปดาห์',day:'รายวัน'};
+let RMODE='day', RVAL='';
+function isoYW(k){const d=new Date(k+'T00:00:00Z');const n=(d.getUTCDay()+6)%7;
+  d.setUTCDate(d.getUTCDate()-n+3);return d.getUTCFullYear()+'-W'+String(isoWk(k)).padStart(2,'0');}
+function perKey(m,k){ if(!k)return '';
+  if(m==='year')return k.slice(0,4);
+  if(m==='q')return k.slice(0,4)+'-Q'+(Math.floor((+k.slice(5,7)-1)/3)+1);
+  if(m==='month')return k.slice(0,7);
+  if(m==='week')return isoYW(k);
+  if(m==='day')return k;
+  return 'all'; }
+function wkMon(v){const y=+v.slice(0,4),w=+v.slice(6);const j=new Date(Date.UTC(y,0,4));
+  j.setUTCDate(j.getUTCDate()-((j.getUTCDay()+6)%7)+(w-1)*7);return j;}
+function perLabel(m,v){
+  if(m==='all')return 'ทุกช่วงเวลา';
+  if(m==='year')return 'ปี '+v;
+  if(m==='q')return `ไตรมาส ${v.slice(-1)} / ${v.slice(0,4)}`;
+  if(m==='month')return MONTHS[+v.slice(5,7)-1]+' '+v.slice(0,4);
+  if(m==='week'){const a=wkMon(v),b=new Date(a);b.setUTCDate(a.getUTCDate()+6);
+    const f=d=>`${d.getUTCDate()} ${MON_SR[d.getUTCMonth()]}`;
+    return `สัปดาห์ ${+v.slice(6)} · ${f(a)} – ${f(b)} ${b.getUTCFullYear()}`;}
+  const[y,mo,d]=v.split('-');return `${d}/${mo}/${y}`; }
+let RF_OPTS=[];
+function buildRF(){
+  const keys=new Set(allRows().map(r=>perKey(RMODE,r.date)).filter(Boolean));
+  if(RMODE!=='all')keys.add(perKey(RMODE,todayKey()));      /* ช่วงปัจจุบันเลือกได้เสมอ แม้ยังไม่มีข้อมูล */
+  RF_OPTS=[...keys].sort();
+  if(!RF_OPTS.includes(RVAL))RVAL=RMODE==='all'?'all':perKey(RMODE,todayKey());
+  const sel=el('rfSel');
+  sel.innerHTML=RF_OPTS.slice().reverse().map(v=>`<option value="${v}">${perLabel(RMODE,v)}</option>`).join('');
+  sel.value=RVAL; sel.disabled=RMODE==='all';
+  const i=RF_OPTS.indexOf(RVAL);
+  el('rfPrev').disabled=RMODE==='all'||i<=0;
+  el('rfNext').disabled=RMODE==='all'||i>=RF_OPTS.length-1;
+  document.querySelectorAll('#rf .rf-modes button').forEach(b=>{
+    const on=b.dataset.m===RMODE; b.classList.toggle('on',on); b.setAttribute('aria-selected',on);});
+}
+const match=r=>RMODE==='all'||perKey(RMODE,r.date)===RVAL;
 const cfg=()=>TEAMS[TEAM];
 /* v-full: หน้ารายงาน — เลือก เดือน / สัปดาห์ / วัน แล้วกล่องทุกกล่องกางออกเต็ม แสดงครบทุกรายการ ไม่ต้องเลื่อนในกล่อง */
-const rptFiltered=()=>!!(el('fm').value||RWK.length||FD.value);
+const rptFiltered=()=>RMODE!=='all';   /* เลือกช่วงเวลาไหนก็ได้ → กางทุกแถว · ดูทั้งหมด → กล่องเลื่อนดู */
 let SHIPROWS=[];   /* ออเดอร์ทุกแถวจากชีต Packing (ใช้นับยอด) */
 const shipPanel=()=>cfg().panels.some(p=>p.ship);
 const hasShip=()=>shipPanel()||!!cfg().shipStats;   /* v-shipadm: ทีมไหนมีช่องค้างส่ง (ตอนนี้ = Admin) */
@@ -7113,7 +8147,7 @@ function tableHTML(rows,empty,noQty,p){
   let last='',b='';
   rows.forEach(r=>{const n=r.date!==last;
     b+=`<tr class="${n?'newday':''}"><td class="d">${n?show(r.date)+(p.dayCount?`<br><b style="color:var(--ink);font-size:1.1em">${perDay[r.date]}</b> <span style="font-size:.85em">${p.unit}</span>`:''):''}</td>
-        <td>${r.tag?`<span class="tag">${r.tag}</span><br>`:''}${r.item}</td>
+        <td>${r.tag?`<span class="tag${/raw/i.test(r.tag)?' t-rm':/packag/i.test(r.tag)?' t-pk':/finish/i.test(r.tag)?' t-fg':''}">${p.tagIco?`<i class="tgi">${ico(p.tagIco,'#0F766E',2.2)}</i>`:''}${r.tag}</span><br>`:''}${r.item}</td>
         ${noQty?'':`<td class="num">${r.qty!=null?fmt(r.qty):'—'}</td>`}</tr>`;last=r.date;});
   const hd=p.cols||['วันที่พบปัญหา','เกณฑ์ · รายละเอียด'];
   if(noQty)return `<table><thead><tr><th style="width:112px">${hd[0]}</th><th>${hd[1]}</th></tr></thead>
@@ -7131,9 +8165,13 @@ function renderReport(){
   document.body.classList.toggle('rptfull',rptFiltered());
   el('title').textContent=c.title;
   el('subtitle').textContent=c.sub;
-  el('source').textContent='ที่มา: '+c.source;
+  el('source').innerHTML='<b>ที่มา:</b> '+esc(c.source);
+  el('rIco').innerHTML=ico(TEAM_ICO[TEAM]||'warehouse','#fff',1.8);
+  el('rCal').innerHTML=ico('cal','#E9E4FF',1.8);
+  el('rDb').innerHTML=ico('db','#C9C1EE',1.8);
+  el('rClk').innerHTML=ico('clock','#E9E4FF',1.9);
 
-  const shipSel=hasShip()?SHIPROWS.filter(match):[];
+  const shipSel=(hasShip()&&!RLOADING)?SHIPROWS.filter(match):[];
   const sets=c.panels.map(p=>({p,rows:p.ship?shipProblemRows(shipSel):(DATA[p.k]||[]).filter(match)}));
   const work=sets.filter(s=>!s.p.ship);
 
@@ -7178,29 +8216,34 @@ function renderReport(){
     const top=Object.entries(tg).sort((a,b)=>b[1]-a[1])[0];
     k.push({l:'พบบ่อยที่สุด',v:top?top[1]:0,n:top?top[0]:'—'});
   }
+  if(RLOADING)k=k.map(x=>({l:x.l,v:'กำลังโหลด…',n:'',pending:true}));
   el('kpis').style.gridTemplateColumns=`repeat(${k.length},1fr)`;
   el('kpis').classList.toggle('many',k.length>4);
-  el('kpis').innerHTML=k.map((x,i)=>
-    `<div class="kpi ${x.pending?'pending':(x.cls||'c'+i)}"><div class="l">${x.l}</div>
-     <div class="v">${typeof x.v==='number'?fmt(x.v):x.v}</div><div class="n">${x.n}</div></div>`).join('');
+  el('kpis').innerHTML=k.map((x,i)=>{const [ia,ib]=kpiIco(x.l);
+    return `<div class="kpi ${x.pending?'pending':(x.cls||'c'+i)}"><span class="kic">${ico(ia,'#fff',1.8)}</span>
+     <div class="kbody"><div class="l">${x.l}</div>
+     <div class="v">${typeof x.v==='number'?fmt(x.v):x.v}</div><div class="n">${x.n}</div></div>
+     <span class="kdeco" aria-hidden="true">${ico(ib,'#fff',1.3)}</span></div>`;}).join('');
 
   /* ---- ช่องข้อมูล ---- */
   el('panels').style.gridTemplateColumns=`repeat(${sets.length},1fr)`;
   el('panels').innerHTML=sets.map(s=>
-    `<div class="panel"><div class="hd ${s.p.hd}">
-       <h2 class="sec">${s.p.t} <em>${s.rows.length} ${s.p.unit} · ${s.p.c}</em><span></span></h2></div>
-     <div class="scroll">${s.p.ship?shipTableHTML(s.rows,s.p.empty):tableHTML(s.rows,s.p.empty,s.p.form||s.p.noQty,s.p)}</div></div>`).join('');
+    `<div class="panel p-${s.p.hd}"><div class="hd ${s.p.hd}">
+       <span class="pic" aria-hidden="true">${ico(PANEL_ICO[s.p.k]||'doc','#fff',1.9)}</span>
+       <h2 class="sec">${s.p.t} <em>${s.rows.length} ${s.p.unit} · ${s.p.c}</em></h2>
+       <span class="pdoc" aria-hidden="true">${ico('doc','#D9D3F5',1.7)}</span></div>
+     <div class="scroll">${(()=>{const em=RLOADING?'กำลังโหลดข้อมูล…':s.p.empty;
+       return s.p.ship?shipTableHTML(s.rows,em):tableHTML(s.rows,em,s.p.form||s.p.noQty,s.p);})()}</div></div>`).join('');
 
   const ks=[...new Set([...days,...shipSel.map(r=>r.date)])].filter(Boolean).sort();
-  el('period').textContent=ks.length
-    ?(ks[0]===ks[ks.length-1]?showLong(ks[0]):`${showLong(ks[0])} – ${showLong(ks[ks.length-1])}`):'—';
-  const bits=[];
-  if($('fy').value)bits.push('ปี '+$('fy').value);
-  if($('fm').value)bits.push(MONTHS[+$('fm').value-1]);
-  if(RWK.length)bits.push(RWK.length===1?'สัปดาห์ '+RWK[0]:RWK.length+' สัปดาห์');
-  if(FD.value)bits.push(show(FD.value));
-  el('chip').style.display=bits.length?'inline-block':'none';
-  el('chip').textContent=bits.join(' · ');
+  el('period').textContent=RMODE==='day'?showLong(RVAL)
+    :ks.length?(ks[0]===ks[ks.length-1]?showLong(ks[0]):`${showLong(ks[0])} – ${showLong(ks[ks.length-1])}`)
+    :perLabel(RMODE,RVAL);
+  el('chip').style.display='inline-block';
+  el('chip').textContent=RMODE==='day'&&RVAL===todayKey()?'วันนี้'
+    :RMODE==='week'?'สัปดาห์ '+(+RVAL.slice(6)):RMODE==='q'?'ไตรมาส '+RVAL.slice(-1)
+    :RMODE==='month'?MON_SR[+RVAL.slice(5,7)-1]+' '+RVAL.slice(0,4):RMODE==='year'?'ปี '+RVAL
+    :RMODE==='all'?'ทั้งหมด':RMODE_NAME[RMODE];
 }
 
 function opts(sel,list,label,all){
@@ -7226,7 +8269,17 @@ function fillFiltersReport(){
   buildWeekPopR();
   const byW=byM.filter(r=>!RWK.length||RWK.includes(String(r.wk)));
   opts(FD,uniq(byW,r=>r.date),v=>show(v),'ทุกวัน');
+  buildRF();
 }
+document.querySelectorAll('#rf .rf-modes button').forEach(b=>b.addEventListener('click',()=>{
+  if(RMODE===b.dataset.m)return;
+  RMODE=b.dataset.m; RVAL=RMODE==='all'?'all':perKey(RMODE,todayKey());
+  buildRF(); renderReport();}));
+el('rfSel').addEventListener('change',e=>{RVAL=e.target.value;buildRF();renderReport();});
+const rfStep=d=>{const i=RF_OPTS.indexOf(RVAL)+d; if(i<0||i>=RF_OPTS.length)return;
+  RVAL=RF_OPTS[i];buildRF();renderReport();};
+el('rfPrev').addEventListener('click',()=>rfStep(-1));
+el('rfNext').addEventListener('click',()=>rfStep(1));
 
 /* ---------- ปฏิทิน ---------- */
 const ymOf=k=>k.slice(0,7);
@@ -7294,9 +8347,11 @@ function stamp(){const d=new Date();
 
 /* v135: กันโหลดซ้อน — สลับทีมเร็ว ๆ (เช่น เปิดมาที่ Delivery แล้วกดไป Admin) ผลของทีมเก่าที่มาช้า
    เคยทับข้อมูลทีมใหม่ ทำให้ยกเลิก/Return เป็น 0 และช่องแจ้งปัญหาโชว์ข้อมูลของ Delivery */
-let LOAD_SEQ=0;
+let LOAD_SEQ=0, RLOADING=false;
 async function load(){
   const seq=++LOAD_SEQ;
+  /* v-rptload: สลับทีมแล้วล้างหน้าเป็นของทีมใหม่ทันที (ขึ้น "กำลังโหลด…") ไม่ค้างข้อมูลทีมเดิมไว้ระหว่างรอ */
+  RLOADING=true; DATA={}; try{renderReport();}catch(e){}
   for(const k in CSV_CACHE)delete CSV_CACHE[k];
   ['fy','fm'].forEach(i=>el(i).value='');RWK=[];RYEAR_INIT=false;FD.value='';calYM=null;
   el('stat').className='stat';el('stat').textContent='กำลังดึงข้อมูล…';el('reload').disabled=true;
@@ -7307,6 +8362,7 @@ async function load(){
     : grab(p)));
   if(extra)await extra;
   if(seq!==LOAD_SEQ)return;          /* มีการโหลดใหม่กว่าแล้ว ทิ้งผลนี้ */
+  RLOADING=false;
   buildShipRows();
   DATA={};const bad=[];
   res.forEach((r,i)=>{
@@ -7359,8 +8415,7 @@ document.addEventListener('keydown',e=>{
 const RPT_SHOT_W=1800;   /* กว้างพอให้ภาพออกมาราว 3:4 (แนวตั้งแต่ไม่ผอมเกิน) */
 el('save').addEventListener('click',async()=>{
   const sh=el('shot'), kp=el('kpis'), pn=el('panels');
-  const tag=[el('fy').value, el('fm').value&&MONTH_EN_R[+el('fm').value-1],
-             RWK.length&&('W'+RWK.join('_')), FD.value].filter(Boolean).join('-')||'all';
+  const tag=RMODE==='all'?'all':RVAL;
   const keep=[sh.style.width,sh.style.maxWidth,kp.style.gridTemplateColumns,pn.style.gridTemplateColumns];
   const n=kp.children.length;
   document.body.classList.add('cap'); sh.classList.add('cap-full','cap-tall');
@@ -7474,96 +8529,6 @@ window.RPT_INIT=(t)=>{ if(started){ if(t&&t!==TEAM) team(t); return; } started=t
 })();
 </script>
 
-<template id="msopDoc">&lt;!DOCTYPE html&gt;
-&lt;html lang="th"&gt;
-&lt;head&gt;
-&lt;meta charset="utf-8"&gt;
-&lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;
-&lt;title&gt;Mini SOP: การ Cancel และใบ Return&lt;/title&gt;
-&lt;style&gt;
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
---bg:#f7f6f2;--card:#fff;--text:#1f2328;--muted:#5d6670;--line:#dcd9d0;--org:#d9650b;--orgbg:#fff1e3;--blue:#1565c0;--bluebg:#e5f0fc;--warn:#b42318;--warnbg:#fdecea}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181a;--card:#1f2224;--text:#eceae4;--muted:#a3a9ae;--line:#34383b;--org:#ff9a4d;--orgbg:#3a2a1c;--blue:#6db3ff;--bluebg:#1b2c40;--warn:#ff8a80;--warnbg:#3b1f1d}}
-:root[data-theme="dark"]{--bg:#16181a;--card:#1f2224;--text:#eceae4;--muted:#a3a9ae;--line:#34383b;--org:#ff9a4d;--orgbg:#3a2a1c;--blue:#6db3ff;--bluebg:#1b2c40;--warn:#ff8a80;--warnbg:#3b1f1d}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans Thai","Sarabun",system-ui,sans-serif;line-height:1.6}
-main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
-h1{font-size:1.5rem;margin:0 0 4px}
-h2{font-size:1.1rem;margin:28px 0 10px;border-left:4px solid var(--blue);padding-left:10px}
-.meta{color:var(--muted);font-size:.85rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
-.key{font-size:1.15rem;font-weight:700;text-align:center;padding:14px;background:var(--bluebg);border-radius:10px;margin:12px 0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:560px){.grid{grid-template-columns:1fr}}
-.c{border-top:5px solid var(--org);background:var(--orgbg)}
-.r{border-top:5px solid var(--blue);background:var(--bluebg)}
-.tag{font-weight:700;font-size:1.05rem}
-.c .tag{color:var(--org)}.r .tag{color:var(--blue)}
-.flow{text-align:center}
-.box{display:inline-block;border:2px solid var(--line);background:var(--card);border-radius:8px;padding:8px 14px;margin:4px}
-.fork{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
-.arrow{color:var(--muted);margin:2px 0}
-.ph{border:2px dashed var(--line);color:var(--muted);border-radius:8px;padding:12px;text-align:center;font-size:.85rem;margin:8px 0}
-.todo{background:#fff8c5;color:#4d3b00;border-radius:4px;padding:0 5px;font-size:.85em}
-table{width:100%;border-collapse:collapse;font-size:.92rem}
-th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
-th{background:var(--bg)}
-.warn{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:10px 14px;font-weight:600}
-ol,ul{margin:6px 0;padding-left:22px}
-@page{size:A5 portrait;margin:7mm}
-@media print{
-:root{padding:0;--bg:#fff;--card:#fff;--text:#000}
-body{background:#fff;font-size:8pt;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-main{max-width:none;padding:0}
-h1{font-size:12pt;margin:0 0 2px}
-h2{font-size:9pt;margin:7px 0 4px;padding-left:6px;border-left-width:3px}
-.meta{font-size:7pt}
-.card{padding:4px 7px;margin:4px 0;border-radius:5px;break-inside:avoid}
-.key{font-size:9pt;padding:5px;margin:5px 0}
-.grid{grid-template-columns:1fr 1fr;gap:5px}
-.grid ul,.card ul{margin:2px 0;padding-left:14px}
-.tag{font-size:9pt}
-.box{padding:3px 8px;margin:2px}
-.arrow{margin:0}
-table{font-size:7.5pt}
-th,td{padding:3px 5px}
-}
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;main&gt;
-&lt;h1&gt;Mini SOP: การ Cancel และใบ Return&lt;/h1&gt;
-&lt;div class="meta"&gt;Carital Admin · วันที่ 2/10/69 · ผู้จัดทำ: กัลยาณี · ผู้อนุมัติ: ________&lt;/div&gt;
-
-&lt;h2&gt;1. วัตถุประสงค์&lt;/h2&gt;
-&lt;div class="card"&gt;เพื่อลดความซ้ำซ้อนและความสับสนของสถานะในระบบและ Dashboard&lt;/div&gt;
-
-&lt;h2&gt;2. หลักเดียวที่ต้องจำ&lt;/h2&gt;
-&lt;div class="key"&gt;ดูที่เดียว: "ของถูกส่งออกไปข้างนอกจริงหรือยัง?"&lt;/div&gt;
-&lt;div class="grid"&gt;
-&lt;div class="card c"&gt;&lt;div class="tag"&gt;CANCEL (int)&lt;/div&gt;&lt;b&gt;ยกเลิกในวัน&lt;/b&gt;&lt;br&gt;ของยังอยู่ในบริษัท ไม่เคยออกไปข้างนอก&lt;ul&gt;&lt;li&gt;ก่อนหยิบ&lt;/li&gt;&lt;li&gt;ก่อนแพ็ค&lt;/li&gt;&lt;li&gt;กด Out แล้ว แต่ของยังไม่ถูกส่งออก&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
-&lt;div class="card r"&gt;&lt;div class="tag"&gt;RETURN (RT)&lt;/div&gt;&lt;b&gt;กลับมาจากข้างนอก&lt;/b&gt;&lt;br&gt;ของถูกส่งออกไปแล้ว แล้วกลับมาที่บริษัท&lt;ul&gt;&lt;li&gt;ลูกค้าปฏิเสธรับ&lt;/li&gt;&lt;li&gt;ขนส่งตีกลับ&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="card c" style="margin-top:10px"&gt;&lt;b&gt;กรณีมีใบ Out แล้ว แต่ของยังไม่ส่งให้ขนส่ง:&lt;/b&gt; ให้ทำ Return &lt;u&gt;ในใบ Out นั้น&lt;/u&gt; แต่ที่ช่อง &lt;b&gt;Return Reason&lt;/b&gt; ต้อง Fil เป็น &lt;b&gt;"ยกเลิกในวัน"&lt;/b&gt; และใส่เหตุผลใน &lt;b&gt;Log note&lt;/b&gt; เช่น "ลูกค้ายกเลิก"&lt;/div&gt;
-
-&lt;h2&gt;3. Flow การตัดสินใจ: ดูว่าของอยู่ขั้นไหน&lt;/h2&gt;
-&lt;svg viewBox="0 72 740 1142" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="แผนผังการทำใบ Cancel และ Return" style="border-radius:10px;border:1px solid #dcd9d0;width:100%;height:auto;display:block;font-family:'Noto Sans Thai','Sarabun','Loma',Tahoma,sans-serif"&gt;&lt;defs&gt;&lt;marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"&gt;&lt;path d="M0 0L10 5L0 10z" fill="#444"/&gt;&lt;/marker&gt;&lt;/defs&gt;&lt;rect width="740" height="1214" fill="#fff"/&gt;&lt;rect x="34" y="76" width="672" height="42" rx="10" fill="#fdecea" stroke="#b42318" stroke-width="2"/&gt;&lt;text x="370.0" y="102.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;หมายเหตุ: ทุกสถานการณ์ ต้องกด Cancel ก่อน แล้วจึงทำขั้นตอนต่อไป&lt;/text&gt;&lt;rect x="220" y="136" width="300" height="40" rx="10" fill="#f1f1ee" stroke="#555" stroke-width="2"/&gt;&lt;text x="370.0" y="161.0" text-anchor="middle" font-size="16" font-weight="400" fill="#1f2328"&gt;ออเดอร์มีปัญหา / ลูกค้ายกเลิก&lt;/text&gt;&lt;path d="M370 176V204" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="220" y="204" width="300" height="44" rx="10" fill="#fff3bf" stroke="#b58900" stroke-width="2"/&gt;&lt;text x="370.0" y="231.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ตอนนี้ของอยู่ขั้นไหน?&lt;/text&gt;&lt;path d="M220 226H22V788" fill="none" stroke="#444" stroke-width="2"/&gt;&lt;path d="M22 324.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="274" width="290" height="100" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="329.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;A. ยังไม่ถูกหยิบ&lt;/text&gt;&lt;path d="M324 324.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="274" width="322" height="100" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="296.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;กด Cancel ในระบบ&lt;/text&gt;&lt;text x="545.0" y="318.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ก่อนกด Cancel ให้ดูใน BATCH ก่อนว่า&lt;/text&gt;&lt;text x="545.0" y="340.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ของกำลังถูกหยิบหรือยัง&lt;/text&gt;&lt;text x="545.0" y="362.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;หากขึ้นว่ากำลังหยิบ ไม่สามารถกด Cancel ได้&lt;/text&gt;&lt;path d="M22 426.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="394" width="290" height="64" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="431.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;B. หยิบแล้ว แต่ยังไม่แพ็ค&lt;/text&gt;&lt;path d="M324 426.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="394" width="322" height="64" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="431.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ทำ Return จากใบ Pick&lt;/text&gt;&lt;path d="M22 520.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="478" width="290" height="84" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="525.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;C. แพ็คแล้ว แต่ยังไม่กด Out&lt;/text&gt;&lt;path d="M324 520.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="478" width="322" height="84" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="503.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;กด Cancel order (ใบ Out จะถูกยกเลิกให้)&lt;/text&gt;&lt;text x="545.0" y="525.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ทำ Return ในใบ Pack&lt;/text&gt;&lt;text x="545.0" y="547.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Return Reason: Fil “ยกเลิกในวัน”&lt;/text&gt;&lt;path d="M22 647.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="582" width="290" height="130" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="630.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;D. แพ็คแล้ว สถานะ Out แล้ว&lt;/text&gt;&lt;text x="179.0" y="652.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;แต่ของยังไม่ถูกส่งออกไป&lt;/text&gt;&lt;text x="179.0" y="674.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;นอกบริษัท&lt;/text&gt;&lt;path d="M324 647.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="582" width="322" height="130" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="630.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ทำ Return ในใบ Out นั้น&lt;/text&gt;&lt;text x="545.0" y="652.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Return Reason: Fil “ยกเลิกในวัน”&lt;/text&gt;&lt;text x="545.0" y="674.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Note: ใส่เหตุผล เช่น “ลูกค้ายกเลิก”&lt;/text&gt;&lt;path d="M22 788.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="732" width="290" height="112" rx="10" fill="#fff" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="179.0" y="782.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;E. ของถูกส่งออกไปนอกบริษัท&lt;/text&gt;&lt;text x="179.0" y="804.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;แล้วกลับมา&lt;/text&gt;&lt;path d="M324 788.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="732" width="322" height="112" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="545.0" y="760.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ทำใบ Return (RT) ปกติ&lt;/text&gt;&lt;text x="545.0" y="782.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ย้ายไป Location WH300/Good/RT03&lt;/text&gt;&lt;text x="545.0" y="804.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ต้องถ่ายคลิปสินค้าที่กลับมาจากข้างนอก&lt;/text&gt;&lt;text x="545.0" y="826.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;และใส่ไว้ใน Log Note ทุกครั้ง&lt;/text&gt;&lt;path d="M545 844V860" fill="none" stroke="#1565c0" stroke-width="2"/&gt;&lt;path d="M545 860H179V884" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="884" width="290" height="56" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="179.0" y="906.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ไม่เกิน 7 วัน&lt;/text&gt;&lt;text x="179.0" y="928.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ใช้ WH300/Good/RT03 ตามข้างบน&lt;/text&gt;&lt;path d="M545 860V884" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="884" width="322" height="56" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="545.0" y="917.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;เกิน 7 วัน&lt;/text&gt;&lt;path d="M545 940V978" fill="none" stroke="#1565c0" stroke-width="2"/&gt;&lt;path d="M545 978H179V998" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;path d="M545 978V998" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="998" width="290" height="70" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="179.0" y="1016.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ชา&lt;/text&gt;&lt;text x="179.0" y="1038.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ย้ายไป&lt;/text&gt;&lt;text x="179.0" y="1060.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Fac 16/Quarantine/QaLab&lt;/text&gt;&lt;rect x="384" y="998" width="322" height="44" rx="10" fill="#fff3bf" stroke="#b58900" stroke-width="2"/&gt;&lt;text x="545.0" y="1025.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;อุปกรณ์ ชำรุดหรือไม่?&lt;/text&gt;&lt;path d="M545 1042V1062" fill="none" stroke="#1565c0" stroke-width="2"/&gt;&lt;path d="M545 1062H462V1082" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;path d="M545 1062H628V1082" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="1082" width="156" height="84" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="462.0" y="1107.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ชำรุด&lt;/text&gt;&lt;text x="462.0" y="1129.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;ย้ายไป&lt;/text&gt;&lt;text x="462.0" y="1151.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;WH300/Quarantine/Qz01&lt;/text&gt;&lt;rect x="550" y="1082" width="156" height="84" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="628.0" y="1107.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ไม่ชำรุด&lt;/text&gt;&lt;text x="628.0" y="1129.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;ย้ายเข้า&lt;/text&gt;&lt;text x="628.0" y="1151.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;WH300/Good/RT03&lt;/text&gt;&lt;rect x="34" y="1188" width="18" height="18" rx="3" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="60" y="1203" font-size="14" fill="#1f2328"&gt;Cancel / ยกเลิกในวัน&lt;/text&gt;&lt;rect x="270" y="1188" width="18" height="18" rx="3" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="296" y="1203" font-size="14" fill="#1f2328"&gt;Return (RT)&lt;/text&gt;&lt;/svg&gt;
-
-&lt;h2&gt;4. ตัวอย่างกรณี&lt;/h2&gt;
-&lt;div class="card"&gt;&lt;table&gt;
-&lt;tr&gt;&lt;th&gt;สถานการณ์&lt;/th&gt;&lt;th&gt;ทำอย่างไร&lt;/th&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;ลูกค้ายกเลิก ของยังไม่ถูกหยิบ&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;กด Cancel ในระบบ (ดู BATCH ก่อนว่ากำลังหยิบหรือยัง)&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;ของถูกหยิบแล้ว ยังไม่แพ็ค แล้วลูกค้ายกเลิก&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;ทำ Return ในใบ Pick&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;แพ็คแล้ว แต่ยังไม่กด Out แล้วลูกค้ายกเลิก&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;กด Cancel order → ทำ Return ในใบ Pack → Return Reason Fil “ยกเลิกในวัน”&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;แพ็คเสร็จ ระบบขึ้น Out แล้ว ของยังไม่ออกจากบริษัท ลูกค้ายกเลิก&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;Return ในใบ Out → Return Reason "ยกเลิกในวัน" + Note "ลูกค้ายกเลิก"&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;ของออกไปนอกบริษัทแล้ว ลูกค้าปฏิเสธ ของตีกลับ (ไม่เกิน 7 วัน)&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--blue)"&gt;Return (RT) ปกติ → ย้ายไป WH300/Good/RT03 + ถ่ายคลิปใส่ Log Note ทุกครั้ง&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;ของส่งออกไปเกิน 7 วันแล้วกลับมา&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--blue)"&gt;Return (RT) + ย้ายไป QA: ชา → Fac 16/Quarantine/QaLab, อุปกรณ์ที่ชำรุด → WH300/Quarantine/Qz01 (ไม่ชำรุด → WH300/Good/RT03) + ถ่ายคลิปใส่ Log Note ทุกครั้ง&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;/table&gt;&lt;/div&gt;
-
-&lt;/main&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</template>
 <template id="sopDoc">&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;th&quot;&gt;
 &lt;head&gt;
@@ -8253,6 +9218,96 @@ th,td{padding:3px 5px}
     &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</template>
+<template id="sopcrDoc">&lt;!DOCTYPE html&gt;
+&lt;html lang="th"&gt;
+&lt;head&gt;
+&lt;meta charset="utf-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;
+&lt;title&gt;Mini SOP: การ Cancel และใบ Return&lt;/title&gt;
+&lt;style&gt;
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f7f6f2;--card:#fff;--text:#1f2328;--muted:#5d6670;--line:#dcd9d0;--org:#d9650b;--orgbg:#fff1e3;--blue:#1565c0;--bluebg:#e5f0fc;--warn:#b42318;--warnbg:#fdecea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181a;--card:#1f2224;--text:#eceae4;--muted:#a3a9ae;--line:#34383b;--org:#ff9a4d;--orgbg:#3a2a1c;--blue:#6db3ff;--bluebg:#1b2c40;--warn:#ff8a80;--warnbg:#3b1f1d}}
+:root[data-theme="dark"]{--bg:#16181a;--card:#1f2224;--text:#eceae4;--muted:#a3a9ae;--line:#34383b;--org:#ff9a4d;--orgbg:#3a2a1c;--blue:#6db3ff;--bluebg:#1b2c40;--warn:#ff8a80;--warnbg:#3b1f1d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans Thai","Sarabun",system-ui,sans-serif;line-height:1.6}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.1rem;margin:28px 0 10px;border-left:4px solid var(--blue);padding-left:10px}
+.meta{color:var(--muted);font-size:.85rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.key{font-size:1.15rem;font-weight:700;text-align:center;padding:14px;background:var(--bluebg);border-radius:10px;margin:12px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.c{border-top:5px solid var(--org);background:var(--orgbg)}
+.r{border-top:5px solid var(--blue);background:var(--bluebg)}
+.tag{font-weight:700;font-size:1.05rem}
+.c .tag{color:var(--org)}.r .tag{color:var(--blue)}
+.flow{text-align:center}
+.box{display:inline-block;border:2px solid var(--line);background:var(--card);border-radius:8px;padding:8px 14px;margin:4px}
+.fork{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.arrow{color:var(--muted);margin:2px 0}
+.ph{border:2px dashed var(--line);color:var(--muted);border-radius:8px;padding:12px;text-align:center;font-size:.85rem;margin:8px 0}
+.todo{background:#fff8c5;color:#4d3b00;border-radius:4px;padding:0 5px;font-size:.85em}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+.warn{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:10px 14px;font-weight:600}
+ol,ul{margin:6px 0;padding-left:22px}
+@page{size:A5 portrait;margin:7mm}
+@media print{
+:root{padding:0;--bg:#fff;--card:#fff;--text:#000}
+body{background:#fff;font-size:8pt;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+main{max-width:none;padding:0}
+h1{font-size:12pt;margin:0 0 2px}
+h2{font-size:9pt;margin:7px 0 4px;padding-left:6px;border-left-width:3px}
+.meta{font-size:7pt}
+.card{padding:4px 7px;margin:4px 0;border-radius:5px;break-inside:avoid}
+.key{font-size:9pt;padding:5px;margin:5px 0}
+.grid{grid-template-columns:1fr 1fr;gap:5px}
+.grid ul,.card ul{margin:2px 0;padding-left:14px}
+.tag{font-size:9pt}
+.box{padding:3px 8px;margin:2px}
+.arrow{margin:0}
+table{font-size:7.5pt}
+th,td{padding:3px 5px}
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;main&gt;
+&lt;h1&gt;Mini SOP: การ Cancel และใบ Return&lt;/h1&gt;
+&lt;div class="meta"&gt;Carital Admin · วันที่ 2/10/69 · ผู้จัดทำ: กัลยาณี · ผู้อนุมัติ: ________&lt;/div&gt;
+
+&lt;h2&gt;1. วัตถุประสงค์&lt;/h2&gt;
+&lt;div class="card"&gt;เพื่อลดความซ้ำซ้อนและความสับสนของสถานะในระบบและ Dashboard&lt;/div&gt;
+
+&lt;h2&gt;2. หลักเดียวที่ต้องจำ&lt;/h2&gt;
+&lt;div class="key"&gt;ดูที่เดียว: "ของถูกส่งออกไปข้างนอกจริงหรือยัง?"&lt;/div&gt;
+&lt;div class="grid"&gt;
+&lt;div class="card c"&gt;&lt;div class="tag"&gt;CANCEL (int)&lt;/div&gt;&lt;b&gt;ยกเลิกในวัน&lt;/b&gt;&lt;br&gt;ของยังอยู่ในบริษัท ไม่เคยออกไปข้างนอก&lt;ul&gt;&lt;li&gt;ก่อนหยิบ&lt;/li&gt;&lt;li&gt;ก่อนแพ็ค&lt;/li&gt;&lt;li&gt;กด Out แล้ว แต่ของยังไม่ถูกส่งออก&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+&lt;div class="card r"&gt;&lt;div class="tag"&gt;RETURN (RT)&lt;/div&gt;&lt;b&gt;กลับมาจากข้างนอก&lt;/b&gt;&lt;br&gt;ของถูกส่งออกไปแล้ว แล้วกลับมาที่บริษัท&lt;ul&gt;&lt;li&gt;ลูกค้าปฏิเสธรับ&lt;/li&gt;&lt;li&gt;ขนส่งตีกลับ&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="card c" style="margin-top:10px"&gt;&lt;b&gt;กรณีมีใบ Out แล้ว แต่ของยังไม่ส่งให้ขนส่ง:&lt;/b&gt; ให้ทำ Return &lt;u&gt;ในใบ Out นั้น&lt;/u&gt; แต่ที่ช่อง &lt;b&gt;Return Reason&lt;/b&gt; ต้อง Fil เป็น &lt;b&gt;"ยกเลิกในวัน"&lt;/b&gt; และใส่เหตุผลใน &lt;b&gt;Log note&lt;/b&gt; เช่น "ลูกค้ายกเลิก"&lt;/div&gt;
+
+&lt;h2&gt;3. Flow การตัดสินใจ: ดูว่าของอยู่ขั้นไหน&lt;/h2&gt;
+&lt;svg viewBox="0 72 740 1142" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="แผนผังการทำใบ Cancel และ Return" style="border-radius:10px;border:1px solid #dcd9d0;width:100%;height:auto;display:block;font-family:'Noto Sans Thai','Sarabun','Loma',Tahoma,sans-serif"&gt;&lt;defs&gt;&lt;marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"&gt;&lt;path d="M0 0L10 5L0 10z" fill="#444"/&gt;&lt;/marker&gt;&lt;/defs&gt;&lt;rect width="740" height="1214" fill="#fff"/&gt;&lt;rect x="34" y="76" width="672" height="42" rx="10" fill="#fdecea" stroke="#b42318" stroke-width="2"/&gt;&lt;text x="370.0" y="102.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;หมายเหตุ: ทุกสถานการณ์ ต้องกด Cancel ก่อน แล้วจึงทำขั้นตอนต่อไป&lt;/text&gt;&lt;rect x="220" y="136" width="300" height="40" rx="10" fill="#f1f1ee" stroke="#555" stroke-width="2"/&gt;&lt;text x="370.0" y="161.0" text-anchor="middle" font-size="16" font-weight="400" fill="#1f2328"&gt;ออเดอร์มีปัญหา / ลูกค้ายกเลิก&lt;/text&gt;&lt;path d="M370 176V204" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="220" y="204" width="300" height="44" rx="10" fill="#fff3bf" stroke="#b58900" stroke-width="2"/&gt;&lt;text x="370.0" y="231.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ตอนนี้ของอยู่ขั้นไหน?&lt;/text&gt;&lt;path d="M220 226H22V788" fill="none" stroke="#444" stroke-width="2"/&gt;&lt;path d="M22 324.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="274" width="290" height="100" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="329.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;A. ยังไม่ถูกหยิบ&lt;/text&gt;&lt;path d="M324 324.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="274" width="322" height="100" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="296.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;กด Cancel ในระบบ&lt;/text&gt;&lt;text x="545.0" y="318.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ก่อนกด Cancel ให้ดูใน BATCH ก่อนว่า&lt;/text&gt;&lt;text x="545.0" y="340.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ของกำลังถูกหยิบหรือยัง&lt;/text&gt;&lt;text x="545.0" y="362.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;หากขึ้นว่ากำลังหยิบ ไม่สามารถกด Cancel ได้&lt;/text&gt;&lt;path d="M22 426.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="394" width="290" height="64" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="431.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;B. หยิบแล้ว แต่ยังไม่แพ็ค&lt;/text&gt;&lt;path d="M324 426.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="394" width="322" height="64" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="431.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ทำ Return จากใบ Pick&lt;/text&gt;&lt;path d="M22 520.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="478" width="290" height="84" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="525.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;C. แพ็คแล้ว แต่ยังไม่กด Out&lt;/text&gt;&lt;path d="M324 520.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="478" width="322" height="84" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="503.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;กด Cancel order (ใบ Out จะถูกยกเลิกให้)&lt;/text&gt;&lt;text x="545.0" y="525.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ทำ Return ในใบ Pack&lt;/text&gt;&lt;text x="545.0" y="547.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Return Reason: Fil “ยกเลิกในวัน”&lt;/text&gt;&lt;path d="M22 647.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="582" width="290" height="130" rx="10" fill="#fff" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="179.0" y="630.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;D. แพ็คแล้ว สถานะ Out แล้ว&lt;/text&gt;&lt;text x="179.0" y="652.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;แต่ของยังไม่ถูกส่งออกไป&lt;/text&gt;&lt;text x="179.0" y="674.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;นอกบริษัท&lt;/text&gt;&lt;path d="M324 647.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="582" width="322" height="130" rx="10" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="545.0" y="630.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ทำ Return ในใบ Out นั้น&lt;/text&gt;&lt;text x="545.0" y="652.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Return Reason: Fil “ยกเลิกในวัน”&lt;/text&gt;&lt;text x="545.0" y="674.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Note: ใส่เหตุผล เช่น “ลูกค้ายกเลิก”&lt;/text&gt;&lt;path d="M22 788.0H34" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="732" width="290" height="112" rx="10" fill="#fff" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="179.0" y="782.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;E. ของถูกส่งออกไปนอกบริษัท&lt;/text&gt;&lt;text x="179.0" y="804.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;แล้วกลับมา&lt;/text&gt;&lt;path d="M324 788.0H384" fill="none" stroke="#444" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="732" width="322" height="112" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="545.0" y="760.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ทำใบ Return (RT) ปกติ&lt;/text&gt;&lt;text x="545.0" y="782.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ย้ายไป Location WH300/Good/RT03&lt;/text&gt;&lt;text x="545.0" y="804.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ต้องถ่ายคลิปสินค้าที่กลับมาจากข้างนอก&lt;/text&gt;&lt;text x="545.0" y="826.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;และใส่ไว้ใน Log Note ทุกครั้ง&lt;/text&gt;&lt;path d="M545 844V860" fill="none" stroke="#1565c0" stroke-width="2"/&gt;&lt;path d="M545 860H179V884" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="884" width="290" height="56" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="179.0" y="906.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ไม่เกิน 7 วัน&lt;/text&gt;&lt;text x="179.0" y="928.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ใช้ WH300/Good/RT03 ตามข้างบน&lt;/text&gt;&lt;path d="M545 860V884" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="884" width="322" height="56" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="545.0" y="917.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;เกิน 7 วัน&lt;/text&gt;&lt;path d="M545 940V978" fill="none" stroke="#1565c0" stroke-width="2"/&gt;&lt;path d="M545 978H179V998" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;path d="M545 978V998" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="34" y="998" width="290" height="70" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="179.0" y="1016.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ชา&lt;/text&gt;&lt;text x="179.0" y="1038.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;ย้ายไป&lt;/text&gt;&lt;text x="179.0" y="1060.0" text-anchor="middle" font-size="14" font-weight="400" fill="#1f2328"&gt;Fac 16/Quarantine/QaLab&lt;/text&gt;&lt;rect x="384" y="998" width="322" height="44" rx="10" fill="#fff3bf" stroke="#b58900" stroke-width="2"/&gt;&lt;text x="545.0" y="1025.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;อุปกรณ์ ชำรุดหรือไม่?&lt;/text&gt;&lt;path d="M545 1042V1062" fill="none" stroke="#1565c0" stroke-width="2"/&gt;&lt;path d="M545 1062H462V1082" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;path d="M545 1062H628V1082" fill="none" stroke="#1565c0" stroke-width="2" marker-end="url(#ah)"/&gt;&lt;rect x="384" y="1082" width="156" height="84" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="462.0" y="1107.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ชำรุด&lt;/text&gt;&lt;text x="462.0" y="1129.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;ย้ายไป&lt;/text&gt;&lt;text x="462.0" y="1151.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;WH300/Quarantine/Qz01&lt;/text&gt;&lt;rect x="550" y="1082" width="156" height="84" rx="10" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="628.0" y="1107.0" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2328"&gt;ไม่ชำรุด&lt;/text&gt;&lt;text x="628.0" y="1129.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;ย้ายเข้า&lt;/text&gt;&lt;text x="628.0" y="1151.0" text-anchor="middle" font-size="12" font-weight="400" fill="#1f2328"&gt;WH300/Good/RT03&lt;/text&gt;&lt;rect x="34" y="1188" width="18" height="18" rx="3" fill="#fff1e3" stroke="#d9650b" stroke-width="2"/&gt;&lt;text x="60" y="1203" font-size="14" fill="#1f2328"&gt;Cancel / ยกเลิกในวัน&lt;/text&gt;&lt;rect x="270" y="1188" width="18" height="18" rx="3" fill="#e5f0fc" stroke="#1565c0" stroke-width="2"/&gt;&lt;text x="296" y="1203" font-size="14" fill="#1f2328"&gt;Return (RT)&lt;/text&gt;&lt;/svg&gt;
+
+&lt;h2&gt;4. ตัวอย่างกรณี&lt;/h2&gt;
+&lt;div class="card"&gt;&lt;table&gt;
+&lt;tr&gt;&lt;th&gt;สถานการณ์&lt;/th&gt;&lt;th&gt;ทำอย่างไร&lt;/th&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;ลูกค้ายกเลิก ของยังไม่ถูกหยิบ&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;กด Cancel ในระบบ (ดู BATCH ก่อนว่ากำลังหยิบหรือยัง)&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;ของถูกหยิบแล้ว ยังไม่แพ็ค แล้วลูกค้ายกเลิก&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;ทำ Return ในใบ Pick&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;แพ็คแล้ว แต่ยังไม่กด Out แล้วลูกค้ายกเลิก&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;กด Cancel order → ทำ Return ในใบ Pack → Return Reason Fil “ยกเลิกในวัน”&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;แพ็คเสร็จ ระบบขึ้น Out แล้ว ของยังไม่ออกจากบริษัท ลูกค้ายกเลิก&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--org)"&gt;Return ในใบ Out → Return Reason "ยกเลิกในวัน" + Note "ลูกค้ายกเลิก"&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;ของออกไปนอกบริษัทแล้ว ลูกค้าปฏิเสธ ของตีกลับ (ไม่เกิน 7 วัน)&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--blue)"&gt;Return (RT) ปกติ → ย้ายไป WH300/Good/RT03 + ถ่ายคลิปใส่ Log Note ทุกครั้ง&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;ของส่งออกไปเกิน 7 วันแล้วกลับมา&lt;/td&gt;&lt;td&gt;&lt;b style="color:var(--blue)"&gt;Return (RT) + ย้ายไป QA: ชา → Fac 16/Quarantine/QaLab, อุปกรณ์ที่ชำรุด → WH300/Quarantine/Qz01 (ไม่ชำรุด → WH300/Good/RT03) + ถ่ายคลิปใส่ Log Note ทุกครั้ง&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;/div&gt;
+
+&lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</template>
 <template id="crDoc">&lt;!DOCTYPE html&gt;
 &lt;html lang="th"&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;
 &lt;meta name="viewport" content="width=device-width,initial-scale=1"&gt;
