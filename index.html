@@ -736,6 +736,10 @@ body.cap .wrap{height:auto;overflow:visible;padding:0}#vKPI .shpfc #shpfcReload{
 .side-foot{padding:20px 28px 26px;font-size:20.5px;color:#8AA9A7;
   border-top:1px solid rgba(255,255,255,.10)}
 /* เส้นคั่นก่อนเมนูเดี่ยวบรรทัดสุดท้าย (Forecast) — ไม่ได้อยู่ใต้หัวข้อไหน */
+/* หัวข้อย่อยในกลุ่มเมนู (เช่น Mini SOP ใต้ วิธีการปฏิบัติงาน) */
+.sidenav .subgrp{font-size:19px;font-weight:700;letter-spacing:.06em;color:#B9D3D1;margin:14px 0 4px 20px;padding-left:12px;border-left:2px solid rgba(255,255,255,.22);white-space:nowrap}
+.sidenav button.sub{padding-left:46px}
+.sidenav button.sub:hover{padding-left:52px}
 .sidenav .nav-sep{height:1px;background:rgba(255,255,255,.13);margin:22px 22px 14px}
 .main{flex:1;min-width:0}
 .side-toggle{display:none;position:fixed;top:12px;left:12px;z-index:80;
@@ -1156,7 +1160,8 @@ body.mobile .side .brand{padding-left:112px;padding-right:16px}body.mobile .side
 
       <div class="grp">วิธีการปฏิบัติงาน</div>
       <button data-view="kpi" data-sec="sop">เงื่อนไขการส่งสินค้าแต่ละ Platform</button>
-      <button data-view="kpi" data-sec="msop">Mini SOP: Cancel และใบ Return</button>
+      <div class="subgrp">Mini SOP</div>
+      <button data-view="kpi" data-sec="msop" class="sub">Cancel และใบ Return</button>
 
       <div class="nav-sep"></div>
       <button data-view="kpi" data-sec="fc">Forecast</button>
