@@ -5038,6 +5038,10 @@ async function loadShip(force){
 /* สถิติ — ตรรกะเดียวกับ applyShipFilter ของ Logistics Central
    จุดสำคัญ: ทุกตัวนับ "ออเดอร์ไม่ซ้ำ" ด้วย Set ของ Order Reference
    ไม่ใช่นับจำนวนแถว เพราะ 1 ออเดอร์อาจมีหลายบรรทัด (หลายสินค้า) */
+const shipCritSkip=v=>/ไม่ต้องจัดส่ง|ไม่ต้องส่ง/.test(String(v||'').replace(/\s+/g,''));
+const shipCritOK=v=>{ const t=String(v||'').replace(/\s+/g,'');
+  if(/ไม่ตรง|ไม่ผ่าน|ไม่สำเร็จ/.test(t))return false;
+  return /สำเร็จ|ตรง|ผ่าน|on ?time|delivered/i.test(t); };
 function shipStats(list){
   const ords=new Set(), pend=new Set();
   const byDay={}, byCh={}, byCarrier={}, byStatus={}, byUrg={}, bySend={}, byCrit={};
@@ -5060,10 +5064,14 @@ function shipStats(list){
                     .sort((a,b)=>b[1]-a[1]);
   const peak=days.length?days.reduce((a,b)=>byDay[b].size>byDay[a].size?b:a,days[0]):null;
   const carrierE=numEnt(byCarrier);
-  const isOK=v=>/สำเร็จ|ตรง|ผ่าน|on ?time|delivered/i.test(v||'');
-  const okCrit=list.filter(x=>isOK(x.crit)).length;
+  /* v-shipskip: "ไม่ต้องจัดส่ง" ไม่ใช่งานที่ต้องส่ง → ไม่นับทั้งตัวตั้งและตัวหาร (เดิมนับเป็นไม่ตรงเกณฑ์)
+     และแก้คำที่มีคำว่า "ไม่" นำหน้า (เช่น ไม่ตรงเกณฑ์ / ไม่สำเร็จ) ไม่ให้ถูกนับเป็นผ่าน */
+  const isOK=v=>shipCritOK(v);
+  const skipN=list.filter(x=>shipCritSkip(x.crit)).length;
+  const cList=list.filter(x=>!shipCritSkip(x.crit));
+  const okCrit=cList.filter(x=>isOK(x.crit)).length;
   /* v-ship3: รายการที่ไม่ตรงเกณฑ์ (คอลัมน์ P) — แยกจาก "ค้างส่ง" (คอลัมน์ Q) */
-  const badCrit={}; list.filter(x=>!isOK(x.crit)).forEach(x=>{badCrit[x.crit]=(badCrit[x.crit]||0)+1;});
+  const badCrit={}; cList.filter(x=>!isOK(x.crit)).forEach(x=>{badCrit[x.crit]=(badCrit[x.crit]||0)+1;});
   return {
     orders:ords.size, pending:pend.size,
     pendingPct:ords.size?pend.size/ords.size*100:null,
@@ -5074,8 +5082,8 @@ function shipStats(list){
     chE:setEnt(byCh), sendE:setEnt(bySend),
     carrierE, topCarrier:carrierE[0]?carrierE[0][0]:'-',
     statusE:numEnt(byStatus), urgE:numEnt(byUrg),
-    critPct:list.length?okCrit/list.length*100:null,
-    critBad:list.length-okCrit, critBadE:Object.entries(badCrit).sort((a,b)=>b[1]-a[1]),
+    critPct:cList.length?okCrit/cList.length*100:null,
+    critBad:cList.length-okCrit, critN:cList.length, skipN, critBadE:Object.entries(badCrit).sort((a,b)=>b[1]-a[1]),
     rows:list.length
   };
 }
@@ -5118,7 +5126,7 @@ function secShip(){
   let list=all0;
   if(chSel.length)list=list.filter(r=>chSel.includes(r.ch));
   if(sdSel.length)list=list.filter(r=>sdSel.includes(r.send));
-  list=catApply(list,{ch:r=>r.ch,st:r=>/สำเร็จ|ตรง|ผ่าน|on ?time|delivered/i.test(r.crit||'')?'ตรงเกณฑ์':'ไม่ตรงเกณฑ์',car:r=>r.carrier});
+  list=catApply(list,{ch:r=>r.ch,st:r=>shipCritSkip(r.crit)?'ไม่นับ (ไม่ต้องจัดส่ง)':shipCritOK(r.crit)?'ตรงเกณฑ์':'ไม่ตรงเกณฑ์',car:r=>r.carrier});
   if(!list.length)return bar+'<div class="empty2">ไม่มีข้อมูลตามตัวกรองนี้</div>';
 
   const S=shipStats(list);
@@ -5136,7 +5144,8 @@ function secShip(){
     ? ringHTML(S.critPct, null,
         `<span>จัดส่งตรงตามเกณฑ์ในชีต</span>`
        +`<span style="opacity:.8">${fmt(S.rows)} รายการ · ${fmt(S.days.length)} วัน</span>`
-       +(S.critBad?`<span style="opacity:.8">ไม่ตรงเกณฑ์ ${fmt(S.critBad)} รายการ (${S.critBadE.slice(0,3).map(([k,v])=>esc(k)+' '+fmt(v)).join(' · ')}) — คนละเรื่องกับค้างส่ง</span>`:''))
+       +(S.critBad?`<span style="opacity:.8">ไม่ตรงเกณฑ์ ${fmt(S.critBad)} รายการ (${S.critBadE.slice(0,3).map(([k,v])=>esc(k)+' '+fmt(v)).join(' · ')}) — คนละเรื่องกับค้างส่ง</span>`:'')
+       +(S.skipN?`<span style="opacity:.8">ไม่นับ ${fmt(S.skipN)} รายการ (ไม่ต้องจัดส่ง)</span>`:''))
     : '<div class="empty2">ไม่มีคอลัมน์เกณฑ์การจัดส่งให้คำนวณ</div>';
 
   return cacheNote+bar
@@ -5219,7 +5228,7 @@ function drawShip(){
   /* โดนัทสถานะพัสดุ — v-shst2: ใช้ตัวเลขชุดเดียวกับวงแหวนด้านบน (นับรายการตามคอลัมน์เกณฑ์ในชีต)
      ตรงเกณฑ์ vs ไม่ตรงเกณฑ์ (รวมยกเลิก/ค้างส่ง/แบ่งรอบ) → % ตรงกลางวงเท่ากับวงแหวนเสมอ
      จำนวน "ค้างส่ง" ยังดูได้ที่การ์ดด้านบน */
-  const okN=Math.max(0,S.rows-S.critBad), badN=S.critBad, stTot=S.rows||1;
+  const okN=Math.max(0,(S.critN||0)-S.critBad), badN=S.critBad, stTot=S.critN||1;
   const badPct=badN/stTot*100;
   const badDraw=badN>0?Math.max(badPct,1.5):0;
   destroy('shSt');
