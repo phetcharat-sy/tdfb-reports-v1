@@ -1720,9 +1720,10 @@ body.kdark #vKPI #detail .fbar .wsel-p .wsel-h,body.kdark #vKPI #detail .fbar .w
 #vKPI .hleg.hleg-row button{font-size:32px;color:#3F3A57;gap:12px;padding:4px 8px}
 #vKPI .hleg.hleg-row i{width:24px;height:24px;border-radius:5px}
 /* โดนัทสัดส่วนการแพ็ค: วงใหญ่ขึ้น ชื่อพนักงานอยู่ชิดวง ตัวใหญ่ */
-#vKPI .piewrap.pw-c:has(#lg_pkShare){grid-template-columns:minmax(0,860px) auto;justify-content:center;gap:70px}
-#vKPI .piewrap.pw-c:has(#lg_pkShare)>.cbox{grid-column:1;height:760px!important}
-#vKPI .piewrap.pw-c:has(#lg_pkShare)>.hleg{grid-column:2;justify-self:start;margin-right:0}
+/* วงอยู่กลางกล่อง · รายชื่อชิดขอบขวาของกล่อง */
+#vKPI .piewrap.pw-c:has(#lg_pkShare){grid-template-columns:minmax(0,1fr) minmax(0,860px) minmax(0,1fr);justify-content:stretch;gap:40px}
+#vKPI .piewrap.pw-c:has(#lg_pkShare)>.cbox{grid-column:2;height:760px!important}
+#vKPI .piewrap.pw-c:has(#lg_pkShare)>.hleg{grid-column:3;justify-self:end;margin-right:2%}
 #vKPI #lg_pkShare button{font-size:38px;gap:16px;padding:8px 10px}
 #vKPI #lg_pkShare i{width:28px;height:28px;border-radius:6px}
 @media(max-width:1100px){#vKPI .piewrap.pw-c:has(#lg_pkShare){grid-template-columns:1fr}
@@ -1734,6 +1735,14 @@ body.kdark #vKPI #detail .fbar .wsel-p .wsel-h,body.kdark #vKPI #detail .fbar .w
 #vKPI .shpbadge{display:inline-flex;align-items:center;gap:12px;background:#EE4D2D;color:#fff;font-weight:bold;
   border-radius:14px;padding:6px 20px 6px 14px;margin-right:18px;font-size:.78em;vertical-align:middle;line-height:1.2}
 #vKPI .shpbadge svg{width:1.15em;height:1.15em;flex:none}
+</style>
+<style id="ovTitleV1">
+/* v-ovtitle: หน้า KPI ทุกแผนก — ชื่อ KPI ในการ์ด + บรรทัด Target ใหญ่ขึ้น (ตัวเลข/ข้อมูลเหมือนเดิม) */
+#vKPI #ovBox .kpi2 .kt{font-size:48px;line-height:1.2}
+#vKPI #ovBox .kpi2 .ktg{font-size:32px;margin-top:4px}
+#vKPI #ovBox .kpi2 .kic{width:96px;height:96px}
+#vKPI #ovBox .kpi2 .kic svg{width:54px;height:54px}
+#vKPI #ovBox .kpi2 .kbase,#vKPI #ovBox .kpi2 .knote{font-size:26px}
 </style>
 </head>
 <body>
@@ -2707,6 +2716,13 @@ const kDark={id:'kDark',
       s.border=Object.assign({},s.border||{},{color:'rgba(255,255,255,.14)'}); }); }};
 if(window.Chart&&!Chart.registry.plugins.get('kDark'))Chart.register(kDark);
 
+/* v-pct2: แสดง % ทศนิยม 2 ตำแหน่งเสมอ (xx.xx%) — ปัดปกติ
+   แต่ถ้ายังไม่ถึง 100% จริงแล้วปัดได้ 100.00 → แสดง 99.99 · ถ้ามากกว่า 0 แต่ปัดได้ 0.00 → แสดง <0.01 */
+function pct2(v){ if(v==null||!isFinite(v))return '—';
+  let t=+(+v).toFixed(2);
+  if(v<100&&t>=100)t=99.99;
+  if(v>0&&t<=0)return '<0.01';
+  return t.toFixed(2); }
 function ringHTML(pct_,target,caption){
   const CIRC=565.48;
   /* target = null แปลว่าหน้านั้นไม่มีเป้า — ไม่ตัดสินผ่าน/ไม่ผ่าน และไม่โชว์ป้าย */
@@ -2722,7 +2738,7 @@ function ringHTML(pct_,target,caption){
       <svg viewBox="0 0 220 220"><circle class="tr" cx="110" cy="110" r="90"></circle>
       <circle class="fl${miss?' miss':''}" cx="110" cy="110" r="90"
         stroke-dasharray="${CIRC}" stroke-dashoffset="${off}"></circle></svg>
-      <b class="${miss?'miss':''}">${pct_.toFixed(rd)}<i>%</i></b>
+      <b class="${miss?'miss':''}">${pct2(pct_)}<i>%</i></b>
     </div>
     <div class="cap">
       ${noTarget?'':`<span class="tag ${miss?'miss':''}">${miss?'ต่ำกว่าเกณฑ์':'ผ่านเกณฑ์'}</span>`}
@@ -5163,7 +5179,7 @@ function drawShip(){
     options:Object.assign(baseOpts(false),{
       plugins:Object.assign({},baseOpts(false).plugins,{
         legend:{display:false},
-        barPct:{display:true,raw:true,size:18}})})});
+        barPct:{display:true,raw:true,size:S.grp==='day'?18:32}})})});
   CH.shDay.data._unit='ออเดอร์';
 
   /* โดนัทช่องทางขาย Top 5 — plot เป็น % ให้ pieLbl เขียนตัวเลขบนวงได้
@@ -5179,8 +5195,8 @@ function drawShip(){
     data:{labels:chLab,datasets:[{data:chVal.map(v=>Math.round(v/chTot*1000)/10),
       backgroundColor:chLab.map((n,i)=>PAL[i%PAL.length]),borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'58%',layout:{padding:10},
-      plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(22)},boxWidth:20}},
-        pieLbl:{display:true,minPercent:4,size:24,fit:true},
+      plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(26)},boxWidth:22}},
+        pieLbl:{display:true,minPercent:4,size:38,fit:true},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('+fmt(chVal[c.dataIndex])+' ออเดอร์)'}}}}});
   Object.assign(CH.shCh.data,{_cnt:chVal,_unit:'ออเดอร์'});
@@ -5199,9 +5215,9 @@ function drawShip(){
       backgroundColor:[C.good,C.rose],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'62%',layout:{padding:10},
       plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(22)},boxWidth:20}},
-        donutMid:{display:true,top:donePct.toFixed(stP.digits)+'%',bot:'จัดส่งสำเร็จ'},
+        donutMid:{display:true,top:pct2(done/stTot*100)+'%',bot:'จัดส่งสำเร็จ'},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
-          callbacks:{label:c=>c.label+': '+stP.data[c.dataIndex].toFixed(stP.digits)+'% ('
+          callbacks:{label:c=>c.label+': '+pct2([done,S.pending][c.dataIndex]/stTot*100)+'% ('
             +fmt(c.dataIndex===0?done:S.pending)+' ออเดอร์)'}}}}});
   Object.assign(CH.shSt.data,{_cnt:[done,S.pending],_unit:'ออเดอร์'});
 
@@ -7039,7 +7055,7 @@ function renderKPI(){
     ovShip?{dept:'ad',key:'ship',n:1,ic:'send',l:'การจัดส่ง (Shipping)',t:'จัดส่งตรงตามเกณฑ์ในชีต',info:true,
       /* v-shipov: เดิมปัดทศนิยม 1 ตำแหน่ง → 99.95% กลายเป็น "100%" ทั้งที่ยังมีรายการไม่ตรงเกณฑ์
        ใช้รูปแบบเดียวกับวงแหวนหน้า Shipping: ทศนิยม 2 ตำแหน่ง และเพิ่มให้ถ้ายังไม่ถึง 100% จริง (ค่าที่คำนวณเหมือนเดิม) */
-    disp:ovShip.critPct!=null?(v=>{let d=2;while(d<4&&v<100&&+v.toFixed(d)>=100)d++;return v.toFixed(d)+'%';})(ovShip.critPct):'—',
+    disp:ovShip.critPct!=null?pct2(ovShip.critPct)+'%':'—',
       base:`${fmt(ovShip.orders)} ออเดอร์ · ค้างส่ง ${fmt(ovShip.pending)}`+(ovShip.critBad?` · ไม่ตรงเกณฑ์ ${fmt(ovShip.critBad)} รายการ`:'')}
       :{dept:'ad',key:'ship',n:1,ic:'send',l:'การจัดส่ง (Shipping)',t:'จัดส่งตรงตามเกณฑ์ในชีต',wait:true,
         note:SHIP_ERR?('อ่านชีตไม่ได้ — '+SHIP_ERR):!SHIP?'กำลังโหลดข้อมูล…':'ไม่มีข้อมูลในช่วงที่เลือก'}
@@ -7154,7 +7170,11 @@ function renderKPI(){
           {label:META.lbl,data:pts.map(p=>+p.v.toFixed(dp)),borderColor:'#9B7BFF',backgroundColor:grd,fill:true,
            tension:.35,borderWidth:cf(4),pointRadius:cf(5),pointBackgroundColor:'#fff',pointBorderColor:'#9B7BFF',pointBorderWidth:cf(2)},
           ...(META.t!=null?[{label:META.tl,data:pts.map(()=>META.t),borderColor:'rgba(242,84,91,.75)',borderDash:[8,6],borderWidth:cf(2),pointRadius:0,fill:false}]:[])]},
+        /* v-ovgap: เว้นระยะใต้ป้ายชื่อเส้น ไม่ให้ชนเส้นกราฟ */
+        plugins:[{id:'ovLgGap',beforeInit(ch){ const L=ch.legend; if(!L||L._gap)return; const f=L.fit;
+          L.fit=function(){ f.call(this); this.height+=cf(34); }; L._gap=1; }}],
         options:{responsive:true,maintainAspectRatio:false,animation:false,
+          layout:{padding:{top:cf(6)}},
           plugins:{legend:{display:true,labels:{color:'#C9C3EA',font:{size:cf(20)},boxWidth:cf(28)}},
             tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y.toFixed(dp)}%`},titleFont:{size:cf(20)},bodyFont:{size:cf(19)}}},
           scales:{x:{ticks:{color:'#A9A3CF',font:{size:cf(19)}},grid:{display:false}},
