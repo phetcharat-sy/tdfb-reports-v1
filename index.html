@@ -4988,7 +4988,7 @@ async function loadShip(force){
   if(force){ SHIP=null; SHIP_ERR=''; }
   if(SHIP||SHIP_LOADING)return SHIP;
   SHIP_LOADING=true;
-  if(!SHIP){ const c=await lcGet('ship');
+  if(!SHIP){ const c=await lcGet('ship4');
     if(c&&Array.isArray(c.list)&&c.list.length&&!SHIP){
       SHIP={list:c.list,cachedAt:c.at}; SHIP_ERR='';
       SHEET_STATE.ship='ใช้ข้อมูลชุดก่อน ('+shipAt(c.at)+') · กำลังโหลดใหม่…';
@@ -4997,6 +4997,14 @@ async function loadShip(force){
     const rows=await shipRows();
     if(!rows||rows.length<2)throw new Error('ได้ข้อมูลว่าง');
     const A=0,E=4,G=6,J=9,K=10,M=12,P=15,Q=16,R=17;
+    /* v-shipdet: คอลัมน์ที่ใช้โชว์ตารางรายละเอียด หาจากชื่อหัวตาราง (เหมือนหน้า Packing) */
+    const H=rows[0].map(c=>String(c).replace(/\s+/g,''));
+    const hc=(...p)=>{for(const x of p){const i=H.findIndex(v=>v.includes(x));if(i>=0)return i;}return -1;};
+    const S_COL=18;   /* คอลัมน์ S = เหตุผลที่ค้างส่ง */
+    /* เก็บรายละเอียด (สินค้า/วันที่แพ็ค/Remark) ของ 60 วันล่าสุด + ทุกแถวที่ผิดปกติ — กันแคชบวม */
+    let maxDay=''; rows.slice(1).forEach(r=>{ const d=shipDateKey(r&&r.length?String(r[A]||'').trim():''); if(d>maxDay)maxDay=d; });
+    let cutDay=''; if(maxDay){ const d=new Date(maxDay+'T00:00:00'); d.setDate(d.getDate()-60);
+      cutDay=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
     const g=(r,i)=>i<r.length&&r[i]!=null?String(r[i]).trim():'';
     const clean=v=>{
       const s=String(v==null?'':v).trim();
@@ -5011,16 +5019,20 @@ async function loadShip(force){
       if(!ref&&!day)return;
       if(!day)return;
       const q=g(r,Q);
+      const needDet=SHIP_PENDING_RE.test(q)||SHIP_PENDING_P_RE.test(g(r,P).normalize('NFC').replace(/[\s\u200B-\u200D\uFEFF]/g,''))
+        ||(!shipCritSkip(g(r,P))&&!shipCritOK(g(r,P)))||day>=cutDay;
       list.push({ day, ref,
         dst:clean(g(r,E)), send:clean(g(r,J)), ch:clean(g(r,K)),
         urg:clean(g(r,M)), crit:clean(g(r,P)), q:clean(q),
         carrier:clean(g(r,R)),
+        /* เก็บรายละเอียดเฉพาะแถวที่ค้างส่ง/ไม่ตรงเกณฑ์ — กันแคชในเบราว์เซอร์บวม (ชีต ~150k แถว) */
+        reason:needDet?g(r,S_COL):'',
         /* v-ship5: ตัดช่องว่าง/อักขระล่องหน (zero-width) ก่อนเทียบคำ กันพิมพ์ในชีตไม่เหมือนกันเป๊ะ */
         pending:SHIP_PENDING_RE.test(q)||SHIP_PENDING_P_RE.test(g(r,P).normalize('NFC').replace(/[\s\u200B-\u200D\uFEFF]/g,'')) });
     });
     if(!list.length)throw new Error('อ่านได้ 0 แถว (เช็คคอลัมน์วันที่ / เลขออเดอร์)');
     SHIP={list};
-    lcSet('ship',{list,at:Date.now()});
+    lcSet('ship4',{list,at:Date.now()});
     /* v-ship2: โชว์ค่าที่เจอในคอลัมน์ Q (เช็คค้างส่ง) ไว้ที่แถบสถานะชีตด้านล่าง
        ถ้าค้างส่งขึ้น 0 ทั้งที่มีของค้าง จะเห็นทันทีว่าในชีตเขียนคำว่าอะไร */
     const qCnt={}; list.forEach(x=>{qCnt[x.q]=(qCnt[x.q]||0)+1;});
@@ -5088,6 +5100,42 @@ function shipStats(list){
   };
 }
 
+/* v-shipdet: ตารางรายละเอียดรายออเดอร์ — หน้าตาเหมือนตารางหน้า Packing */
+const SHIP_DET_MAX=500;
+const shipKind=x=>x.pending?'pend':shipCritSkip(x.crit)?'skip':shipCritOK(x.crit)?'ok':'bad';
+function shipTable(arr,max){
+  const uniq=new Map();
+  arr.forEach((x,i)=>{const k=x.ref||('r'+i); const o=uniq.get(k);
+    if(!o)uniq.set(k,Object.assign({},x,{reasons:x.reason?[x.reason]:[]}));
+    else{ if(x.reason&&!o.reasons.includes(x.reason))o.reasons.push(x.reason); if(x.pending)o.pending=true; }});
+  const orders=[...uniq.values()].sort((a,b)=>(b.day||'').localeCompare(a.day||'')||(a.ref||'').localeCompare(b.ref||''));
+  const cut=orders.slice(0,max);
+  const dash='—';
+  const body=cut.map(x=>{
+    const k=shipKind(x);
+    const st=k==='pend'?'<span class="bad">ค้างส่ง</span>'
+            :k==='bad'?'<span style="color:var(--amber);font-weight:bold">ไม่ตรงเกณฑ์</span>'
+            :k==='skip'?'<span style="color:var(--mute)">ไม่ต้องจัดส่ง</span>'
+            :'<span class="good">ตรงเกณฑ์</span>';
+    return `<tr>
+      <td style="white-space:nowrap"><b>${showD(x.day)}</b></td>
+      <td><b>${esc(x.ref||dash)}</b></td>
+      <td style="white-space:nowrap">${esc(x.ch==='ไม่ระบุ'?dash:x.ch)}</td>
+      <td style="white-space:nowrap">${esc(x.carrier==='ไม่ระบุ'?dash:x.carrier)}</td>
+      <td style="white-space:nowrap">${st}</td>
+      <td>${x.reasons.length?esc(x.reasons.join(' / ')):dash}</td></tr>`;}).join('');
+  const more=orders.length>cut.length
+    ?`<div class="chint">แสดง ${fmt(cut.length)} จาก ${fmt(orders.length)} ออเดอร์ (วันที่ใหม่สุดก่อน) — เลือกช่วงเวลาหรือตัวกรองให้แคบลงเพื่อดูส่วนที่เหลือ</div>`:'';
+  return `<div class="tscroll t10b"><table class="dt"><thead><tr>
+    <th>วันที่ต้องส่ง</th><th>Order Ref</th><th>Source</th><th>ขนส่ง</th><th>สถานะ</th><th>เหตุผลที่ค้างส่ง</th></tr></thead><tbody>${body}</tbody></table></div>`+more;
+}
+function shipIssues(list){
+  const rows=list.filter(x=>{const k=shipKind(x);return k==='pend'||k==='bad';});
+  if(!rows.length)return '';
+  const nP=rows.filter(x=>x.pending).length;
+  return `<h2 class="sec">รายละเอียดค้างส่ง / ไม่ตรงเกณฑ์ <em>ค้างส่ง ${fmt(nP)} · ไม่ตรงเกณฑ์ ${fmt(rows.length-nP)} รายการ</em><span></span></h2>`
+    +shipTable(rows,100);
+}
 let SHIP_CTX=null;
 function secShip(){
   if(!SHIP){
@@ -5156,6 +5204,7 @@ function secShip(){
        ${card('ขนส่งที่ใช้มากสุด',esc(S.topCarrier),'plum')}
        ${card('วันพีคสุด ('+(S.peak||'-')+')',S.peakQty,'amber')}</div>
 
+
      <h2 class="sec">ออเดอร์จัดส่ง${grpTxt} <em>นับออเดอร์ไม่ซ้ำ ตาม Expected Delivery</em><span></span></h2>
      <div class="cpanel"><div class="cbox"><canvas id="c_shDay"></canvas></div></div>
 
@@ -5167,7 +5216,8 @@ function secShip(){
      </div>
 
      <h2 class="sec">Top 10 ขนส่งที่ใช้งาน<span></span></h2>
-     <div class="cpanel"><div class="cbox"><canvas id="c_shCar"></canvas></div></div>`;
+     <div class="cpanel"><div class="cbox"><canvas id="c_shCar"></canvas></div></div>`
+   + shipIssues(list);
 }
 
 function drawShip(){
