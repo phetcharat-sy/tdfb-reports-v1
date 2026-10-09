@@ -7739,9 +7739,28 @@ document.addEventListener('keydown',e=>{
 });
 
 /* เรียกจากแถบเมนูข้าง — สลับหน้าย่อยของ Warehouse */
+/* v-repl-day: หน้า Replenishment เปิดมาแสดง "รายวัน" ของวันนี้เสมอ
+   เก็บตัวกรองเดิมไว้ก่อนเข้า แล้วคืนให้ตอนออกไปหน้าอื่น — หน้าอื่นจึงทำงานเหมือนเดิมทุกอย่าง */
+let REPL_FSAVE=null;
+const rdSetY=y=>{ const s=el('kY');
+  if(y&&![...s.options].some(o=>o.value===y)){const o=document.createElement('option');o.value=o.textContent=y;s.appendChild(o);}
+  s.value=y; };
 window.KPI_SEC=async(sec)=>{
+  const prevSec=SEC;
   SEC=sec||'overview';
   OPEN_DD='';
+  if(SEC==='repl'&&prevSec!=='repl'){
+    REPL_FSAVE={y:el('kY').value,m:el('kM').value,wk:WKSEL.slice(),d:DAYSEL,q:QSEL,cal:calYM,
+                r:[RFK_Y,RFK_M,RFK_W,RFK_D]};
+    const t=rfkToday();
+    el('kM').value=''; WKSEL=[]; QSEL=''; calYM=null;
+    RFK_Y=t.slice(0,4); RFK_M=RFK_W=''; RFK_D=t; DAYSEL=t; rdSetY(RFK_Y);
+  }else if(prevSec==='repl'&&SEC!=='repl'&&REPL_FSAVE){
+    const f=REPL_FSAVE; REPL_FSAVE=null;
+    rdSetY(f.y); WKSEL=f.wk; DAYSEL=f.d; QSEL=f.q; calYM=f.cal;
+    [RFK_Y,RFK_M,RFK_W,RFK_D]=f.r;
+    fillFiltersKPI(); el('kM').value=f.m;
+  }
   fillFiltersKPI();   /* v-pack3: ตัวกรองเปลี่ยนแหล่งวันที่ตามหน้า */
   renderKPI();
   if((SEC==='repl'||SEC==='fc')&&!REPL){ await loadRepl(); renderKPI(); }
