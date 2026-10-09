@@ -5118,7 +5118,7 @@ function secShip(){
   let list=all0;
   if(chSel.length)list=list.filter(r=>chSel.includes(r.ch));
   if(sdSel.length)list=list.filter(r=>sdSel.includes(r.send));
-  list=catApply(list,{ch:r=>r.ch,st:r=>r.pending?'ค้างส่ง':'จัดส่งสำเร็จ',car:r=>r.carrier});
+  list=catApply(list,{ch:r=>r.ch,st:r=>/สำเร็จ|ตรง|ผ่าน|on ?time|delivered/i.test(r.crit||'')?'ตรงเกณฑ์':'ไม่ตรงเกณฑ์',car:r=>r.carrier});
   if(!list.length)return bar+'<div class="empty2">ไม่มีข้อมูลตามตัวกรองนี้</div>';
 
   const S=shipStats(list);
@@ -5153,7 +5153,7 @@ function secShip(){
      <div class="g2">
        <div><h2 class="sec">สัดส่วนร้านค้า/ช่องทาง <em>Top 5</em><span></span></h2>
          <div class="cpanel"><div class="cbox"><canvas id="c_shCh"></canvas></div></div></div>
-       <div><h2 class="sec">สถานะพัสดุ <em>สำเร็จ vs ค้าง</em><span></span></h2>
+       <div><h2 class="sec">สถานะพัสดุ <em>ตรงเกณฑ์ vs ไม่ตรงเกณฑ์ (ชุดเดียวกับวงแหวนด้านบน)</em><span></span></h2>
          <div class="cpanel"><div class="cbox"><canvas id="c_shSt"></canvas></div></div></div>
      </div>
 
@@ -5216,25 +5216,24 @@ function drawShip(){
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('+fmt(chVal[c.dataIndex])+' ออเดอร์)'}}}}});
   Object.assign(CH.shCh.data,{_cnt:chVal,_unit:'ออเดอร์'});
 
-  /* โดนัทสถานะพัสดุ — สำเร็จ vs ค้างส่ง พร้อม % ตรงกลางวง */
-  const done=Math.max(0,S.orders-S.pending);
-  const stTot=done+S.pending||1;
-  /* v134: เดิมปัดทศนิยม 1 ตำแหน่ง → ค้างส่ง 26 จาก 145k = 0.0% วงขึ้น 100% ไม่เห็นสีแดง */
-  const stP=pctSet([done,S.pending],stTot);
-  const donePct=stP.data[0], pendPct=stP.data[1];
-  const pendDraw=S.pending>0?Math.max(pendPct,1.5):0;
+  /* โดนัทสถานะพัสดุ — v-shst2: ใช้ตัวเลขชุดเดียวกับวงแหวนด้านบน (นับรายการตามคอลัมน์เกณฑ์ในชีต)
+     ตรงเกณฑ์ vs ไม่ตรงเกณฑ์ (รวมยกเลิก/ค้างส่ง/แบ่งรอบ) → % ตรงกลางวงเท่ากับวงแหวนเสมอ
+     จำนวน "ค้างส่ง" ยังดูได้ที่การ์ดด้านบน */
+  const okN=Math.max(0,S.rows-S.critBad), badN=S.critBad, stTot=S.rows||1;
+  const badPct=badN/stTot*100;
+  const badDraw=badN>0?Math.max(badPct,1.5):0;
   destroy('shSt');
   CH.shSt=new Chart(document.getElementById('c_shSt'),{type:'doughnut',
-    data:{labels:['จัดส่งสำเร็จ','ค้างส่ง'],datasets:[{
-      data:[100-pendDraw, pendDraw],
+    data:{labels:['ตรงเกณฑ์','ไม่ตรงเกณฑ์'],datasets:[{
+      data:[100-badDraw, badDraw],
       backgroundColor:[C.good,C.rose],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'62%',layout:{padding:10},
-      plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(22)},boxWidth:20}},
-        donutMid:{display:true,top:pct2(done/stTot*100)+'%',bot:'จัดส่งสำเร็จ'},
+      plugins:{legend:{position:'right',labels:{color:C.mute,font:{size:cf(26)},boxWidth:22}},
+        donutMid:{display:true,top:(S.critPct!=null?pct2(S.critPct):pct2(okN/stTot*100))+'%',bot:'ตรงเกณฑ์'},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
-          callbacks:{label:c=>c.label+': '+pct2([done,S.pending][c.dataIndex]/stTot*100)+'% ('
-            +fmt(c.dataIndex===0?done:S.pending)+' ออเดอร์)'}}}}});
-  Object.assign(CH.shSt.data,{_cnt:[done,S.pending],_unit:'ออเดอร์'});
+          callbacks:{label:c=>c.label+': '+pct2([okN,badN][c.dataIndex]/stTot*100)+'% ('
+            +fmt(c.dataIndex===0?okN:badN)+' รายการ)'}}}}});
+  Object.assign(CH.shSt.data,{_cnt:[okN,badN],_unit:'รายการ'});
 
   /* Top 10 ขนส่ง — แท่งตั้ง มีตัวเลขกำกับบนหัวแท่ง (barPct โหมด raw) */
   const car=S.carrierE.slice(0,10);
