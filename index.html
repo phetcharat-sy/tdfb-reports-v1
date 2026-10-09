@@ -3157,6 +3157,7 @@ function drawOOS(){
   const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
   destroy('top5');
   const ot=baseOpts(false); ot.layout={padding:{top:26}};
+  ot.scales.x.ticks.font={size:cf(17)};   /* v-top5: ชื่อสินค้าใต้กราฟเล็กลง ไม่เบียดกัน */
   ot.plugins.barPct={display:true,raw:true};
   CH.top5=new Chart(document.getElementById('c_top5'),{type:'bar',
     data:{labels:top.map(e=>e[0].length>26?e[0].slice(0,24)+'…':e[0]),
@@ -6801,7 +6802,12 @@ function renderKPI(){
                            : SEC==='cr'?secCREmbed() : secRepl());
     /* v-kbig: กราฟสรุปภาพรวม 2 กล่องแรกของหน้า สูงกว่ากราฟอื่น 35% */
     if(kbig&&!document.body.classList.contains('present')){
-      [...el('detail').querySelectorAll('.cpanel')].filter(p=>p.querySelector('canvas')).slice(0,2).forEach(p=>{
+      /* กล่องที่วางคู่กันในแถวเดียว (เช่น Top 5 Products กับ Out-of-Stock Rate) ต้องสูงเท่ากัน → ขยายทั้งแถวพร้อมกัน */
+      const det=el('detail'), rowOf=p=>{let n=p;while(n.parentElement&&n.parentElement!==det)n=n.parentElement;return n;};
+      const tops=[...det.querySelectorAll('.cpanel')].filter(p=>p.querySelector('canvas')).slice(0,2);
+      const tgt=new Set(); tops.forEach(p=>{ const r=rowOf(p); tgt.add(p);
+        r.querySelectorAll('.cpanel').forEach(q=>{ if(q.querySelector('canvas'))tgt.add(q); }); });
+      [...tgt].forEach(p=>{
         p.classList.add('ctop');
         p.querySelectorAll('.cbox').forEach(cb=>{
           const h=parseFloat(cb.style.height)||parseFloat(getComputedStyle(cb).height);
@@ -7818,6 +7824,19 @@ window.KPI_SEC=async(sec)=>{
   if(SEC==='ship'&&!SHIP){ await loadShip(); renderKPI(); }
 };
 
+/* v-loadwait: เดิมถ้ามีการเรียกโหลดชีตซ้ำระหว่างที่กำลังโหลดอยู่ ตัวที่เรียกทีหลังได้ค่าว่างกลับไปทันที
+   (ไม่รอโหลดเสร็จ) → เปิดหน้า Shipping แล้วสลับไปหน้า KPI ทุกแผนกระหว่างโหลด การ์ดค้างที่ "กำลังโหลดข้อมูล…" ตลอด
+   แก้: ทุกตัวที่เรียกระหว่างโหลดรอผลชุดเดียวกัน และพอโหลดเสร็จก็วาดหน้า KPI ที่เปิดอยู่ใหม่ทันที (ข้อมูล/วิธีคำนวณเหมือนเดิม) */
+(function(){
+  const share=f=>{ let p=null;
+    return function(force){
+      if(p&&!force)return p;
+      const run=()=>f(force);
+      p=(p?p.then(run,run):run()).finally(()=>{ p=null;
+        try{ if(!el('vKPI').hidden){ fillFiltersKPI(); renderKPI(); } }catch(e){} });
+      return p; }; };
+  loadShip=share(loadShip); loadPick=share(loadPick); loadPack=share(loadPack); loadPerr=share(loadPerr);
+})();
 /* ให้หน้า Replenishment เริ่มโหลดชีตของตัวเองทันที ไม่ต้องรอชีต On-Time ที่ใหญ่กว่ามาก */
 if(/^#kpi-(repl|fc)/.test(location.hash||'')) loadRepl().then(()=>{ if(SEC==='repl'||SEC==='fc')renderKPI(); });
 if(/^#kpi-pick/.test(location.hash||'')) loadPick().then(()=>{ if(SEC==='pick')renderKPI(); });
