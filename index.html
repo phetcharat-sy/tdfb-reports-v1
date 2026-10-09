@@ -1672,6 +1672,40 @@ body.rptfull #vRPT .panel .scroll,#vRPT #shot.cap-full .panel .scroll{overflow:h
 #vRPT .tag.t-pk{background:#FDEBD3;color:#9A5A0C}
 #vRPT .tag.t-fg{background:#E6E0FB;color:#5338B8}
 </style>
+<style id="kbigV1">
+/* v-kbig: ปุ่มบนแถบเครื่องมือหน้า KPI (ดึงข้อมูลใหม่ / บันทึกเป็นรูป / โหมดพรีเซนต์) ใหญ่และเห็นชัดขึ้น */
+#vKPI #kReload,#vKPI #kSave,#vKPI #kPresent{font-size:36px;font-weight:bold;padding:0 34px;height:84px;
+  border-radius:16px;display:inline-flex;align-items:center;gap:10px;white-space:nowrap}
+#vKPI #kReload,#vKPI #kPresent{background:var(--card);color:var(--teal-d);border:2.5px solid var(--teal-d);
+  box-shadow:0 2px 6px rgba(20,24,40,.08)}
+#vKPI #kReload:hover:not(:disabled),#vKPI #kPresent:hover{background:#F1FAF8}
+#vKPI #kSave{border:2.5px solid var(--teal-d);background:linear-gradient(100deg,var(--teal-d),#14B8A6);color:#fff;
+  box-shadow:0 6px 16px rgba(15,118,110,.35)}
+#vKPI .toolbar>.stat{font-size:34px}
+body.mobile #vKPI #kReload,body.mobile #vKPI #kSave{height:96px;font-size:40px!important}
+/* v-kbig: หน้าย่อย KPI (ยกเว้น ภาพรวม / Replenishment / ยกเลิก-คืนสินค้า / SOP / รายงานประจำวัน)
+   ภาพรวม (วงแหวน + การ์ดตัวเลข + กราฟสรุปชุดแรก) ใหญ่กว่ากราฟอื่น · ตัวอักษรรายละเอียดด้านล่างใหญ่ขึ้น
+   เปลี่ยนแค่ขนาด ไม่แตะข้อมูลหรือวิธีคำนวณ · โหมดพรีเซนต์ใช้ขนาดเดิม */
+body.kbig:not(.present) #vKPI #detail .ring{padding:64px 80px;gap:90px}
+body.kbig:not(.present) #vKPI #detail .ring svg{width:500px;height:500px}
+body.kbig:not(.present) #vKPI #detail .ringwrap b{font-size:120px}
+body.kbig:not(.present) #vKPI #detail .ring .cap{font-size:44px;max-width:1400px}
+body.kbig:not(.present) #vKPI #detail .ring .cap .tag{font-size:38px}
+body.kbig:not(.present) #vKPI #detail .scard{padding:34px 36px}
+body.kbig:not(.present) #vKPI #detail .scard .sl{font-size:44px}
+body.kbig:not(.present) #vKPI #detail .scard .sv{font-size:90px}
+body.kbig:not(.present) #vKPI #detail h2.sec{font-size:54px}
+body.kbig:not(.present) #vKPI #detail h2.sec em{font-size:42px}
+body.kbig:not(.present) #vKPI #detail .chname2{font-size:50px}
+body.kbig:not(.present) #vKPI #detail .chint{font-size:36px}
+body.kbig:not(.present) #vKPI #detail .fbar,body.kbig:not(.present) #vKPI #detail .fbar button{font-size:36px}
+body.kbig:not(.present) #vKPI #detail table.dt{font-size:52px}
+body.kbig:not(.present) #vKPI #detail table.dt th{font-size:42px}
+body.kbig:not(.present) #vKPI #detail table.dt .pname{font-size:48px}
+body.kbig:not(.present) #vKPI #detail table.dt .pmeta{font-size:37px}
+body.kbig:not(.present) #vKPI #detail table.dt .why{font-size:40px}
+body.kbig:not(.present) #vKPI #detail table.dt .mono{font-size:40px}
+</style>
 </head>
 <body>
 
@@ -6745,6 +6779,10 @@ function renderKPI(){
   document.body.classList.toggle('crmode', SEC==='cr');
   /* v-kdark: ธีมเข้มของหน้าย่อย KPI (ไม่ใช้กับหน้าภาพรวม และหน้าเอกสาร/หน้าที่ฝังไฟล์แยก) */
   document.body.classList.toggle('kdark', !['overview','sop','sopcr','cr','ret','can'].includes(SEC));
+  /* v-kbig: หน้าที่ขยายภาพรวม + ตัวอักษรรายละเอียด · ฟอนต์ในกราฟใหญ่ขึ้น 15% (โหมดพรีเซนต์คงเดิม) */
+  const kbig=['oos','diff','dock','pick','perr','pack','ship','fc'].includes(SEC);
+  document.body.classList.toggle('kbig', kbig);
+  CFZ=document.body.classList.contains('present')?2.0:(kbig?1.84:1.6);
   try{ const nb=document.querySelector('.sidenav button.on .nic');
     el('kIco').innerHTML=nb?nb.innerHTML.replace(/currentColor/g,'#fff'):''; }catch(e){}
   if(!isOv){
@@ -6761,6 +6799,16 @@ function renderKPI(){
                            : SEC==='ret'?secRetEmbed()
                            : SEC==='can'?secCanEmbed()
                            : SEC==='cr'?secCREmbed() : secRepl());
+    /* v-kbig: กราฟสรุปภาพรวม 2 กล่องแรกของหน้า สูงกว่ากราฟอื่น 35% */
+    if(kbig&&!document.body.classList.contains('present')){
+      [...el('detail').querySelectorAll('.cpanel')].filter(p=>p.querySelector('canvas')).slice(0,2).forEach(p=>{
+        p.classList.add('ctop');
+        p.querySelectorAll('.cbox').forEach(cb=>{
+          const h=parseFloat(cb.style.height)||parseFloat(getComputedStyle(cb).height);
+          if(h>0)cb.style.height=Math.round(h*1.35)+'px';
+        });
+      });
+    }
     fitScrolls();
     /* กราฟต้องวาดหลัง canvas เข้า DOM แล้ว */
     requestAnimationFrame(()=>{
