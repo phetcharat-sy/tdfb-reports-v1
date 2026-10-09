@@ -1706,6 +1706,35 @@ body.kbig:not(.present) #vKPI #detail table.dt .pmeta{font-size:37px}
 body.kbig:not(.present) #vKPI #detail table.dt .why{font-size:40px}
 body.kbig:not(.present) #vKPI #detail table.dt .mono{font-size:40px}
 </style>
+<style id="fix7V1">
+/* v-fix7 (1): ดรอปดาวน์ตัวกรองย่อยในหน้าพื้นเข้ม — รายการในกล่องเป็นตัวเข้มบนพื้นขาว อ่านชัด */
+body.kdark #vKPI #detail .fbar .wsel-p button{background:#fff;border:0;border-radius:10px;box-shadow:none;
+  color:#1E1B33;font-weight:600;padding:12px 18px}
+body.kdark #vKPI #detail .fbar .wsel-p button:hover{background:#EDF6F4;border:0}
+body.kdark #vKPI #detail .fbar .wsel-p button.on{background:#E3F4F0;color:#0F766E;font-weight:bold;border:0;box-shadow:none}
+body.kdark #vKPI #detail .fbar .wsel-p .ck{border-color:#9AA3B5;background:#fff}
+body.kdark #vKPI #detail .fbar .wsel-p .ck.on{border-color:#0F766E;background:#0F766E;color:#fff}
+body.kdark #vKPI #detail .fbar .wsel-p .wsel-h,body.kdark #vKPI #detail .fbar .wsel-p .wsel-f{color:#5D6478}
+/* v-fix7 (5): ป้ายชื่อพนักงานเหนือกราฟ (Picking / Packing) ใหญ่ขึ้น */
+#vKPI .hleg.hleg-row{gap:6px 30px;margin-bottom:8px}
+#vKPI .hleg.hleg-row button{font-size:32px;color:#3F3A57;gap:12px;padding:4px 8px}
+#vKPI .hleg.hleg-row i{width:24px;height:24px;border-radius:5px}
+/* โดนัทสัดส่วนการแพ็ค: วงใหญ่ขึ้น ชื่อพนักงานอยู่ชิดวง ตัวใหญ่ */
+#vKPI .piewrap.pw-c:has(#lg_pkShare){grid-template-columns:minmax(0,860px) auto;justify-content:center;gap:70px}
+#vKPI .piewrap.pw-c:has(#lg_pkShare)>.cbox{grid-column:1;height:760px!important}
+#vKPI .piewrap.pw-c:has(#lg_pkShare)>.hleg{grid-column:2;justify-self:start;margin-right:0}
+#vKPI #lg_pkShare button{font-size:38px;gap:16px;padding:8px 10px}
+#vKPI #lg_pkShare i{width:28px;height:28px;border-radius:6px}
+@media(max-width:1100px){#vKPI .piewrap.pw-c:has(#lg_pkShare){grid-template-columns:1fr}
+  #vKPI .piewrap.pw-c:has(#lg_pkShare)>.cbox,#vKPI .piewrap.pw-c:has(#lg_pkShare)>.hleg{grid-column:auto}}
+/* v-fix7 (6): ป้ายบอกว่ากำลังแสดงข้อมูล Shipping ชุดก่อน */
+#vKPI #detail .chint.shipcache{background:#FFF8EA;border:1px solid #F4DDAE;color:#7A5208;border-radius:16px;
+  padding:16px 24px;font-size:32px;margin-bottom:18px}
+/* v-fix7 (7): ป้าย Shopee หน้า Forecast */
+#vKPI .shpbadge{display:inline-flex;align-items:center;gap:12px;background:#EE4D2D;color:#fff;font-weight:bold;
+  border-radius:14px;padding:6px 20px 6px 14px;margin-right:18px;font-size:.78em;vertical-align:middle;line-height:1.2}
+#vKPI .shpbadge svg{width:1.15em;height:1.15em;flex:none}
+</style>
 </head>
 <body>
 
@@ -2210,7 +2239,8 @@ let STATIC_ERR={diff:'',dock:''};
 
 /* ชีตเล็ก: ใช้ /export?format=csv เป็นหลัก (ได้ทุกแถวเสมอ) ถ้าไม่ได้ค่อยถอยไป gviz
    ทั้งสองทางต้องมี timeout ไม่งั้นถ้าค้างจะรอไม่รู้จบ (เคยเป็นแบบนั้นมาแล้ว) */
-async function smallSheet(id,gid,onState){
+async function smallSheet(id,gid,onState,ms){
+  ms=ms||{};
   /* ใช้ export?format=csv เป็นทางหลัก เพราะคืนข้อมูล "ทุกแถว" เสมอ
      ไม่สนว่ามีใครตั้งฟิลเตอร์หรือซ่อนแถวไว้ในชีต (gviz จะคืนเฉพาะแถวที่มองเห็น)
      ถ้า CSV ล้มเหลวค่อยถอยไปใช้ gviz */
@@ -2218,7 +2248,7 @@ async function smallSheet(id,gid,onState){
   try{
     onState&&onState('กำลังโหลด (csv)…');
     const url=`https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}&_=${Date.now()}`;
-    const t=await fetchBig(url,60000);
+    const t=await fetchBig(url,ms.csv||60000);
     if(t.trim().startsWith('<'))throw new Error('ชีตยังไม่ได้แชร์เป็น “ทุกคนที่มีลิงก์”');
     const rows=(typeof Papa!=='undefined')?Papa.parse(t,{skipEmptyLines:true}).data:parseCSV(t);
     if(rows&&rows.length>1)return rows;
@@ -2227,7 +2257,7 @@ async function smallSheet(id,gid,onState){
 
   onState&&onState('กำลังโหลด (gviz)…');
   let rows;
-  try{ rows=await gviz(id,gid,null,40000,true); }
+  try{ rows=await gviz(id,gid,null,ms.gviz||40000,true); }
   catch(e){
     /* ทั้ง CSV และ gviz ล้มเหลวแบบ Failed to fetch = เบราว์เซอร์เข้าชีตไม่ได้เลย
        เกือบทุกครั้งคือชีตยังไม่ได้แชร์เป็น "ทุกคนที่มีลิงก์ · ผู้อ่าน" */
@@ -4124,24 +4154,8 @@ function secForecast(){
 
     ${shpfcHTML()}
 
-    <h2 class="sec">พยากรณ์รายสัปดาห์ <em>ยอดจริง + ประมาณการ 4 สัปดาห์ข้างหน้า</em><span></span></h2>
-    <details class="fnote">
-      <summary>วิธีคิด — บวกกัน 3 อย่าง</summary>
-      <div class="fbody">
-      <div>1. <b>ยอดปกติ</b> เฉลี่ยจาก 4 สัปดาห์ล่าสุด = <b>${fmt(Math.round(wOrd.avg4))}</b> ออเดอร์ / <b>${fmt(Math.round(wQty.avg4))}</b> ชิ้น</div>
-      <div>2. <b>แนวโน้ม</b> จากข้อมูล ${wOrd.weeksUsed} สัปดาห์ = <b>${wOrd.slope>=0?'+':''}${wOrd.slope.toFixed(1)}</b> ออเดอร์/สัปดาห์ · <b>${wQty.slope>=0?'+':''}${wQty.slope.toFixed(1)}</b> ชิ้น/สัปดาห์</div>
-      <div>3. <b>Double Day</b> (1.1, 2.2, … 12.12) — ${esc(ddNote)}</div>
-      <code>พยากรณ์ (h สัปดาห์ข้างหน้า) = avg4 + slope × h + Double Day boost</code>
-      </div>
-    </details>
-    <div class="fcacc-grid">
-      <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / สัปดาห์</div>
-        <div class="fcacc-chartbox" style="height:560px"><canvas id="c_fcwo"></canvas></div>
-        ${fcStrip(wOrd,'ออเดอร์')}</div>
-      <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / สัปดาห์</div>
-        <div class="fcacc-chartbox" style="height:560px"><canvas id="c_fcwq"></canvas></div>
-        ${fcStrip(wQty,'ชิ้น')}</div>
-    </div>
+
+    ${dOrd&&dQty?fcMultTable(dOrd,dQty):''}
 
     <h2 class="sec">พยากรณ์รายวัน <em>ยอดจริง + ประมาณการ 14 วันข้างหน้า</em><span></span></h2>
     ${dOrd?`<details class="fnote">
@@ -4165,25 +4179,24 @@ function secForecast(){
         ${fcStrip(dQty,'ชิ้น')}</div>
     </div>`:'<div class="empty2">ข้อมูลรายวันไม่พอสำหรับพยากรณ์ (ต้องมีอย่างน้อย 7 วัน)</div>'}
 
-    ${dOrd&&dQty?fcMultTable(dOrd,dQty):''}
 
-    <h2 class="sec">ความแม่นยำของพยากรณ์ย้อนหลัง <em>Forecast Accuracy · เทียบพยากรณ์ล่วงหน้า 1 วัน กับยอดจริง · 30 วันล่าสุด</em><span></span></h2>
+    <h2 class="sec">พยากรณ์รายสัปดาห์ <em>ยอดจริง + ประมาณการ 4 สัปดาห์ข้างหน้า</em><span></span></h2>
     <details class="fnote">
-      <summary>วิธีคิด — ทำไมไม่ต้องเก็บไฟล์พยากรณ์เก่าไว้</summary>
-      <div class="fbody">ย้อนเวลากลับไปพยากรณ์ทีละวันด้วยข้อมูลเท่าที่ "มีอยู่จริงในวันนั้น" เท่านั้น (ตัดข้อมูลหลังจากนั้นทิ้งชั่วคราว แล้วเรียนรู้ตัวคูณและยอดฐานใหม่ด้วยสูตรเดียวกับด้านบน) ได้พยากรณ์ล่วงหน้า 1 วัน แล้วเทียบกับยอดจริงในวันนั้น ทำแบบนี้ย้อนหลัง 30 วัน · ชุดค่าที่ใช้เลือกจากช่วงก่อนหน้า 30 วันนี้ ตัวเลขความแม่นจึงไม่ได้แอบเห็นคำตอบ · <b>เป้าหมาย MAPE ≤ 25%</b> · ไม่นับวันนี้ (ยอดยังไม่ครบ) และวันที่ยอด = 0</div>
-    </details>
-    <div class="fcacc">
-      ${fcAccCards(btOrd)}
-      <div class="fcacc-grid">
-        <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / วัน
-            <em>${btOrd?`MAPE ${btOrd.mape.toFixed(1)}% · ความแม่น ${btOrd.accuracy.toFixed(1)}% (${btOrd.total} วัน)`:''}</em></div>
-          <div class="fcacc-chartbox"><canvas id="c_btord"></canvas></div>
-          ${fcAccTable(btOrd,'ออเดอร์')}</div>
-        <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / วัน
-            <em>${btQty?`MAPE ${btQty.mape.toFixed(1)}% · ความแม่น ${btQty.accuracy.toFixed(1)}% (${btQty.total} วัน)`:''}</em></div>
-          <div class="fcacc-chartbox"><canvas id="c_btqty"></canvas></div>
-          ${fcAccTable(btQty,'ชิ้น')}</div>
+      <summary>วิธีคิด — บวกกัน 3 อย่าง</summary>
+      <div class="fbody">
+      <div>1. <b>ยอดปกติ</b> เฉลี่ยจาก 4 สัปดาห์ล่าสุด = <b>${fmt(Math.round(wOrd.avg4))}</b> ออเดอร์ / <b>${fmt(Math.round(wQty.avg4))}</b> ชิ้น</div>
+      <div>2. <b>แนวโน้ม</b> จากข้อมูล ${wOrd.weeksUsed} สัปดาห์ = <b>${wOrd.slope>=0?'+':''}${wOrd.slope.toFixed(1)}</b> ออเดอร์/สัปดาห์ · <b>${wQty.slope>=0?'+':''}${wQty.slope.toFixed(1)}</b> ชิ้น/สัปดาห์</div>
+      <div>3. <b>Double Day</b> (1.1, 2.2, … 12.12) — ${esc(ddNote)}</div>
+      <code>พยากรณ์ (h สัปดาห์ข้างหน้า) = avg4 + slope × h + Double Day boost</code>
       </div>
+    </details>
+    <div class="fcacc-grid">
+      <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / สัปดาห์</div>
+        <div class="fcacc-chartbox" style="height:560px"><canvas id="c_fcwo"></canvas></div>
+        ${fcStrip(wOrd,'ออเดอร์')}</div>
+      <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / สัปดาห์</div>
+        <div class="fcacc-chartbox" style="height:560px"><canvas id="c_fcwq"></canvas></div>
+        ${fcStrip(wQty,'ชิ้น')}</div>
     </div>
 
     ${staff.length?`<h2 class="sec">พยากรณ์อัตรากำลังคน <em>7 วันข้างหน้า · แถวไฮไลท์ = วันพิเศษที่ยอดเพิ่ม (Double Day · Mid-month · Payday)</em><span></span></h2>
@@ -4239,6 +4252,25 @@ function secForecast(){
         +`</tbody></table></div>
       </div>
     </div>`:''}
+
+    <h2 class="sec">ความแม่นยำของพยากรณ์ย้อนหลัง <em>Forecast Accuracy · เทียบพยากรณ์ล่วงหน้า 1 วัน กับยอดจริง · 30 วันล่าสุด</em><span></span></h2>
+    <details class="fnote">
+      <summary>วิธีคิด — ทำไมไม่ต้องเก็บไฟล์พยากรณ์เก่าไว้</summary>
+      <div class="fbody">ย้อนเวลากลับไปพยากรณ์ทีละวันด้วยข้อมูลเท่าที่ "มีอยู่จริงในวันนั้น" เท่านั้น (ตัดข้อมูลหลังจากนั้นทิ้งชั่วคราว แล้วเรียนรู้ตัวคูณและยอดฐานใหม่ด้วยสูตรเดียวกับด้านบน) ได้พยากรณ์ล่วงหน้า 1 วัน แล้วเทียบกับยอดจริงในวันนั้น ทำแบบนี้ย้อนหลัง 30 วัน · ชุดค่าที่ใช้เลือกจากช่วงก่อนหน้า 30 วันนี้ ตัวเลขความแม่นจึงไม่ได้แอบเห็นคำตอบ · <b>เป้าหมาย MAPE ≤ 25%</b> · ไม่นับวันนี้ (ยอดยังไม่ครบ) และวันที่ยอด = 0</div>
+    </details>
+    <div class="fcacc">
+      ${fcAccCards(btOrd)}
+      <div class="fcacc-grid">
+        <div class="fcacc-panel"><div class="fcacc-h">จำนวนออเดอร์ / วัน
+            <em>${btOrd?`MAPE ${btOrd.mape.toFixed(1)}% · ความแม่น ${btOrd.accuracy.toFixed(1)}% (${btOrd.total} วัน)`:''}</em></div>
+          <div class="fcacc-chartbox"><canvas id="c_btord"></canvas></div>
+          ${fcAccTable(btOrd,'ออเดอร์')}</div>
+        <div class="fcacc-panel"><div class="fcacc-h">จำนวนสินค้า (ชิ้น) / วัน
+            <em>${btQty?`MAPE ${btQty.mape.toFixed(1)}% · ความแม่น ${btQty.accuracy.toFixed(1)}% (${btQty.total} วัน)`:''}</em></div>
+          <div class="fcacc-chartbox"><canvas id="c_btqty"></canvas></div>
+          ${fcAccTable(btQty,'ชิ้น')}</div>
+      </div>
+    </div>
 
     ${items1.length?`<h2 class="sec">Stock เทียบ Demand <em>เรียงตาม demand มากสุด · แท่งแดง = ส่วนที่สต็อกไม่พอ</em><span></span></h2>
     <div class="cgrid2">
@@ -4901,12 +4933,37 @@ function shipDateKey(v){
   return '';
 }
 
+/* v-shipcache: ชีต Shipping ใหญ่ (~150k แถว) โหลดไม่ทัน 60 วินาทีบ่อย
+   → รอนานขึ้น (csv 3 นาที · gviz 1.5 นาที) + ลองใหม่เองอีก 1 รอบ
+   → จำชุดล่าสุดที่โหลดสำเร็จไว้ในเบราว์เซอร์ (IndexedDB) โชว์ก่อนทันที พร้อมป้ายบอกเวลา แล้วค่อยแทนด้วยชุดใหม่
+   ข้อมูลที่คำนวณ = แถวจากชีตชุดเดียวกัน วิธีคิดไม่เปลี่ยน */
+function lcOpen(){ return new Promise((res,rej)=>{ const r=indexedDB.open('logi-cache',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function lcGet(k){ try{ const db=await lcOpen(); return await new Promise(res=>{
+  const q=db.transaction('kv').objectStore('kv').get(k); q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null); }); }catch(e){ return null; } }
+async function lcSet(k,v){ try{ const db=await lcOpen(); await new Promise(res=>{
+  const t=db.transaction('kv','readwrite'); t.objectStore('kv').put(v,k); t.oncomplete=res; t.onerror=res; t.onabort=res; }); }catch(e){} }
+const shipAt=t=>{ const d=new Date(t); return showD(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`)
+  +' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+' น.'; };
+async function shipRows(){
+  let last;
+  for(let a=0;a<2;a++){
+    try{ return await smallSheet(S_SHIP,G_SHIP,s=>SHEET_STATE.ship=(a?'ลองใหม่ · ':'')+s,{csv:180000,gviz:90000}); }
+    catch(e){ last=e; if(/แชร์|เปิดชีตไม่ได้/.test(e.message))break; }
+  }
+  throw last;
+}
 async function loadShip(force){
   if(force){ SHIP=null; SHIP_ERR=''; }
   if(SHIP||SHIP_LOADING)return SHIP;
   SHIP_LOADING=true;
+  if(!SHIP){ const c=await lcGet('ship');
+    if(c&&Array.isArray(c.list)&&c.list.length&&!SHIP){
+      SHIP={list:c.list,cachedAt:c.at}; SHIP_ERR='';
+      SHEET_STATE.ship='ใช้ข้อมูลชุดก่อน ('+shipAt(c.at)+') · กำลังโหลดใหม่…';
+      try{ if(!el('vKPI').hidden)renderKPI(); }catch(e){} } }
   try{
-    const rows=await smallSheet(S_SHIP,G_SHIP,s=>SHEET_STATE.ship=s);
+    const rows=await shipRows();
     if(!rows||rows.length<2)throw new Error('ได้ข้อมูลว่าง');
     const A=0,E=4,G=6,J=9,K=10,M=12,P=15,Q=16,R=17;
     const g=(r,i)=>i<r.length&&r[i]!=null?String(r[i]).trim():'';
@@ -4932,13 +4989,17 @@ async function loadShip(force){
     });
     if(!list.length)throw new Error('อ่านได้ 0 แถว (เช็คคอลัมน์วันที่ / เลขออเดอร์)');
     SHIP={list};
+    lcSet('ship',{list,at:Date.now()});
     /* v-ship2: โชว์ค่าที่เจอในคอลัมน์ Q (เช็คค้างส่ง) ไว้ที่แถบสถานะชีตด้านล่าง
        ถ้าค้างส่งขึ้น 0 ทั้งที่มีของค้าง จะเห็นทันทีว่าในชีตเขียนคำว่าอะไร */
     const qCnt={}; list.forEach(x=>{qCnt[x.q]=(qCnt[x.q]||0)+1;});
     const qTop=Object.entries(qCnt).sort((a,b)=>b[1]-a[1]).slice(0,5)
       .map(([k,v])=>`"${k}" ${fmt(v)}`).join(', ');
     SHEET_STATE.ship=fmt(list.length)+' แถว · คอลัมน์ Q (เช็คค้างส่ง): '+qTop;
-  }catch(e){ SHIP=null; SHIP_ERR=e.message; SHEET_STATE.ship='ผิดพลาด — '+e.message; }
+  }catch(e){
+    if(SHIP&&SHIP.cachedAt){ SHIP.loadErr=e.message; SHIP_ERR='';
+      SHEET_STATE.ship='โหลดใหม่ไม่สำเร็จ — ใช้ข้อมูลชุดก่อน ('+shipAt(SHIP.cachedAt)+')'; }
+    else{ SHIP=null; SHIP_ERR=e.message; SHEET_STATE.ship='ผิดพลาด — '+e.message; } }
   SHIP_LOADING=false;
   return SHIP;
 }
@@ -5030,6 +5091,8 @@ function secShip(){
   if(!list.length)return bar+'<div class="empty2">ไม่มีข้อมูลตามตัวกรองนี้</div>';
 
   const S=shipStats(list);
+  const cacheNote=SHIP.cachedAt?`<div class="chint shipcache">กำลังแสดงข้อมูลชุดก่อน (โหลดไว้เมื่อ ${shipAt(SHIP.cachedAt)})`
+    +(SHIP.loadErr?` — โหลดชุดใหม่ไม่สำเร็จ กด “ดึงข้อมูลใหม่” เพื่อลองอีกครั้ง`:` — กำลังโหลดชุดใหม่ เสร็จแล้วจะอัปเดตเอง`)+`</div>`:'';
   /* v-shipgrp: ภาพรวม = รายเดือน · เลือกเดือน = รายสัปดาห์ · เลือกสัปดาห์/วัน = รายวัน */
   S.grp=(DAYSEL||WKSEL.length)?'day':(shipYM||fMonth())?'week':'month';
   S.list=list;
@@ -5045,7 +5108,7 @@ function secShip(){
        +(S.critBad?`<span style="opacity:.8">ไม่ตรงเกณฑ์ ${fmt(S.critBad)} รายการ (${S.critBadE.slice(0,3).map(([k,v])=>esc(k)+' '+fmt(v)).join(' · ')}) — คนละเรื่องกับค้างส่ง</span>`:''))
     : '<div class="empty2">ไม่มีคอลัมน์เกณฑ์การจัดส่งให้คำนวณ</div>';
 
-  return bar
+  return cacheNote+bar
    + ring
    +`<div class="sgrid">
        ${card('ออเดอร์จัดส่งทั้งหมด',S.orders)}
@@ -5585,7 +5648,7 @@ function drawPack(){
       backgroundColor:S.pArr.map((n,i)=>col(i)),borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',layout:{padding:10},
       plugins:{legend:{display:false},   /* v-hleg: รายชื่อเป็น HTML ข้างวง (ไม่แบ่ง 2 คอลัมน์) */
-        pieLbl:{display:true,minPercent:3,size:20,fit:true},
+        pieLbl:{display:true,minPercent:3,size:30,fit:true},
         tooltip:{titleFont:{size:cf(22)},bodyFont:{size:cf(21)},padding:12,
           callbacks:{label:c=>c.label+': '+c.formattedValue+'% ('
             +fmt(shareVal[c.dataIndex])+' กล่อง)'}}}}});
@@ -5800,11 +5863,13 @@ function drawPick(){
     o.scales.y.ticks.font={size:cf(23)};
     o.scales.y.ticks.callback=v=>fmt(v);
     o.plugins.tooltip.callbacks={label:c=>`${c.dataset.label}: ${fmt(c.raw)} ชิ้น`};
+    const one=tLbl.length===1;   /* v-pk1: มีช่วงเดียว → วางจุดไว้กลางกราฟ ไม่ชิดซ้าย */
+    if(one)o.scales.x.offset=true;
     CH.pkday=new Chart(el3,{type:'line',
       data:{labels:tLbl,
         datasets:per.map((p,i)=>({label:p.who,data:tBy[p.who],
           borderColor:cols[i],backgroundColor:cols[i],borderWidth:3,
-          tension:.35,pointRadius:3,pointBackgroundColor:cols[i],
+          tension:.35,pointRadius:one?9:3,pointBackgroundColor:cols[i],
           spanGaps:true,fill:false}))},options:o});
     CH.pkday.data._cfv=pg==='day'?tk:tLbl; CH.pkday.data._unit='ชิ้น';
     CH.pkday.options.plugins.legend.display=false; CH.pkday.update('none'); dsLegend('lg_pkday',CH.pkday);
@@ -6416,7 +6481,7 @@ function secPickErr(){
      <div class="cpanel"><div class="cbox"><canvas id="c_perr"></canvas></div></div>
 
      <h2 class="sec">ประเภทความผิดพลาด <em>จำนวนเคส</em><span></span></h2>
-     <div class="cpanel"><div class="cbox" style="height:${Math.max(260,Object.keys(kinds).length*70+80)}px"><canvas id="c_perrk"></canvas></div></div>
+     <div class="cpanel"><div class="cbox" style="height:${Math.max(320,Object.keys(kinds).length*110+90)}px"><canvas id="c_perrk"></canvas></div></div>
 
      <h2 class="sec">รายการที่แจ้ง <em>${fmt(rows.length)} เคส · ใหม่ → เก่า</em><span></span></h2>
      <div class="tscroll"><table class="dt perr-t"><colgroup><col style="width:13%"><col style="width:11%"><col style="width:11%"><col style="width:25%"><col style="width:40%"></colgroup><thead><tr>
@@ -6448,12 +6513,22 @@ function drawPickErr(){
   const ks=Object.entries(kinds).sort((a,b)=>b[1]-a[1]);
   if(el2&&ks.length){
     destroy('perrk');
+    /* v-perrk: แท่งหนาขึ้น · ชื่อประเภทตัวใหญ่ · จำนวนเคส + % ที่ปลายแท่ง · สีแยกแต่ละประเภท */
     const o=baseOpts(false); o.indexAxis='y';
+    const kt=ks.reduce((a,x)=>a+x[1],0)||1;
+    o.layout={padding:{right:220,top:6,bottom:6}};
     o.scales.x.ticks.precision=0;
+    o.scales.x.ticks.font={size:cf(22)};
     o.scales.y.grid={display:false};
+    o.scales.y.ticks.font={size:cf(28),weight:'bold'};
+    o.scales.y.ticks.color='#1E1B33';
     o.plugins.tooltip.callbacks={label:c=>fmt(c.raw)+' เคส'};
+    o.plugins.barEnd={display:true,vals:ks.map(x=>x[1]),
+      pcts:ks.map(x=>Math.round(x[1]/kt*1000)/10)};
+    const kPal=[C.rose,C.amber,C.plum,C.teal,C.plumD,'#B4547F',C.tealD,'#C2703A'];
     CH.perrk=new Chart(el2,{type:'bar',data:{labels:ks.map(x=>x[0]),datasets:[{data:ks.map(x=>x[1]),
-      backgroundColor:C.rose,borderRadius:6,maxBarThickness:46}]},options:o});
+      backgroundColor:ks.map((x,i)=>kPal[i%kPal.length]),borderRadius:8,maxBarThickness:72}]},options:o});
+    CH.perrk.data._unit='เคส';
   }
 }
 
@@ -6658,7 +6733,7 @@ function shpfcPaint(){
   shpfcCalc();
 }
 function shpfcHTML(){
-  return `<h2 class="sec">คาดการณ์ออเดอร์รวมจากยอด Shopee <em>กรอกออเดอร์ Shopee → ดูช่วงออเดอร์รวมทุกช่องทาง (Min · Avg. · Max)</em><span></span></h2>
+  return `<h2 class="sec"><span class="shpbadge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Shopee</span>คาดการณ์ออเดอร์รวมจากยอด Shopee <em>กรอกออเดอร์ Shopee → ดูช่วงออเดอร์รวมทุกช่องทาง (Min · Avg. · Max)</em><span></span></h2>
     <div class="cpanel shpfc">
       <div class="shpfc-row">
         <label class="shpfc-in">ออเดอร์ Shopee <input type="number" min="0" id="shpfcIn" placeholder="เช่น 497" value="${esc(SHPFC.x)}"></label>
@@ -6781,7 +6856,7 @@ function renderKPI(){
   /* v-kdark: ธีมเข้มของหน้าย่อย KPI (ไม่ใช้กับหน้าภาพรวม และหน้าเอกสาร/หน้าที่ฝังไฟล์แยก) */
   document.body.classList.toggle('kdark', !['overview','sop','sopcr','cr','ret','can'].includes(SEC));
   /* v-kbig: หน้าที่ขยายภาพรวม + ตัวอักษรรายละเอียด · ฟอนต์ในกราฟใหญ่ขึ้น 15% (โหมดพรีเซนต์คงเดิม) */
-  const kbig=['oos','diff','dock','pick','perr','pack','ship','fc'].includes(SEC);
+  const kbig=['oos','diff','dock','pick','perr','pack','ship','fc','repl'].includes(SEC);
   document.body.classList.toggle('kbig', kbig);
   CFZ=document.body.classList.contains('present')?2.0:(kbig?1.84:1.6);
   try{ const nb=document.querySelector('.sidenav button.on .nic');
