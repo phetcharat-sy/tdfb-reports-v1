@@ -5518,6 +5518,8 @@ let PACK_CTX=null;
 function secPack(){
   if(!PACK){
     if(!PACK_ERR)return '<div class="empty2">กำลังโหลดข้อมูล…</div>';
+    /* v-packretry: ระหว่างรอลองใหม่ บอกว่าชีตกำลังอัปเดต ไม่ขึ้นวิธีแก้เรื่อง Publish */
+    if(PACK_LOADING)return `<div class="empty2">ชีต Packing กำลังอัปเดตจาก n8n (ว่างชั่วคราว) — กำลังลองดึงใหม่อัตโนมัติ…<br><small>${esc(SHEET_STATE.pack||'')}</small></div>`;
     return `<div class="empty2">อ่านชีตไม่ได้ — ${esc(PACK_ERR)}</div>`
       +`<div class="cpanel" style="max-width:1100px;margin:0 auto">
         <div class="chname2">วิธีแก้</div>
