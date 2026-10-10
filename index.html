@@ -8022,6 +8022,12 @@ window.LOGI_SHIP={
   stats:list=>shipStats(list),
   isoWeek:k=>isoWeek(k)
 };
+/* v-rptpick: ให้หน้ารายงานประจำวัน Warehouse ใช้ข้อมูลการหยิบชุดเดียวกับหน้า Picking / Human Error On Picking */
+window.LOGI_PICK={
+  load:force=>loadPick(force),
+  list:()=>PICK?PICK.list:null,
+  err:()=>PICK_ERR
+};
 /* v-rptshot: ให้หน้ารายงานใช้ตัวบันทึกรูปตัวเดียวกับหน้า KPI */
 window.LOGI_SHOT={run:o=>shotExport(o),menu:(b,f)=>shotMenu(b,f)};
 
@@ -8079,8 +8085,9 @@ const TEAMS={
   },
   warehouse:{
     title:'รายงานทีม Warehouse',
-    sub:'รับสินค้าเข้าระบบ · การแจ้งปัญหาประจำวัน',
-    source:'Job Daily Operation (แท็บ GR Warehouse) และ แจ้งรายการมีปัญหาประจำวันของ Operation (แท็บ Warehouse)',
+    sub:'จำนวนสินค้าที่หยิบ · รับสินค้าเข้าระบบ · การแจ้งปัญหาประจำวัน',
+    pickStats:true,   /* v-rptpick: การ์ดจำนวนสินค้าที่หยิบ (ชีต Performance Picking ชุดเดียวกับหน้า Picking) */
+    source:'Performance Picking (จำนวนสินค้าที่หยิบ) · Job Daily Operation (แท็บ GR Warehouse) และ แจ้งรายการมีปัญหาประจำวันของ Operation (แท็บ Warehouse)',
     panels:[
       /* v137: รายการรับสินค้าเข้าระบบ — n8n เติมจาก Odoo ทุกวัน 16:30 */
       {k:'gr',t:'รับสินค้าเข้าระบบ', c:'GR Warehouse', hd:'a', unit:'รายการ',
@@ -8116,6 +8123,7 @@ const SNAP=[{"year": "2026", "month": "มิถุนายน", "wk": 24, "dat
 
 /* ===== v-rptdesign: ไอคอนของหน้ารายงาน (ใส่สีตรง ๆ ไม่ใช้ currentColor — ให้ html2canvas วาดสีถูกตอนบันทึกรูป) ===== */
 const RI={
+  cart:'<circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h3l2.6 11.4a1.6 1.6 0 0 0 1.6 1.2h8.6a1.6 1.6 0 0 0 1.6-1.2L21 7H6.2"/>',
   warehouse:'<path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/>',
   truck:'<path d="M1 4h14v12H1z"/><path d="M15 8h4l3 3.5V16h-7"/><circle cx="5.5" cy="18" r="2.2"/><circle cx="18" cy="18" r="2.2"/>',
   clip:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/>',
@@ -8136,7 +8144,7 @@ const ico=(n,c='#fff',sw=1.9,extra='')=>`<svg viewBox="0 0 24 24" fill="none" st
 const TEAM_ICO={warehouse:'warehouse',delivery:'truck',admin:'clip'};
 const PANEL_ICO={gr:'box',issue:'warn',mo:'clip',order:'clock',cancel:'xcircle',ret:'ret'};
 /* ไอคอนการ์ดตัวเลข: [ไอคอนในกรอบ, ไอคอนจาง ๆ ด้านขวา] — เลือกจากชื่อการ์ด (แสดงผลอย่างเดียว ไม่แตะการคำนวณ) */
-const kpiIco=l=>/รับสินค้า/.test(l)?['boxplus','box']:/แจ้งปัญหา/.test(l)?['warn','docwarn']:/พบบ่อย/.test(l)?['person','users']
+const kpiIco=l=>/หยิบ/.test(l)?['cart','cart']:/รับสินค้า/.test(l)?['boxplus','box']:/แจ้งปัญหา/.test(l)?['warn','docwarn']:/พบบ่อย/.test(l)?['person','users']
   :/ค้างส่ง/.test(l)?['clock','clock']:/MO/.test(l)?['clip','clip']:/ยกเลิก/.test(l)?['xcircle','xcircle']
   :/ออกไปแล้ว/.test(l)?['ret','ret']:['box','truck'];
 const FD={value:'',options:[]};
@@ -8361,8 +8369,16 @@ const rptFiltered=()=>RMODE!=='all';   /* เลือกช่วงเวล�
 let SHIPROWS=[];   /* ออเดอร์ทุกแถวจากชีต Packing (ใช้นับยอด) */
 const shipPanel=()=>cfg().panels.some(p=>p.ship);
 const hasShip=()=>shipPanel()||!!cfg().shipStats;   /* v-shipadm: ทีมไหนมีช่องค้างส่ง (ตอนนี้ = Admin) */
+/* v-rptpick: batch การหยิบ (นับ batch ละครั้ง · เฉพาะที่ปิดงานแล้ว — กติกาเดียวกับหน้า Picking) */
+let PICKROWS=[];
+const hasPick=()=>!!cfg().pickStats;
+function buildPickRows(){
+  const src=(window.LOGI_PICK&&LOGI_PICK.list())||[];
+  PICKROWS=src.filter(x=>x.date).map(x=>({...x,y:x.date.slice(0,4),m:x.date.slice(5,7),
+                        wk:LOGI_SHIP.isoWeek(x.date)}));
+}
 const allRows=()=>cfg().panels.filter(p=>!p.ship).flatMap(p=>DATA[p.k]||[])
-                   .concat(hasShip()?SHIPROWS:[]);
+                   .concat(hasShip()?SHIPROWS:[]).concat(hasPick()?PICKROWS:[]);
 const SHIP_OK=/สำเร็จ|ตรง|ผ่าน|on ?time|delivered/i;   /* เกณฑ์เดียวกับหน้า Shipping */
 function buildShipRows(){
   const src=(window.LOGI_SHIP&&LOGI_SHIP.list())||[];
@@ -8465,6 +8481,22 @@ function renderReport(){
     }
     k.push(...rest);
   }
+  if(hasPick()){                    /* v-rptpick: การ์ดจำนวนสินค้าที่หยิบ นำหน้าการ์ดอื่นของทีม Warehouse */
+    const pickSel=PICKROWS.filter(match);
+    let pk;
+    if(!PICKROWS.length){
+      const er=window.LOGI_PICK&&LOGI_PICK.err();
+      pk={l:'จำนวนสินค้าที่หยิบ',v:er?'ดึงไม่ได้':'กำลังโหลด…',n:'ชีต Performance Picking',pending:true};
+    }else if(!pickSel.length){
+      pk={l:'จำนวนสินค้าที่หยิบ',v:0,n:'ไม่มีการหยิบในช่วงนี้',cls:'ink'};
+    }else{
+      const q=pickSel.reduce((a,r)=>a+(r.qty||0),0);
+      const pd=new Set(pickSel.map(r=>r.date)).size;
+      pk={l:'จำนวนสินค้าที่หยิบ',v:q,cls:'ink',
+          n:`ชิ้น · ${fmt(pickSel.length)} batch`+(pd>1?` · เฉลี่ย ${fmt(q/pd)}/วัน`:'')};
+    }
+    k.unshift(pk);
+  }
   if(TEAM==='warehouse'){   /* v136: Admin ไม่ต้องมีการ์ดพบบ่อยที่สุด */
     const tg={};(sets.find(x=>x.p.k==='issue')||sets[0]).rows.forEach(r=>{const t=r.tag||'ไม่ระบุ';tg[t]=(tg[t]||0)+1;});
     const top=Object.entries(tg).sort((a,b)=>b[1]-a[1])[0];
@@ -8489,7 +8521,8 @@ function renderReport(){
      <div class="scroll">${(()=>{const em=RLOADING?'กำลังโหลดข้อมูล…':s.p.empty;
        return s.p.ship?shipTableHTML(s.rows,em):tableHTML(s.rows,em,s.p.form||s.p.noQty,s.p);})()}</div></div>`).join('');
 
-  const ks=[...new Set([...days,...shipSel.map(r=>r.date)])].filter(Boolean).sort();
+  const pickDays=(hasPick()&&!RLOADING)?PICKROWS.filter(match).map(r=>r.date):[];
+  const ks=[...new Set([...days,...shipSel.map(r=>r.date),...pickDays])].filter(Boolean).sort();
   el('period').textContent=RMODE==='day'?showLong(RVAL)
     :ks.length?(ks[0]===ks[ks.length-1]?showLong(ks[0]):`${showLong(ks[0])} – ${showLong(ks[ks.length-1])}`)
     :perLabel(RMODE,RVAL);
@@ -8611,13 +8644,16 @@ async function load(){
   el('stat').className='stat';el('stat').textContent='กำลังดึงข้อมูล…';el('reload').disabled=true;
   const ps=cfg().panels;
   const extra=(cfg().shipStats&&!ps.some(p=>p.ship))?LOGI_SHIP.load(true).catch(()=>null):null;
+  const extraPick=(cfg().pickStats&&window.LOGI_PICK)?LOGI_PICK.load(true).catch(()=>null):null;
   const res=await Promise.allSettled(ps.map(p=>p.ship
     ? LOGI_SHIP.load(true).then(r=>{ if(!r)throw new Error(LOGI_SHIP.err()||'ดึงไม่ได้'); return []; })
     : grab(p)));
   if(extra)await extra;
+  if(extraPick)await extraPick;
   if(seq!==LOAD_SEQ)return;          /* มีการโหลดใหม่กว่าแล้ว ทิ้งผลนี้ */
   RLOADING=false;
   buildShipRows();
+  buildPickRows();
   DATA={};const bad=[];
   res.forEach((r,i)=>{
     if(r.status==='fulfilled') DATA[ps[i].k]=r.value;
