@@ -3233,14 +3233,14 @@ function drawOOS(){
   const t=on+ea+la||1;
   destroy('oos');
   const oO=pctOpts(99);
-  oO.onClick=(e,els)=>{ if(els.length){ SUBF.oos_st=['ontime','early','late'][els[0].index]; renderKPI(); } };
+  oO.onClick=(e,els)=>{ if(els.length){ SUBF.oos_st=['ontime|early','late'][els[0].index]; renderKPI(); } };
   oO.onHover=(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default';};
-  const os=pctSet([on,ea,la],t);   /* ตรงกับวงแหวน — ไม่ปัดเป็น 100% / 0% */
+  const os=pctSet([on+ea,la],t);   /* v-oos-early: Early นับเป็น On time · ตรงกับวงแหวน */
   oO.plugins.barPct.digits=os.digits;
   CH.oos=new Chart(document.getElementById('c_oos'),{type:'bar',
-    data:{labels:['On time','Early','Late'],datasets:[{
+    data:{labels:['On time','Late'],datasets:[{
       data:os.data,
-      backgroundColor:[C.teal,C.tealD,C.rose],borderRadius:6,maxBarThickness:74}]},
+      backgroundColor:[C.teal,C.rose],borderRadius:6,maxBarThickness:74}]},
     options:oO});
 }
 
