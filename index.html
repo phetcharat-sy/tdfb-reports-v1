@@ -6731,8 +6731,8 @@ function secRepl(){
         <td class="num"><span class="qty">${fmt(r.qty)}</span></td>
         <td>${esc(r.remark||'—')}</td></tr>`).join('')+'</tbody></table></div>';})():''}
 
-    <h2 class="sec">รวมทั้งหมด <em>เรียง “ต้องเติม” ก่อน แล้วตามคะแนนขายดี</em><span></span></h2>
-    <div class="tscroll" style="overflow-x:auto"><table class="dt" style="min-width:1000px"><thead><tr>
+    <h2 class="sec" data-shot-skip="1">รวมทั้งหมด <em>เรียง “ต้องเติม” ก่อน แล้วตามคะแนนขายดี</em><span></span></h2>
+    <div class="tscroll" data-shot-skip="1" style="overflow-x:auto"><table class="dt" style="min-width:1000px"><thead><tr>
       <th>No</th><th>Product</th><th class="num">คะแนนขายดี</th><th>สถานะ</th>
       <th class="num">WH300</th><th class="num">QUOTA</th><th class="num">Plan PD</th>
       <th class="num">FAC16</th><th class="num">OWH</th><th class="num">Quarantine</th>
@@ -7850,7 +7850,10 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       if(L&&b.top<L.bot-1){L.bot=Math.max(L.bot,b.bot);L.head=L.head&&b.head;L.items.push(b);}
       else bands.push({top:b.top,bot:b.bot,head:b.head,items:[b]});});
     const pages=[]; let cur=[];
-    bands.forEach(b=>{
+    /* v-shot11: ส่วนที่ติด data-shot-skip (ตาราง "รวมทั้งหมด" หน้า Replenishment) ไม่เอาไปทำสไลด์ 16:9
+       — แบบแยกทีละกราฟ / ทั้งหน้า ยังมีครบเหมือนเดิม */
+    const isSkip=b=>b.items.every(it=>it.el.closest('[data-shot-skip="1"]'));
+    bands.filter(b=>!isSkip(b)).forEach(b=>{
       if(cur.length&&(b.bot-cur[0].top)>pageH){
         const carry=[]; while(cur.length>1&&cur[cur.length-1].head)carry.unshift(cur.pop());
         pages.push(cur); cur=carry;
@@ -7881,7 +7884,13 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
         const s=Math.min(sc,Math.sqrt(cap/(w*h)),16000/h,16000/w);
         c=await html2canvas(root,{scale:s,backgroundColor:bg,useCORS:true,logging:false,
           x:0,y:0,width:w,height:h,scrollX:0,scrollY:0,windowWidth:w,windowHeight:h,
-          onclone:d=>prep(d)});
+          onclone:d=>{prep(d);
+            /* v-shot10: ซ่อนแถบตัวกรองย่อยที่ยังเป็น "ทั้งหมด" — เป็นปุ่มบนจอ ไม่ต้องติดไปในรูป
+               (ถ้ากำลังกรองอยู่ ยังแสดงไว้ คนดูจะได้รู้ว่าเป็นข้อมูลเฉพาะส่วน) */
+            d.querySelectorAll('.fbar').forEach(f=>{
+              if(f.querySelector('button[data-v=""].on,.ddbtn[data-on="0"]'))
+                f.style.setProperty('display','none','important');});
+          }});
         if(!shotBlank(c))return c;
         c.width=c.height=0;
       }
@@ -7915,6 +7924,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
         const rc=d.querySelector('[data-shot-root="1"]'); if(!rc)return;
         shotIsolate(d,rc,w0);
         d.querySelectorAll('[data-shot-pg]').forEach(e=>{if(e.dataset.shotPg!==String(i))e.style.setProperty('display','none','important');});
+        d.querySelectorAll('[data-shot-skip="1"]').forEach(e=>e.style.setProperty('display','none','important'));
       });
       c=shotTrim(c,bg);
       const sl=document.createElement('canvas'); sl.width=SHOT_SLIDE_W; sl.height=SHOT_SLIDE_H;
@@ -7922,7 +7932,8 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       const FOOT=90, M=70, bw=sl.width-M*2, bh=sl.height-M-FOOT;
       const k=Math.min(bw/c.width,bh/c.height), dw=c.width*k, dh=c.height*k;
       x.imageSmoothingQuality='high';
-      x.drawImage(c,(sl.width-dw)/2,M+Math.max(0,(bh-dh)/2)*(dh<bh*0.6?0.4:1),dw,dh);
+      /* v-shot10: ชิดบนเสมอ (เดิมจัดกึ่งกลางแนวตั้ง → ช่องว่างด้านบนใหญ่ ดูลอย) */
+      x.drawImage(c,(sl.width-dw)/2,M,dw,dh);
       x.fillStyle=fg; x.font='500 34px "Baloo 2","Mitr",sans-serif'; x.textBaseline='middle';
       x.textAlign='left'; x.fillText('Logistics Dashboard · '+(title||''),M,sl.height-FOOT/2);
       x.textAlign='right'; x.fillText(`${i+1} / ${pages.length}`,sl.width-M,sl.height-FOOT/2);
