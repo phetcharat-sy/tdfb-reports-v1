@@ -3175,7 +3175,7 @@ function secOOS(){
   return bars
    +(stSel.length?`<div class="chint">กำลังกรอง — แสดง ${fmt(tq)} ชิ้น จากทั้งหมด ${fmt(totQ)} ชิ้นในช่วงนี้</div>`:'')
    +ringHTML(p,99,`<span>WH ส่งของให้ Packing ตามกำหนด</span><span>เป้าหมาย <b>≥ 99%</b></span>`)
-   +`<div class="sgrid">${card('จำนวนสินค้า (ชิ้น)',tq)}${card('On-Time Dispatch',on,'teal')}
+   +`<div class="sgrid">${card('จำนวนสินค้า (ชิ้น)',tq)}${card('On-Time Dispatch',on+ea,'teal')}
       ${card('จัดส่งล่าช้า',la,'rose')}${card('Orders',ord)}</div>
      <!-- "จัดส่งก่อนกำหนด" ย้ายไปแสดงที่หน้า On-Time Performance แล้ว — % ยังคำนวณ (on+early)/total เหมือนเดิม
           เพราะ on-time กับ early ยังนับเป็นผ่านเกณฑ์ทั้งคู่ มีแค่ late เท่านั้นที่ไม่ผ่าน -->
@@ -7427,6 +7427,10 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&OPEN_DD){ OPEN_DD=
 let YEAR_INIT=false;
 /* v-latest: true = ตัวกรองยังเป็นค่าตั้งต้น (วันนี้) → เลื่อนไปวันล่าสุดที่มีข้อมูลให้อัตโนมัติ */
 let RFK_AUTO=true;
+/* v-latest: วันที่ของแถว Dock to Stock (วันส่ง → วันรับ → วันจัดเก็บ ตามลำดับ เหมือนหน้า Dock) */
+const rfkDockDates=()=>(DOCK_ROWS||[]).map(r=>{
+  const a=dparse(r.send||''),b=dparse(r.recv||''),c=dparse(r.store||'');
+  const ms=!isNaN(a)?a:(!isNaN(b)?b:c); return isNaN(ms)?'':dkey(new Date(ms)); });
 function rfkLatest(){
   const d=new Date(),
         t=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -7438,6 +7442,7 @@ function rfkLatest(){
     else if((SEC==='pick'||SEC==='perr')&&PICK&&PICK.list)src=PICK.list.map(r=>r.date);
     else if(SEC==='ship'&&SHIP&&SHIP.list)src=SHIP.list.map(r=>r.day);
     else if(SEC==='diff'&&DIFF)src=DIFF.map(r=>r.date);
+    else if(SEC==='dock'&&DOCK_ROWS)src=rfkDockDates();
     else src=filterBase().map(r=>r.date);
   }catch(e){}
   let L=mx(src);
@@ -7541,6 +7546,7 @@ function rfkDates(){
   try{ if(PICK&&PICK.list)add(PICK.list.map(r=>r.date)); }catch(e){}
   try{ if(SHIP&&SHIP.list)add(SHIP.list.map(r=>r.day)); }catch(e){}
   try{ if(PACK&&PACK.list)add(PACK.list.map(r=>r.d&&r.d.fd)); }catch(e){}
+  try{ if(SEC==='dock')add(rfkDockDates()); }catch(e){}
   return s;
 }
 let RFK_OPTS=[];
