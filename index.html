@@ -7433,11 +7433,17 @@ function fillFiltersKPI(){
   /* ตั้งต้นที่ "ปีปัจจุบัน" เสมอ — เปิดแดชบอร์ดปีไหนก็เห็นผลของปีนั้น
      ข้อมูลปีก่อนๆ จะไม่ขึ้น จนกว่าจะเลือกตัวกรอง YEAR เอง
      ถ้าปีปัจจุบันยังไม่มีข้อมูลเลย ค่อยถอยไปใช้ปีล่าสุดที่มี */
+  /* v-today: เปิดแดชบอร์ดมาครั้งแรก = "รายวัน" ของวันนี้ทุกหน้า (ผลลัพธ์ ณ ปัจจุบัน)
+     ยังเลือกดูช่วงอื่นได้ตามเดิมจากปุ่ม ดูทั้งหมด / รายปี / ไตรมาส / รายเดือน / รายสัปดาห์ */
   if(!YEAR_INIT&&years.length){
     YEAR_INIT=true;
     if(!el('kY').value){
-      const now=String(new Date().getFullYear());
-      el('kY').value = years.includes(now) ? now : years[0];
+      const d=new Date(),
+            t=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,
+            y=t.slice(0,4), s=el('kY');
+      if(![...s.options].some(o=>o.value===y)){const o=document.createElement('option');o.value=o.textContent=y;s.appendChild(o);}
+      RFK_Y=y; RFK_M=RFK_W=''; RFK_D=t; WKSEL=[]; QSEL=''; DAYSEL=t; calYM=null;
+      s.value=y;
     }
   }
   const byY=filterBase().filter(r=>!fYear()||yrOf(r)===fYear());
