@@ -94,6 +94,8 @@ body.present{zoom:1.15}
 #vKPI .ringwrap b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   gap:6px;color:#fff;font-weight:bold;line-height:1;
   font-size:104px;letter-spacing:-3px}
+/* v-ringfit: ตัวเลข 6 หลักขึ้นไป (เช่น 100.00) ย่อลงให้อยู่ในวงพอดี */
+#vKPI .ringwrap b .n.long{font-size:.8em;letter-spacing:-.02em}
 #vKPI .ringwrap b i{font-style:normal;font-size:.46em;letter-spacing:0;
   opacity:.9;transform:translateY(-.30em)}
 #vKPI .ringwrap b.miss{color:var(--bad)}
@@ -2755,7 +2757,7 @@ function ringHTML(pct_,target,caption){
       <svg viewBox="0 0 220 220"><circle class="tr" cx="110" cy="110" r="90"></circle>
       <circle class="fl${miss?' miss':''}" cx="110" cy="110" r="90"
         stroke-dasharray="${CIRC}" stroke-dashoffset="${off}"></circle></svg>
-      <b class="${miss?'miss':''}">${pct2(pct_)}<i>%</i></b>
+      <b class="${miss?'miss':''}">${(t=>`<span class="n${t.length>=6?' long':''}">${t}</span>`)(String(pct2(pct_)))}<i>%</i></b>
     </div>
     <div class="cap">
       ${noTarget?'':`<span class="tag ${miss?'miss':''}">${miss?'ต่ำกว่าเกณฑ์':'ผ่านเกณฑ์'}</span>`}
@@ -7423,6 +7425,28 @@ document.addEventListener('click',()=>{ if(OPEN_DD){ OPEN_DD=''; renderKPI(); } 
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&OPEN_DD){ OPEN_DD=''; renderKPI(); } });
 
 let YEAR_INIT=false;
+/* v-latest: true = ตัวกรองยังเป็นค่าตั้งต้น (วันนี้) → เลื่อนไปวันล่าสุดที่มีข้อมูลให้อัตโนมัติ */
+let RFK_AUTO=true;
+function rfkLatest(){
+  const d=new Date(),
+        t=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const mx=a=>{let b='';for(const x of a||[]){const k=String(x||'').slice(0,10);
+    if(k.length===10&&/^\d{4}-\d{2}-\d{2}$/.test(k)&&k<=t&&k>b)b=k;}return b;};
+  let src=null;
+  try{
+    if(SEC==='pack'&&PACK&&PACK.list)src=PACK.list.map(r=>r.d&&r.d.fd);
+    else if((SEC==='pick'||SEC==='perr')&&PICK&&PICK.list)src=PICK.list.map(r=>r.date);
+    else if(SEC==='ship'&&SHIP&&SHIP.list)src=SHIP.list.map(r=>r.day);
+    else if(SEC==='diff'&&DIFF)src=DIFF.map(r=>r.date);
+    else src=filterBase().map(r=>r.date);
+  }catch(e){}
+  let L=mx(src);
+  if(!L){ const all=[];
+    try{all.push(...filterBase().map(r=>r.date));}catch(e){}
+    try{if(DIFF)all.push(...DIFF.map(r=>r.date));}catch(e){}
+    L=mx(all); }
+  return L;
+}
 /* v-pack3: หน้า Packing ใช้วันที่ของข้อมูล Packing เอง หน้าอื่นใช้ชีต On-Time เหมือนเดิม */
 const filterBase=()=>(SEC==='pack'&&PACK&&PACK.fRows)?PACK.fRows:RAW;
 function fillFiltersKPI(){
@@ -7444,6 +7468,15 @@ function fillFiltersKPI(){
       if(![...s.options].some(o=>o.value===y)){const o=document.createElement('option');o.value=o.textContent=y;s.appendChild(o);}
       RFK_Y=y; RFK_M=RFK_W=''; RFK_D=t; WKSEL=[]; QSEL=''; DAYSEL=t; calYM=null;
       s.value=y;
+    }
+  }
+  /* v-latest: โหมดตั้งต้น "วันนี้" — ถ้าวันนี้ยังไม่มีข้อมูล ให้ขยับไปวันล่าสุดที่มีข้อมูลของหน้านั้นแทน */
+  if(RFK_AUTO&&DAYSEL&&DAYSEL===RFK_D){
+    const L=rfkLatest();
+    if(L&&L!==DAYSEL){
+      const y=L.slice(0,4), s=el('kY');
+      if(![...s.options].some(o=>o.value===y)){const o=document.createElement('option');o.value=o.textContent=y;s.appendChild(o);}
+      RFK_Y=y; RFK_D=L; DAYSEL=L; calYM=null; s.value=y;
     }
   }
   const byY=filterBase().filter(r=>!fYear()||yrOf(r)===fYear());
@@ -7528,6 +7561,10 @@ function buildRFK(){
 }
 /* สั่งตัวกรองเดิมตามช่วงที่เลือก */
 function rfkApply(m,v){
+  /* กด "รายวัน" (= วันนี้) ให้กลับไปโหมดอัตโนมัติ · เลือกวัน/ช่วงอื่นเอง = ปิดอัตโนมัติ */
+  { const d=new Date(),
+          t=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    RFK_AUTO=(m==='day'&&v===t); }
   el('kM').value=''; WKSEL=[]; DAYSEL=''; QSEL=''; calYM=null;
   RFK_Y=RFK_M=RFK_W=RFK_D='';
   const setY=y=>{ RFK_Y=y; const s=el('kY');
