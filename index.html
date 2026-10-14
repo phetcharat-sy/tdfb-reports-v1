@@ -7019,6 +7019,9 @@ function secReplM(){
   const all=[...RP].sort((a,b)=>{
     const an=isNeed(a)?1:0,bn=isNeed(b)?1:0;
     if(an!==bn)return bn-an;
+    /* v-noprodlast: ในกลุ่มต้องเติม "ไม่มีผลิตสินค้า" ไปอยู่ล่างสุด */
+    const ap=an&&noProd(a)?1:0,bp=bn&&noProd(b)?1:0;
+    if(ap!==bp)return ap-bp;
     return (ord.get(a)??0)-(ord.get(b)??0);
   });
 
@@ -7039,7 +7042,7 @@ function secReplM(){
     <div class="cpanel"><div class="cbox"><canvas id="c_remark"></canvas></div></div>
     
 
-    <h2 class="sec">รวมทั้งหมด <em>${rf==='need'?'เฉพาะที่ต้องเติม':rf==='non'?'เฉพาะที่ไม่ต้องเติม':'เรียง “ต้องเติม” ก่อน'} · ${fmt(all.filter(r=>rf==='all'||(rf==='need'?isNeed(r):!isNeed(r))).length)} รายการ · เรียงตามลำดับในชีต</em><span></span><div class="h2f">${chipOne('repl_all','แสดง',[['need','ต้องเติม ('+fmt(need.length)+')'],['non','ไม่ต้องเติม ('+fmt(RP.length-need.length)+')'],['all','ทั้งหมด ('+fmt(RP.length)+')']],rf)}</div></h2>
+    <h2 class="sec">รวมทั้งหมด <em>${rf==='need'?'เฉพาะที่ต้องเติม':rf==='non'?'เฉพาะที่ไม่ต้องเติม':'เรียง “ต้องเติม” ก่อน'} · ${fmt(all.filter(r=>rf==='all'||(rf==='need'?isNeed(r):!isNeed(r))).length)} รายการ · เรียงตามลำดับในชีต · ไม่มีผลิตสินค้าอยู่ท้าย</em><span></span><div class="h2f">${chipOne('repl_all','แสดง',[['need','ต้องเติม ('+fmt(need.length)+')'],['non','ไม่ต้องเติม ('+fmt(RP.length-need.length)+')'],['all','ทั้งหมด ('+fmt(RP.length)+')']],rf)}</div></h2>
     <div class="tscroll" style="overflow-x:auto"><table class="dt" style="min-width:1120px"><thead><tr>
       <th>No</th><th>Product</th><th class="num">คะแนนขายดี</th><th>สถานะ</th><th>Status</th>
       <th class="num">WH300</th><th class="num">QUOTA</th><th class="num">Plan PD</th>
@@ -8134,9 +8137,11 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
      ได้ canvas กว้าง 7,000–8,000px สูงหลายพัน เกินที่เบราว์เซอร์วาดไหว → ได้ภาพว่างเปล่า
      ตอนนี้คำนวณ scale ให้ภาพกว้างราว 3,900px เท่ากันทุกคน ไม่ว่าจะตั้งขนาดจอเท่าไร */
   const S=Math.min(5,Math.max(1,(SHOT_SLIDE_W+60)/w0));
+  /* v-shotsharp: ภาพทั้งหน้าใช้ความละเอียดสูงขึ้น (ราว 23 ล้านพิกเซล · ไม่เกินเพดาน 25MP ของ Google Slides) ให้ตัวหนังสือคมเวลาวางในสไลด์ */
+  const SP=mode==='page'?Math.min(5,Math.max(S,Math.sqrt(2.3e7/(w0*Math.max(root.scrollHeight,root.offsetHeight,1))))):S;
   const charts=doc===document?Object.values(CH):[];
   /* ปิด tooltip ที่ค้างอยู่ตอนเอาเมาส์ชี้กราฟ ไม่ให้ติดไปในภาพ */
-  charts.forEach(c=>{try{c.options.devicePixelRatio=S;
+  charts.forEach(c=>{try{c.options.devicePixelRatio=SP;
     if(c.tooltip)c.tooltip.setActiveElements([],{x:0,y:0}); c.setActiveElements([]);
     c.resize(); c.update('none');}catch(e){}});
   await shotFrame(); await shotWait(250);
@@ -8213,7 +8218,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     if(mode==='page'){
       say('กำลังสร้างภาพทั้งหน้า…');
       const hh=Math.max(root.scrollHeight,R.height);
-      let c=await shoot(w0,Math.ceil(hh+60),S,d=>{
+      let c=await shoot(w0,Math.ceil(hh+60),SP,d=>{
         const rc=d.querySelector('[data-shot-root="1"]'); if(rc)shotIsolate(d,rc,w0);});
       c=shotTrim(c,bg);
       const M=Math.round(c.width*0.025), FOOT=Math.round(c.width*0.03);
