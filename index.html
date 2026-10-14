@@ -8137,8 +8137,8 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
      ได้ canvas กว้าง 7,000–8,000px สูงหลายพัน เกินที่เบราว์เซอร์วาดไหว → ได้ภาพว่างเปล่า
      ตอนนี้คำนวณ scale ให้ภาพกว้างราว 3,900px เท่ากันทุกคน ไม่ว่าจะตั้งขนาดจอเท่าไร */
   const S=Math.min(5,Math.max(1,(SHOT_SLIDE_W+60)/w0));
-  /* v-shotsharp: ภาพทั้งหน้าใช้ความละเอียดสูงขึ้น (ราว 23 ล้านพิกเซล · ไม่เกินเพดาน 25MP ของ Google Slides) ให้ตัวหนังสือคมเวลาวางในสไลด์ */
-  const SP=mode==='page'?Math.min(5,Math.max(S,Math.sqrt(2.3e7/(w0*Math.max(root.scrollHeight,root.offsetHeight,1))))):S;
+  /* v-shotsharp: ภาพทั้งหน้าใช้ความละเอียดสูงขึ้น (ราว 16 ล้านพิกเซล รวมขอบแล้วไม่ถึง 20MP · Google Slides รับไม่เกิน 25MP) ให้ตัวหนังสือคมเวลาวางในสไลด์ */
+  const SP=mode==='page'?Math.min(5,Math.max(S,Math.sqrt(1.6e7/(w0*Math.max(root.scrollHeight,root.offsetHeight,1))))):S;
   const charts=doc===document?Object.values(CH):[];
   /* ปิด tooltip ที่ค้างอยู่ตอนเอาเมาส์ชี้กราฟ ไม่ให้ติดไปในภาพ */
   charts.forEach(c=>{try{c.options.devicePixelRatio=SP;
@@ -8227,11 +8227,18 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       x.drawImage(c,M,M);
       x.fillStyle=fg; x.font=`500 ${Math.round(FOOT*0.42)}px "Baloo 2","Mitr",sans-serif`; x.textBaseline='middle';
       x.textAlign='left'; x.fillText('Logistics Dashboard  ›  '+(title||''),M,out.height-FOOT/2);
-      const a=document.createElement('a'); a.download=name+'-fullpage.png';
-      a.href=URL.createObjectURL(await shotBlob(out));
+      /* v-shotcap: กันภาพใหญ่เกินที่ Google Slides รับได้ (≤25MP / ≤50MB) · ย่อให้ไม่เกิน 20 ล้านพิกเซล และถ้าไฟล์ PNG ใหญ่เกิน 40MB บันทึกเป็น JPG คุณภาพสูงแทน */
+      let fin=out;
+      if(out.width*out.height>2e7){const k=Math.sqrt(2e7/(out.width*out.height));
+        fin=document.createElement('canvas'); fin.width=Math.floor(out.width*k); fin.height=Math.floor(out.height*k);
+        const fx=fin.getContext('2d'); fx.imageSmoothingQuality='high'; fx.drawImage(out,0,0,fin.width,fin.height);}
+      let blob=await shotBlob(fin), ext='png';
+      if(blob&&blob.size>40e6){blob=await new Promise(r=>fin.toBlob(r,'image/jpeg',0.95)); ext='jpg';}
+      const a=document.createElement('a'); a.download=name+'-fullpage.'+ext;
+      a.href=URL.createObjectURL(blob);
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-      c.width=c.height=out.width=out.height=0;
+      c.width=c.height=out.width=out.height=0; if(fin!==out)fin.width=fin.height=0;
     }
     /* ---- แบบที่ 1: สไลด์ 16:9 ---- */
     for(let i=0;mode!=='charts'&&mode!=='page'&&i<pages.length;i++){
