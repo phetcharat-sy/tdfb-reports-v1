@@ -8305,7 +8305,12 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       if(sink){
         /* v-slack: ส่งเข้า Slack ผ่าน n8n — ภาพเดียวกับ "ทั้งหน้า" แต่เป็น JPG คุณภาพสูง (ไฟล์เล็ก) */
         say('กำลังส่งเข้า Slack…');
-        await sink(await new Promise(r=>out.toBlob(r,'image/jpeg',0.92)),name+'.jpg');
+        /* v-slack3: ย่อให้กว้างไม่เกิน 1800px + JPG 0.85 → ไฟล์เล็ก (ราว 0.3–1 MB) ส่งผ่านเซิร์ฟเวอร์ n8n ได้ไม่ติดขนาด */
+        let sc=out; if(out.width>1800){ const k=1800/out.width; sc=document.createElement('canvas');
+          sc.width=1800; sc.height=Math.round(out.height*k); const sx=sc.getContext('2d');
+          sx.imageSmoothingQuality='high'; sx.drawImage(out,0,0,sc.width,sc.height); }
+        await sink(await new Promise(r=>sc.toBlob(r,'image/jpeg',0.85)),name+'.jpg');
+        if(sc!==out)sc.width=sc.height=0;
       }else{
       const a=document.createElement('a'); a.download=name+'-fullpage.png';
       a.href=URL.createObjectURL(await shotBlob(out));
