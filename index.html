@@ -1938,6 +1938,7 @@ body.mobile .side{width:540px}
   <button class="btn ghost" id="kClear">Clear filters</button>
   <button class="btn ghost" id="kReload">ดึงข้อมูลใหม่</button>
   <button class="btn" id="kSave">บันทึกเป็นรูป</button>
+  <button class="btn ghost" id="kSlack" title="ถ่ายภาพหน้านี้แล้วส่งเข้า Slack">💬 ส่งเข้า Slack</button>
   <button class="btn ghost" id="kPresent">🖥 โหมดพรีเซนต์</button>
   <div class="stat" id="kStat">กำลังดึงข้อมูล…</div>
 </div>
@@ -2064,6 +2065,7 @@ body.mobile .side{width:540px}
       <option value="full">รูปเต็มทุกรายการ</option>
     </select></div>
   <button class="btn" id="save">บันทึกเป็นรูป</button>
+  <button class="btn ghost" id="rSlack" title="ถ่ายภาพรายงานนี้แล้วส่งเข้า Slack">💬 ส่งเข้า Slack</button>
   <button class="btn ghost" id="present">🖥 โหมดพรีเซนต์</button>
   <div class="stat" id="stat">กำลังดึงข้อมูล…</div>
 </div>
@@ -7347,6 +7349,7 @@ function renderKPI(){
   const tt=TITLE[SEC]||TITLE.overview;
   el('kTitle').textContent=tt[0];
   el('kSub').textContent=tt[1];
+  { const sb=el('kSlack'); if(sb)sb.hidden=!(window.SLACK_KPI||['pick','pack','ship']).includes(SEC); }   /* v-slack: ปุ่มส่ง Slack เฉพาะหน้าที่กำหนด */
   { const ht=el('kHdTabs'); if(ht){ ht.innerHTML=SEC==='repl'?replTabs(sf('repl_cat','matcha')):'';
       ht.onclick=e=>{const b=e.target.closest('[data-sf]'); if(!b)return; SUBF[b.dataset.sf]=b.dataset.v; renderKPI();}; } }
   document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='sopcr'||SEC==='ret'||SEC==='can'||SEC==='cr');
@@ -8195,7 +8198,7 @@ function shotTrim(c,bg){
   o.getContext('2d').drawImage(c,0,0); return o;
 }
 
-async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',mode='both'}){
+async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',mode='both',sink=null}){
   const doc=root.ownerDocument;
   const label=btn?btn.textContent:'';
   const say=t=>{if(btn)btn.textContent=t;};
@@ -8310,12 +8313,19 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       if(out.width*out.height>2e7){const k=Math.sqrt(2e7/(out.width*out.height));
         fin=document.createElement('canvas'); fin.width=Math.floor(out.width*k); fin.height=Math.floor(out.height*k);
         const fx=fin.getContext('2d'); fx.imageSmoothingQuality='high'; fx.drawImage(out,0,0,fin.width,fin.height);}
+      if(sink){
+        /* v-slack: ส่งเข้า Slack ผ่าน n8n — ใช้ JPG คุณภาพสูง ไฟล์เล็ก (n8n รับได้ไม่เกิน ~16MB) */
+        say('กำลังส่งเข้า Slack…');
+        const jb=await new Promise(r=>fin.toBlob(r,'image/jpeg',0.92));
+        await sink(jb,name+'.jpg');
+      }else{
       let blob=await shotBlob(fin), ext='png';
       if(blob&&blob.size>40e6){blob=await new Promise(r=>fin.toBlob(r,'image/jpeg',0.95)); ext='jpg';}
       const a=document.createElement('a'); a.download=name+'-fullpage.'+ext;
       a.href=URL.createObjectURL(blob);
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+      }
       c.width=c.height=out.width=out.height=0; if(fin!==out)fin.width=fin.height=0;
     }
     /* v-shotfit: ทุกภาพ (สไลด์ + แยกทีละหัวข้อ) ออกเป็น 3840×2160 พอดีสไลด์ 16:9
@@ -8403,7 +8413,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),4000);
     }
-  }catch(e){ alert('บันทึกรูปไม่สำเร็จ: '+e.message); }
+  }catch(e){ alert((sink?'ส่งเข้า Slack ไม่สำเร็จ: ':'บันทึกรูปไม่สำเร็จ: ')+e.message); }
   marked.forEach(([e,k])=>{delete e.dataset[k];});
   saved.forEach(([e,z])=>e.style.zoom=z);
   window.__noFit=false; if(window.fitZoom)fitZoom();
@@ -8437,6 +8447,36 @@ el('kSave').addEventListener('click',()=>{
     shotExport({root:el('kShot'),btn:el('kSave'),zoomEls:[document.body],mode,
       name:`kpi-${SEC}-${tag}`,title:el('kTitle').textContent});
   });
+});
+
+/* ---------- v-slack: ส่งภาพเข้า Slack (ผ่าน n8n webhook · โทเคน Slack อยู่ใน n8n ไม่อยู่ในหน้าเว็บ) ----------
+   ส่งได้เฉพาะ: รายงานประจำวัน (ทุกทีม) + หน้า KPI ในรายการ SLACK_KPI ด้านล่าง (แก้รายการได้ที่นี่) */
+const SLACK_HOOK='https://automation.tdfb.co/webhook/dashboard-to-slack';
+var SLACK_KPI=['pick','pack','ship'];   /* Picking · Packing · การจัดส่ง (Shipping) */
+async function slackPost(blob,fname,meta){
+  const fd=new FormData();
+  fd.append('data',blob,fname);
+  Object.entries(meta||{}).forEach(([k,v])=>fd.append(k,String(v==null?'':v)));
+  const r=await fetch(SLACK_HOOK,{method:'POST',body:fd});
+  if(!r.ok)throw new Error('n8n ตอบกลับ HTTP '+r.status);
+}
+/* ใช้ร่วมกับหน้ารายงานประจำวัน */
+window.LOGI_SLACK={post:slackPost,
+  run:async({root,btn,name,title,period,page})=>{
+    if(!confirm(`ส่งภาพ "${title}"${period?' ('+period+')':''} เข้า Slack ใช่ไหม?`))return false;
+    let sent=false; const lbl=btn.textContent;
+    await shotExport({root,btn,zoomEls:[document.body],mode:'page',name,title,
+      sink:async(b,f)=>{await slackPost(b,f,{title,period,page}); sent=true;}});
+    if(sent){btn.textContent='✅ ส่งแล้ว'; setTimeout(()=>{btn.textContent=lbl;},2500);}
+    return sent;
+  }};
+el('kSlack').addEventListener('click',()=>{
+  const title=el('kTitle').textContent.trim();
+  const [m,v]=(typeof rfkCur==='function')?rfkCur():['',''];
+  const period=(typeof rfkLabel==='function'&&m)?rfkLabel(m,v):'';
+  const tag=[fYear(), QSEL&&('Q'+QSEL), fMonth()&&MONTH_EN[MONTH_ORDER.indexOf(fMonth())],
+             WKSEL.length&&('W'+WKSEL.join('_')), DAYSEL].filter(Boolean).join('-')||'all';
+  LOGI_SLACK.run({root:el('kShot'),btn:el('kSlack'),name:`kpi-${SEC}-${tag}`,title,period,page:SEC});
 });
 
 /* ---------- โหมดพรีเซนต์ของหน้า KPI ---------- */
@@ -9248,6 +9288,29 @@ el('save').addEventListener('click',async()=>{
   try{
     await LOGI_SHOT.run({root:sh,btn:el('save'),zoomEls:[document.body],mode:'page',
       name:`report-${TEAM}-${tag}`,title:el('title').textContent});
+  }finally{
+    sh.classList.remove('cap-full','cap-tall'); document.body.classList.remove('cap');
+    [sh.style.width,sh.style.maxWidth,kp.style.gridTemplateColumns,pn.style.gridTemplateColumns]=keep;
+  }
+});
+
+/* v-slack: รายงานประจำวัน → ส่งเข้า Slack (ภาพเดียวกับปุ่มบันทึกเป็นรูป) */
+el('rSlack').addEventListener('click',async()=>{
+  if(!window.LOGI_SLACK){alert('ระบบส่ง Slack ยังไม่พร้อม ลองรีเฟรชหน้า');return;}
+  const sh=el('shot'), kp=el('kpis'), pn=el('panels');
+  const tag=RMODE==='all'?'all':RVAL;
+  const title=el('title').textContent.trim();
+  const period=(el('rfSel')&&el('rfSel').selectedOptions[0])?el('rfSel').selectedOptions[0].textContent:'';
+  const keep=[sh.style.width,sh.style.maxWidth,kp.style.gridTemplateColumns,pn.style.gridTemplateColumns];
+  const n=kp.children.length;
+  document.body.classList.add('cap'); sh.classList.add('cap-full','cap-tall');
+  sh.style.width=RPT_SHOT_W+'px'; sh.style.maxWidth='none';
+  kp.style.gridTemplateColumns=`repeat(${n<=4?Math.max(n,1):3},1fr)`;
+  pn.style.gridTemplateColumns='1fr';
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  await new Promise(r=>setTimeout(r,200));
+  try{
+    await LOGI_SLACK.run({root:sh,btn:el('rSlack'),name:`report-${TEAM}-${tag}`,title,period,page:'report-'+TEAM});
   }finally{
     sh.classList.remove('cap-full','cap-tall'); document.body.classList.remove('cap');
     [sh.style.width,sh.style.maxWidth,kp.style.gridTemplateColumns,pn.style.gridTemplateColumns]=keep;
