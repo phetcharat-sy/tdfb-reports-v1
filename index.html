@@ -6964,7 +6964,46 @@ function drawAcc(){
       borderRadius:8,barThickness:Math.round(cf(40)),minBarLength:6}]},options:o,plugins:[endLbl]});
 }
 
+/* v-replhist: แปลงตารางชีต Replenishment List → แถวสินค้า (ใช้ทั้งข้อมูลปัจจุบันและแท็บ History) */
+function replRows(t){
+    const c={no:t.col('No'),p:t.col('Product'),s:t.col('คะแนนขายดี'),n:t.col('รายการเติมสินค้า'),
+             w:t.col('WH300'),q:t.col('QUOTA'),pd:t.col('PlanPD'),f:t.col('FAC16'),
+             o:t.col('OWH'),qa:t.col('Quarantine'),y:t.col('จำนวนที่ต้องเติม'),r:t.col('Remark'),st:t.col('Status','STATUS','status','สถานะ'),
+             ss:t.col('SafetyStock','Safetystock','SAFETYSTOCK','Safety','SAFETY','safety')};
+    const g=(row,i)=>i>=0?String(row[i]||'').trim():'';
+    return t.rows.map(r=>({
+      no:g(r,c.no), product:g(r,c.p), score:parseQty(g(r,c.s)),
+      need:g(r,c.n), wh300:g(r,c.w), quota:g(r,c.q), planPd:g(r,c.pd),
+      fac16:g(r,c.f), owh:g(r,c.o), quarantine:g(r,c.qa), safety:g(r,c.ss),
+      qty:parseQty(g(r,c.y)), remark:g(r,c.r), status:g(r,c.st)
+    })).filter(r=>r.product&&!isExcludedProduct(r.product));
+}
+/* v-replhist: ประวัติรายวันจากแท็บ "History" (Apps Script บันทึกสำเนาทุกวัน · คอลัมน์แรก = Snapshot Date) */
+let REPL_HIST=null, REPL_HIST_ERR='', REPL_HIST_P=null;
+function loadReplHist(){
+  if(REPL_HIST||REPL_HIST_P)return REPL_HIST_P||Promise.resolve(REPL_HIST);
+  REPL_HIST_P=(async()=>{
+    try{
+      const url=`https://docs.google.com/spreadsheets/d/${S_REPL}/gviz/tq?tqx=out:csv&sheet=History&_=${Date.now()}`;
+      const txt=await fetchBig(url,60000);
+      if(txt.trim().startsWith('<'))throw new Error('อ่านแท็บ History ไม่ได้');
+      const rows=(typeof Papa!=='undefined')?Papa.parse(txt,{skipEmptyLines:true}).data:parseCSV(txt);
+      const t=table(rows,/Snapshot|Product|คะแนนขายดี/i);
+      if(!t)throw new Error('ยังไม่มีแท็บ History');
+      const cd=t.col('SnapshotDate','Snapshot','วันที่บันทึก');
+      if(cd<0)throw new Error('ไม่พบคอลัมน์ Snapshot Date');
+      const by={};
+      t.rows.forEach(r=>{const d=dparse(r[cd]); if(isNaN(d))return;
+        const k=new Date(d).toISOString().slice(0,10); (by[k]=by[k]||[]).push(r);});
+      REPL_HIST={};
+      Object.keys(by).forEach(k=>{REPL_HIST[k]=replRows({...t,rows:by[k]});});
+    }catch(e){ REPL_HIST={}; REPL_HIST_ERR=e.message; }
+    REPL_HIST_P=null; return REPL_HIST;
+  })();
+  return REPL_HIST_P;
+}
 async function loadRepl(){
+  loadReplHist().then(()=>{try{if(SEC==='repl')renderKPI();}catch(e){}});
   loadAcc().then(()=>{try{if(SEC==='repl')renderKPI();}catch(e){}});
   if(REPL)return;
   try{
@@ -6972,17 +7011,8 @@ async function loadRepl(){
     const t=table(raw,/Product|สินค้า|คะแนนขายดี|WH300|QUOTA/i);
     if(!t)throw new Error('หาหัวตารางไม่เจอ · แถวแรกที่อ่านได้: '
       +((raw&&raw[0])?raw[0].slice(0,6).join(' / '):'ว่าง'));
-    const c={no:t.col('No'),p:t.col('Product'),s:t.col('คะแนนขายดี'),n:t.col('รายการเติมสินค้า'),
-             w:t.col('WH300'),q:t.col('QUOTA'),pd:t.col('PlanPD'),f:t.col('FAC16'),
-             o:t.col('OWH'),qa:t.col('Quarantine'),y:t.col('จำนวนที่ต้องเติม'),r:t.col('Remark'),st:t.col('Status','STATUS','status','สถานะ'),
-             ss:t.col('SafetyStock','Safetystock','SAFETYSTOCK','Safety','SAFETY','safety')};
-    const g=(row,i)=>i>=0?String(row[i]||'').trim():'';
-    REPL=t.rows.map(r=>({
-      no:g(r,c.no), product:g(r,c.p), score:parseQty(g(r,c.s)),
-      need:g(r,c.n), wh300:g(r,c.w), quota:g(r,c.q), planPd:g(r,c.pd),
-      fac16:g(r,c.f), owh:g(r,c.o), quarantine:g(r,c.qa), safety:g(r,c.ss),
-      qty:parseQty(g(r,c.y)), remark:g(r,c.r), status:g(r,c.st)
-    })).filter(r=>r.product&&!isExcludedProduct(r.product));
+    REPL=replRows(t);
+    const c={p:t.col('Product')};
     if(c.p<0)throw new Error('หาคอลัมน์ Product ไม่เจอ · หัวตาราง: '+t.H.slice(0,8).join(' / '));
     if(!REPL.length)throw new Error('ไม่พบรายการสินค้า · หัวตาราง: '+t.H.slice(0,8).join(' / '));
     SHEET_STATE.repl=`${fmt(REPL.length)} สินค้า`;
@@ -7007,6 +7037,12 @@ function secRepl(){
   /* v-replpast: ชีต Replenishment List / Max-Min Stock เก็บแค่สถานะปัจจุบัน (ไม่มีประวัติรายวัน)
      → เลือกวันที่ย้อนหลัง ไม่เอาข้อมูลวันนี้ไปแสดงเหมือนเป็นของวันนั้น */
   if(DAYSEL&&DAYSEL!==rfkToday()){
+    /* v-replhist: มีสำเนาของวันนั้นในแท็บ History → แสดงข้อมูลของวันนั้นจริง (Matcha) */
+    if(cat!=='acc'&&REPL&&REPL_HIST&&REPL_HIST[DAYSEL]){
+      const keep=REPL; REPL=REPL_HIST[DAYSEL];
+      try{ return secReplM(); } finally{ REPL=keep; }
+    }
+    if(cat!=='acc'&&!REPL_HIST)return '<div class="empty2">กำลังโหลดประวัติ…</div>';
     return `<div class="empty2" style="line-height:1.7"><b>ไม่มีข้อมูลของวันที่ ${esc(showD(DAYSEL))}</b><br>
       ชีตรายการเติมสต็อกเก็บเฉพาะข้อมูลปัจจุบัน ยังไม่มีประวัติย้อนหลังรายวัน<br>
       <button type="button" class="rtbtn" onclick="window.replGoToday&&replGoToday()"
