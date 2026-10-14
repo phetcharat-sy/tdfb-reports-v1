@@ -7004,6 +7004,15 @@ function replTabs(cur){
 }
 function secRepl(){
   const cat=sf('repl_cat','matcha');
+  /* v-replpast: ชีต Replenishment List / Max-Min Stock เก็บแค่สถานะปัจจุบัน (ไม่มีประวัติรายวัน)
+     → เลือกวันที่ย้อนหลัง ไม่เอาข้อมูลวันนี้ไปแสดงเหมือนเป็นของวันนั้น */
+  if(DAYSEL&&DAYSEL!==rfkToday()){
+    return `<div class="empty2" style="line-height:1.7"><b>ไม่มีข้อมูลของวันที่ ${esc(showD(DAYSEL))}</b><br>
+      ชีตรายการเติมสต็อกเก็บเฉพาะข้อมูลปัจจุบัน ยังไม่มีประวัติย้อนหลังรายวัน<br>
+      <button type="button" class="rtbtn" onclick="window.replGoToday&&replGoToday()"
+        style="margin-top:18px;font:inherit;font-weight:700;padding:12px 28px;border-radius:12px;border:0;cursor:pointer;
+        background:linear-gradient(135deg,#14B8A6,#0D9488);color:#fff">ดูข้อมูลวันนี้</button></div>`;
+  }
   if(cat==='acc')return secAcc();   /* v-replcat2: แท็บย้ายไปอยู่ข้างหัวข้อหน้า */
   return secReplM();
 }
@@ -7933,6 +7942,7 @@ el('rfk').querySelectorAll('.rf-modes button').forEach(b=>b.addEventListener('cl
   rfkApply(m, m==='all'?'all':rfkKey(m,rfkToday()));
 }));
 el('rfkSel').addEventListener('change',e=>rfkApply(rfkCur()[0],e.target.value));
+window.replGoToday=()=>rfkApply('day',rfkToday());   /* v-replpast: ปุ่ม "ดูข้อมูลวันนี้" ในหน้า Replenishment */
 const rfkStep=d=>{const [m,v]=rfkCur();const i=RFK_OPTS.indexOf(v)+d;
   if(i<0||i>=RFK_OPTS.length)return; rfkApply(m,RFK_OPTS[i]);};
 el('rfkPrev').addEventListener('click',()=>rfkStep(-1));
