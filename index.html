@@ -8247,39 +8247,45 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       setTimeout(()=>URL.revokeObjectURL(a.href),4000);
       c.width=c.height=out.width=out.height=0; if(fin!==out)fin.width=fin.height=0;
     }
+    /* v-shotfit: ทุกภาพ (สไลด์ + แยกทีละหัวข้อ) ออกเป็น 3840×2160 พอดีสไลด์ 16:9
+       — ถ้าเนื้อหาต้องย่อมาก จะถ่ายใหม่ที่สเกลพอดีกรอบ (ไม่ย่อภาพใหญ่ลงทีหลัง) ตัวหนังสือจึงคม */
+    const shotTop=c=>{ const x0=c.getContext('2d'), w=c.width, h=c.height, d0=x0.getImageData(0,0,w,h).data;
+      const t=document.createElement('canvas').getContext('2d'); t.fillStyle=bg; t.fillRect(0,0,1,1);
+      const [r0,g0,b0]=t.getImageData(0,0,1,1).data;
+      let top=0;
+      outer: for(;top<h-1;top+=2){ for(let px=0;px<w;px+=6){const o=(top*w+px)*4;
+        if(Math.abs(d0[o]-r0)+Math.abs(d0[o+1]-g0)+Math.abs(d0[o+2]-b0)>24)break outer;} }
+      top=Math.max(0,top-Math.round(28*(w/1500)));
+      if(top<=4)return c;
+      const o=document.createElement('canvas'); o.width=w; o.height=h-top;
+      o.getContext('2d').drawImage(c,0,-top); c.width=c.height=0; return o; };
+    const shotSlide=async(render,footL,footR)=>{
+      const FOOT=90, M=70, bw=SHOT_SLIDE_W-M*2, bh=SHOT_SLIDE_H-M-FOOT;
+      let sc=S, c=shotTop(shotTrim(await render(sc),bg));
+      let k=Math.min(bw/c.width,bh/c.height);
+      if(k<0.9||k>1.1){ const s2=Math.min(5,Math.max(0.6,sc*k*0.99)); c.width=c.height=0;
+        c=shotTop(shotTrim(await render(s2),bg)); k=Math.min(bw/c.width,bh/c.height); if(k>0.97&&k<1.03)k=Math.min(k,1); }
+      const sl=document.createElement('canvas'); sl.width=SHOT_SLIDE_W; sl.height=SHOT_SLIDE_H;
+      const x=sl.getContext('2d'); x.fillStyle=bg; x.fillRect(0,0,sl.width,sl.height);
+      const dw=Math.round(c.width*k), dh=Math.round(c.height*k);
+      x.imageSmoothingQuality='high';
+      x.drawImage(c,Math.round((sl.width-dw)/2),Math.round(M+Math.max(0,(bh-dh)/2)),dw,dh);
+      x.fillStyle=fg; x.font='500 34px "Baloo 2","Mitr",sans-serif'; x.textBaseline='middle';
+      if(footL){x.textAlign='left'; x.fillText(footL,M,sl.height-FOOT/2);}
+      if(footR){x.textAlign='right'; x.fillText(footR,sl.width-M,sl.height-FOOT/2);}
+      c.width=c.height=0; return sl; };
     /* ---- แบบที่ 1: สไลด์ 16:9 ---- */
     for(let i=0;mode!=='charts'&&mode!=='page'&&i<pages.length;i++){
       say(`กำลังสร้างสไลด์ ${i+1}/${pages.length}…`);
       const pg=pages[i], hh=pg[pg.length-1].bot-pg[0].top;
-      let c=await shoot(w0,Math.ceil(hh+260),S,d=>{
+      const sl=await shotSlide(sc=>shoot(w0,Math.ceil(hh+260),sc,d=>{
         const rc=d.querySelector('[data-shot-root="1"]'); if(!rc)return;
         shotIsolate(d,rc,w0);
         d.querySelectorAll('[data-shot-pg]').forEach(e=>{if(e.dataset.shotPg!==String(i))e.style.setProperty('display','none','important');});
         d.querySelectorAll('[data-shot-skip="1"]').forEach(e=>e.style.setProperty('display','none','important'));
-      });
-      c=shotTrim(c,bg);
-      /* v-shot12: ตัดพื้นว่างด้านบนออกด้วย ให้กึ่งกลางจริง (เดิมตัดแค่ด้านล่าง ภาพเลยดูเอียงลง/บน) */
-      { const x0=c.getContext('2d'), w=c.width, h=c.height, d0=x0.getImageData(0,0,w,h).data;
-        const t=document.createElement('canvas').getContext('2d'); t.fillStyle=bg; t.fillRect(0,0,1,1);
-        const [r0,g0,b0]=t.getImageData(0,0,1,1).data;
-        let top=0;
-        outer: for(;top<h-1;top+=2){ for(let px=0;px<w;px+=6){const o=(top*w+px)*4;
-          if(Math.abs(d0[o]-r0)+Math.abs(d0[o+1]-g0)+Math.abs(d0[o+2]-b0)>24)break outer;} }
-        top=Math.max(0,top-Math.round(28*(w/1500)));
-        if(top>4){ const o=document.createElement('canvas'); o.width=w; o.height=h-top;
-          o.getContext('2d').drawImage(c,0,-top); c.width=c.height=0; c=o; } }
-      const sl=document.createElement('canvas'); sl.width=SHOT_SLIDE_W; sl.height=SHOT_SLIDE_H;
-      const x=sl.getContext('2d'); x.fillStyle=bg; x.fillRect(0,0,sl.width,sl.height);
-      const FOOT=90, M=70, bw=sl.width-M*2, bh=sl.height-M-FOOT;
-      const k=Math.min(bw/c.width,bh/c.height), dw=c.width*k, dh=c.height*k;
-      x.imageSmoothingQuality='high';
-      /* v-shot12: จัดกึ่งกลางทั้งแนวนอน/แนวตั้ง — ระยะว่างบน = ล่าง (นับถึงแถบชื่อท้ายสไลด์) */
-      x.drawImage(c,(sl.width-dw)/2,M+Math.max(0,(bh-dh)/2),dw,dh);
-      x.fillStyle=fg; x.font='500 34px "Baloo 2","Mitr",sans-serif'; x.textBaseline='middle';
-      x.textAlign='left'; x.fillText('Logistics Dashboard · '+(title||''),M,sl.height-FOOT/2);
-      x.textAlign='right'; x.fillText(`${i+1} / ${pages.length}`,sl.width-M,sl.height-FOOT/2);
+      }),'Logistics Dashboard · '+(title||''),`${i+1} / ${pages.length}`);
       zip.file(`1-สไลด์ 16x9/slide-${pad2(i+1)}.png`,await shotBlob(sl));
-      c.width=c.height=0;
+      sl.width=sl.height=0;
     }
     /* ---- แบบที่ 2 (v-shot6): แยกทีละหัวข้อ — หัวข้อ + เนื้อหาใต้หัวข้อนั้นจนถึงหัวข้อถัดไป
        เป็น 1 ภาพ (เช่น ชื่อหน้า + วงแหวน + การ์ดตัวเลข) ภาพจึงมีหัวข้อติดมาเสมอ ---- */
@@ -8304,12 +8310,11 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     for(let j=0;j<groups.length;j++){
       say(`กำลังสร้างภาพแยก ${j+1}/${groups.length}…`);
       const gp=groups[j], hh=gp[gp.length-1].bot-gp[0].top;
-      let c=await shoot(w0,Math.ceil(hh+260),S,d=>{
+      const c=await shotSlide(sc=>shoot(w0,Math.ceil(hh+260),sc,d=>{
         const rc=d.querySelector('[data-shot-root="1"]'); if(!rc)return;
         shotIsolate(d,rc,w0);
         d.querySelectorAll('[data-shot-gp]').forEach(e=>{if(e.dataset.shotGp!==String(j))e.style.setProperty('display','none','important');});
-      });
-      c=shotTrim(c,bg);
+      }),'Logistics Dashboard · '+(title||''),'');
       /* ตั้งชื่อไฟล์ตามหัวข้อแรกของภาพ */
       let nm='';
       for(const b of gp){ for(const it of b.items){
