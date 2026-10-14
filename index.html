@@ -8299,15 +8299,12 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
         const rc=d.querySelector('[data-shot-root="1"]'); if(rc)shotIsolate(d,rc,w0);});
       c=shotTrim(c,bg);
       const M=Math.round(c.width*0.025), FOOT=Math.round(c.width*0.03);
-      /* v-shot169: ภาพทั้งหน้าออกเป็นสัดส่วน 16:9 พอดีสไลด์ (เติมพื้นสีเดียวกันรอบๆ) — วางเป็นพื้นหลัง Google Slides แล้วภาพไม่ถูกยืด/บีบ */
-      const W0=c.width+M*2, H0=c.height+M+FOOT;
-      const out=document.createElement('canvas');
-      out.width=Math.max(W0,Math.ceil(H0*16/9)); out.height=Math.max(H0,Math.ceil(out.width*9/16));
-      const ox=Math.round((out.width-c.width)/2), oy=Math.round((out.height-FOOT-c.height)/2);
+      /* v-shotpage2: ภาพทั้งหน้า = ขนาดตามเนื้อหาจริง (ไม่เติมพื้นให้เป็น 16:9) — ภาพยาวภาพเดียวแบบเดิม */
+      const out=document.createElement('canvas'); out.width=c.width+M*2; out.height=c.height+M+FOOT;
       const x=out.getContext('2d'); x.fillStyle=bg; x.fillRect(0,0,out.width,out.height);
-      x.drawImage(c,ox,oy);
+      x.drawImage(c,M,M);
       x.fillStyle=fg; x.font=`500 ${Math.round(FOOT*0.42)}px "Baloo 2","Mitr",sans-serif`; x.textBaseline='middle';
-      x.textAlign='left'; x.fillText('Logistics Dashboard  ›  '+(title||''),ox,out.height-FOOT/2);
+      x.textAlign='left'; x.fillText('Logistics Dashboard  ›  '+(title||''),M,out.height-FOOT/2);
       /* v-shotcap: กันภาพใหญ่เกินที่ Google Slides รับได้ (≤25MP / ≤50MB) · ย่อให้ไม่เกิน 20 ล้านพิกเซล และถ้าไฟล์ PNG ใหญ่เกิน 40MB บันทึกเป็น JPG คุณภาพสูงแทน */
       let fin=out;
       if(out.width*out.height>2e7){const k=Math.sqrt(2e7/(out.width*out.height));
