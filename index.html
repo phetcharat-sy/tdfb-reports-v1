@@ -7830,7 +7830,7 @@ function rfkLatest(){
   let src=null;
   try{
     if(SEC==='pack'&&PACK&&PACK.list)src=PACK.list.map(r=>r.d&&r.d.fd);
-    else if((SEC==='pick'||SEC==='perr')&&PICK&&PICK.list)src=PICK.list.map(r=>r.date);
+    else if((SEC==='pick'||SEC==='perr')&&PICK&&PICK.list)src=PICK.list.filter(r=>!(!r.who||/^[-–—]$/.test(r.who)||r.who==='ไม่ระบุ')).map(r=>r.date);   /* v-picklatest: วันล่าสุดนับเฉพาะแถวที่มีชื่อพนักงาน (แถวที่ยังไม่มีชื่อไม่ถูกนับในหน้า Picking) */
     else if(SEC==='ship'&&SHIP&&SHIP.list)src=SHIP.list.map(r=>r.day);
     else if(SEC==='diff'&&DIFF)src=DIFF.map(r=>r.date);
     else if(SEC==='dock'&&DOCK_ROWS)src=rfkDockDates();
