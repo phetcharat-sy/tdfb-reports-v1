@@ -1289,6 +1289,29 @@ body.present #vKPI .otc .v{font-size:100px}
 #kHdTabs .rtabs button{font:inherit;font-size:60px;white-space:nowrap;font-weight:800;padding:20px 60px;border-radius:999px;cursor:pointer;
   border:3px solid var(--page-line,rgba(255,255,255,.18));background:rgba(255,255,255,.05);color:var(--page-ink,#F3EFFB)}
 #kHdTabs .rtabs button.on{background:linear-gradient(135deg,#14B8A6,#0D9488);border-color:#14B8A6;color:#fff;box-shadow:0 8px 24px rgba(13,148,136,.35)}
+
+/* v-ovtext: หน้า ภาพรวม KPI ทุกแผนก — ตัวหนังสือเล็ก (Target · เทียบช่วงก่อน · ฐานคำนวณ · คำอธิบายหัวแผนก ฯลฯ) ใหญ่ขึ้น อ่านง่าย */
+html body #vKPI .otc .l{font-size:38px}
+html body #vKPI .otc .n{font-size:32px}
+html body #vKPI .pbar span{font-size:32px;width:92px}
+html body #vKPI .pbar i{max-width:calc(100% - 108px)}
+html body #vKPI .dhead em{font-size:34px}
+html body #vKPI .dscore{font-size:36px}
+html body #vKPI .dscore b{font-size:52px}
+html body #vKPI .dgo{font-size:32px}
+html body #vKPI .kpi2 .kt{font-size:44px}
+html body #vKPI .kpi2 .ktg{font-size:33px}
+html body #vKPI .kbadge{font-size:30px}
+html body #vKPI .kpi2 .delta{font-size:33px}
+html body #vKPI .kpi2 .delta em{font-size:30px}
+html body #vKPI .kpi2 .kbase,html body #vKPI .kpi2 .knote{font-size:30px}
+html body #vKPI .othead b{font-size:44px}
+html body #vKPI .othead em{font-size:32px}
+html body #vKPI .otsel span{font-size:30px}
+html body #vKPI .otsel select{font-size:30px}
+html body #vKPI .leg li{font-size:32px}
+html body #vKPI .donut .dl{font-size:26px}
+html body #vKPI table.ovt th{font-size:30px}
 </style>
 <style id="hlegV17">
 /* v-hleg: ป้ายสีกราฟแบบ HTML ของหน้า Packing — นำกลับมาจากเวอร์ชัน (17) */
@@ -7589,11 +7612,11 @@ function renderKPI(){
           L.fit=function(){ f.call(this); this.height+=cf(34); }; L._gap=1; }}],
         options:{responsive:true,maintainAspectRatio:false,animation:false,
           layout:{padding:{top:cf(6)}},
-          plugins:{legend:{display:true,labels:{color:'#C9C3EA',font:{size:cf(20)},boxWidth:cf(28)}},
-            tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y.toFixed(dp)}%`},titleFont:{size:cf(20)},bodyFont:{size:cf(19)}}},
-          scales:{x:{ticks:{color:'#A9A3CF',font:{size:cf(19)}},grid:{display:false}},
+          plugins:{legend:{display:true,labels:{color:'#C9C3EA',font:{size:cf(26)},boxWidth:cf(32)}},
+            tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y.toFixed(dp)}%`},titleFont:{size:cf(24)},bodyFont:{size:cf(23)}}},
+          scales:{x:{ticks:{color:'#A9A3CF',font:{size:cf(25)}},grid:{display:false}},
             y:(()=>{const vs=pts.map(p=>p.v).concat(META.t!=null?[META.t]:[]);
-              const ax={ticks:{color:'#A9A3CF',font:{size:cf(19)},callback:v=>+(+v).toFixed(dp)+'%'},grid:{color:'rgba(255,255,255,.07)'}};
+              const ax={ticks:{color:'#A9A3CF',font:{size:cf(25)},callback:v=>+(+v).toFixed(dp)+'%'},grid:{color:'rgba(255,255,255,.07)'}};
               if(META.low){ax.min=0;ax.suggestedMax=Math.max(...vs)*1.25;}      /* ค่ายิ่งต่ำยิ่งดี เริ่มจาก 0 */
               else{ax.suggestedMin=Math.max(0,Math.min(...vs)-5);ax.max=100;}
               return ax;})()}}});
@@ -7752,6 +7775,8 @@ const rfkDockDates=()=>(DOCK_ROWS||[]).map(r=>{
 function rfkLatest(){
   const d=new Date(),
         t=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  /* v-repltoday: ชีต Replenishment List เป็นสถานะปัจจุบัน (อัปเดตวันนี้) — ไม่ต้องถอยไปวันล่าสุดของชีต KPI Out Of Stock */
+  if(SEC==='repl')return t;
   const mx=a=>{let b='';for(const x of a||[]){const k=String(x||'').slice(0,10);
     if(k.length===10&&/^\d{4}-\d{2}-\d{2}$/.test(k)&&k<=t&&k>b)b=k;}return b;};
   let src=null;
