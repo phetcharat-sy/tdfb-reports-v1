@@ -8921,7 +8921,9 @@ async function grab(p){
   if(p.cancel)return toCancelRows(txt);
   if(p.ret)return toReturnRows(txt);
   if(!p.form){
-    const rows=toRows(txt);
+    let rows=toRows(txt);
+    /* v-grqa: รับสินค้าเข้าระบบ — ไม่เอารายการ Quality Assurance (เช่น "Quality Assurance-วัสดุสิ้นเปลือง") ทั้งในตาราง การ์ด และยอดรวม */
+    if(p.k==='gr')rows=rows.filter(r=>!/^\s*quality\s*assurance/i.test(String(r.item||'')));
     /* v-grtype: รับสินค้าเข้าระบบ — ประเภทเดียวกันอยู่ติดกัน (Raw Material → Packaging → Finish Goods → อื่น ๆ)
        แล้วเรียงชื่อสินค้า · เรียงเฉพาะการแสดงผล ยอดรวม/จำนวนรายการเหมือนเดิม */
     if(p.k==='gr'){
