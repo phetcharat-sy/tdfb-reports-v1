@@ -3406,8 +3406,8 @@ function secOOS(){
      <h2 class="sec">Top 5 Products<span></span><em class="t5u">จำนวนชิ้น</em></h2>
      <div class="cpanel"><div class="t5list">${t5html}</div></div>
 
-     <h2 class="sec">Order Detail <em>เฉพาะรายการที่มีปัญหา — ไม่ใช่ “ส่งในวัน”</em><span></span></h2>
-     ${detailTable(rows,'ex')}`;
+     <h2 class="sec">Order Detail <em>เฉพาะรายการที่ล่าช้า</em><span></span></h2>
+     ${detailTable(rows,'no')}`;  /* ซ่อน "ก่อนกำหนด" — แสดงเฉพาะล่าช้า */
 }
 
 function drawOOS(){
