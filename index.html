@@ -9,17 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&family=Baloo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script>
-/* v-speed: html2canvas ใช้แค่ตอน "บันทึกเป็นรูป" / ส่ง Slack → โหลดทีหลัง ไม่บล็อกการเปิดหน้า */
-window.loadH2C=(function(){let p=null;return function(){
-  if(window.html2canvas)return Promise.resolve();
-  if(!p)p=new Promise((ok,err)=>{const sc=document.createElement('script');
-    sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-    sc.onload=()=>ok();sc.onerror=()=>{p=null;err(new Error('โหลด html2canvas ไม่ได้'));};
-    document.head.appendChild(sc);});
-  return p;};})();
-window.addEventListener('load',()=>setTimeout(()=>window.loadH2C().catch(()=>{}),5000));
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{--teal:#0D9488;--teal-d:#0F766E;--plum:#7C3AED;--plum-d:#6D28D9;
       --amber:#D97706;--rose:#DC2626;--good:#059669;--bad:#DC2626;
@@ -8060,7 +8050,7 @@ async function boot(){
   el('kStat').className='stat';el('kReload').disabled=true;
   el('kStat').textContent='กำลังเชื่อมต่อชีต…';
   /* Stock Diff / Dock to Stock เป็นชีตเล็ก โหลดคู่ขนานไปเลย ไม่ต้องรอชีตใหญ่ */
-  const tick=setInterval(()=>{ if(el('src')&&OTP_LOADING)renderKPI(); },2500);   /* v-speed: หยุดวาดซ้ำเมื่อชีตใหญ่โหลดเสร็จแล้ว */   /* ให้บรรทัดสถานะขยับตามจริง */
+  const tick=setInterval(()=>{ if(el('src'))renderKPI(); },2500);   /* ให้บรรทัดสถานะขยับตามจริง */
   const staticJob=loadStatic().finally(()=>clearInterval(tick));
   /* v-ov4: หน้าภาพรวมใช้ Human Error On Picking (ชีต Picking + ชีตแจ้งปัญหา) และ Shipping ด้วย
      เริ่มโหลดพร้อมกันตั้งแต่ต้น ไม่ต้องรอชีต On-Time/Out of Stock (ไฟล์ใหญ่ 80+ MB) โหลดเสร็จก่อน
@@ -8283,7 +8273,6 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
         return true;}catch(e){return false;}
     };
     const shoot=async(w,h,sc,prep)=>{
-      await window.loadH2C();
       const caps=[6e7,1.6e7,6e6];   /* พื้นที่ภาพสูงสุด (พิกเซล) ที่ลองตามลำดับ · 1.6e7 = เพดานของ Safari */
       let c=null;
       for(const cap of caps){
@@ -8487,11 +8476,66 @@ async function kpiCapture(btn){
   if(!blob)throw new Error('ถ่ายภาพหน้า '+title+' ไม่สำเร็จ');
   return {blob,fname:`kpi-${SEC}.jpg`,title,period,url:location.href};
 }
+/* v-slack-sender: เลือกชื่อคนที่กดส่ง → แนบไปกับโพสต์ (ช่อง sender) ให้ n8n ใส่ "ส่งโดย …" ในข้อความ
+   แก้/เพิ่มรายชื่อได้ที่ SLACK_SENDERS · หน้าเว็บจำชื่อที่เลือกล่าสุดไว้ให้ในเครื่องนั้น */
+var SLACK_SENDERS=['Mild'];   /* ใช้กับทีมที่ยังไม่มีรายชื่อใน SLACK_PEOPLE */
+/* v-slack-people: รายชื่อคนส่งแยกตามทีม (Slack Member ID) · name = ชื่อที่โชว์ในช่องเลือก (ว่าง = โชว์รหัส)
+   ใน Slack จะแท็กเป็น @ชื่อจริงให้อัตโนมัติจากรหัส */
+var SLACK_PEOPLE={
+  warehouse:[{id:'U08JAK0SQ1J',name:'Don'},{id:'U08J5AFKME1',name:'Mild'},{id:'U098SGM7Y3F',name:'Ya'},{id:'U08H1S8E8HM',name:'Tar'}],
+  delivery: [{id:'U0BTS9L3Z5G',name:'Dao'}],
+  admin:    [{id:'U0BUSPY1AE7',name:'Earn'},{id:'U07A8FKFD3P',name:'Operation'}]
+};
+function slackPickSender(keys){
+  return new Promise(done=>{
+    const rk=keys.find(k=>k.startsWith('report:')), team=rk?rk.split(':')[1]:'';
+    const ppl=(SLACK_PEOPLE[team]||[]);
+    const LS='slackSender'+(ppl.length?':'+team:'');
+    let last=''; try{ last=localStorage.getItem(LS)||''; }catch(e){}
+    const opts=ppl.length?ppl.map(x=>({v:x.id,t:x.name||x.id}))
+      :SLACK_SENDERS.map(n=>({v:n,t:n}));
+    if(last&&!opts.some(o=>o.v===last))opts.push({v:last,t:last});
+    const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;font-family:inherit';
+    ov.innerHTML=`<div style="background:#fff;color:#1e293b;border-radius:16px;padding:26px 28px;width:min(460px,92vw);box-shadow:0 20px 50px rgba(0,0,0,.3);font-size:18px">
+      <div style="font-size:22px;font-weight:700;margin-bottom:6px">ส่งเข้า Slack (#team-warehouse)</div>
+      <div style="color:#475569;margin-bottom:16px;line-height:1.6">${keys.map(k=>'• '+esc(slackName(k))).join('<br>')}</div>
+      <label style="display:block;font-weight:600;margin-bottom:6px">ใครเป็นคนส่ง</label>
+      <select id="slkWho" style="width:100%;font:inherit;font-size:18px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#1e293b">
+        <option value="">— เลือกชื่อ —</option>
+        ${opts.map(o=>`<option value="${esc(o.v)}"${o.v===last?' selected':''}>${esc(o.t)}</option>`).join('')}
+        <option value="__other">อื่น ๆ (พิมพ์ชื่อเอง)</option>
+      </select>
+      <input id="slkOther" placeholder="พิมพ์ชื่อ" hidden style="width:100%;box-sizing:border-box;margin-top:10px;font:inherit;font-size:18px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px">
+      <div id="slkErr" style="color:#dc2626;font-size:15px;min-height:22px;margin-top:6px"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
+        <button type="button" id="slkNo" style="font:inherit;font-size:17px;padding:10px 20px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#334155;cursor:pointer">ยกเลิก</button>
+        <button type="button" id="slkYes" style="font:inherit;font-size:17px;font-weight:600;padding:10px 22px;border-radius:10px;border:0;background:#4A154B;color:#fff;cursor:pointer">ส่ง</button>
+      </div></div>`;
+    document.body.appendChild(ov);
+    const q=id=>ov.querySelector('#'+id), sel=q('slkWho'), oth=q('slkOther');
+    sel.addEventListener('change',()=>{ oth.hidden=sel.value!=='__other'; if(!oth.hidden)oth.focus(); });
+    const close=v=>{ ov.remove(); document.removeEventListener('keydown',key,true); done(v); };
+    const ok=()=>{ const v=(sel.value==='__other'?oth.value:sel.value).trim();
+      if(!v){ q('slkErr').textContent='กรุณาเลือกชื่อคนส่งก่อน'; return; }
+      try{ localStorage.setItem(LS,v); }catch(e){}
+      const pp=ppl.find(x=>x.id===v);
+      close(pp?{id:pp.id,name:pp.name||pp.id,text:'<@'+pp.id+'>'}:{id:'',name:v,text:v}); };
+    const key=e=>{ if(e.key==='Escape'){e.stopPropagation();close(null);} else if(e.key==='Enter'){e.preventDefault();ok();} };
+    document.addEventListener('keydown',key,true);
+    q('slkYes').addEventListener('click',ok);
+    q('slkNo').addEventListener('click',()=>close(null));
+    ov.addEventListener('click',e=>{ if(e.target===ov)close(null); });
+    sel.focus();
+  });
+}
 window.LOGI_SLACK={
   send:async btn=>{
     const cur=slackCurKey();
     const keys=SLACK_COMBO[cur]||[cur];
-    if(!confirm(`ส่งเข้า Slack (#team-warehouse):\n• ${keys.map(slackName).join('\n• ')}\n\nใช่ไหม?`))return;
+    const who=await slackPickSender(keys); if(!who)return;
+    const sender=who.text;   /* มีรหัส Slack = <@U…> (Slack แสดงเป็น @ชื่อ) · ไม่มี = ชื่อที่พิมพ์ */
     const html=btn.innerHTML, parts=[];
     let ok=false;
     try{
@@ -8502,7 +8546,8 @@ window.LOGI_SLACK={
       btn.textContent='กำลังส่งเข้า Slack…';
       const fd=new FormData();
       parts.forEach((p,i)=>fd.append('file'+i,p.blob,p.fname));
-      fd.append('meta',JSON.stringify(parts.map(p=>({title:p.title,period:p.period,url:p.url}))));
+      fd.append('meta',JSON.stringify(parts.map(p=>({title:p.title,period:p.period,url:p.url,sender}))));
+      fd.append('sender',sender); fd.append('sender_id',who.id); fd.append('sender_name',who.name);
       const r=await fetch(SLACK_HOOK,{method:'POST',body:fd});
       const j=await r.json().catch(()=>({}));
       if(!r.ok||j.ok===false)throw new Error(j.error||('n8n ตอบกลับ HTTP '+r.status));
