@@ -8227,7 +8227,13 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
   const say=t=>{if(btn)btn.textContent=t;};
   if(btn)btn.disabled=true;
   say('กำลังเตรียมภาพ…');
-  const w0=root.offsetWidth;
+  /* v-shotw: ความกว้างหน้าเปลี่ยนตามขนาดที่แต่ละคนตั้ง (A− A+) → ภาพที่ได้สัดส่วนไม่เท่ากัน
+     ตั้ง 62% หน้ากว้างขึ้น ~1.6 เท่า ของในภาพเลยดูเล็ก/แบน · ถ่ายภาพที่ความกว้างของขนาด 100% เสมอ
+     ทุกคนได้ภาพหน้าตาเดียวกัน (หน้ารายงานประจำวันใช้ความกว้างคงที่อยู่แล้ว ไม่กระทบ) */
+  let w0=root.offsetWidth;
+  try{ const us=parseFloat(localStorage.getItem('ldash.size'))||1;
+    if(!document.body.classList.contains('mobile')&&!root.style.width&&Math.abs(us-1)>0.01)
+      w0=Math.max(600,Math.round(w0*us)); }catch(e){}
   window.__noFit=true;   /* v-fit: ห้ามปรับ zoom อัตโนมัติระหว่างถ่ายภาพ */
   const saved=zoomEls.map(e=>[e,e.style.zoom]);
   const rw=[root.style.width,root.style.maxWidth];
@@ -8300,6 +8306,26 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
         c=await html2canvas(root,{scale:s,backgroundColor:bg,useCORS:true,logging:false,
           x:0,y:0,width:w,height:h,scrollX:0,scrollY:0,windowWidth:w,windowHeight:h,
           onclone:d=>{prep(d);
+            /* v-shotfit: html2canvas ไม่รองรับ object-fit → รูปสินค้า (กรอบสี่เหลี่ยม · contain) ถูกยืด/บีบในภาพ
+               แปลง <img> ที่ใช้ object-fit เป็นกล่องรูปพื้นหลัง (background-size) ที่ html2canvas วาดได้ถูกสัดส่วน */
+            try{ const W=d.defaultView;
+              d.querySelectorAll('img').forEach(im=>{
+                const cs=W.getComputedStyle(im), fit=cs.objectFit;
+                if(fit!=='contain'&&fit!=='cover'&&fit!=='scale-down')return;
+                if(cs.display==='none'||!im.currentSrc&&!im.src)return;
+                const bx=d.createElement('div');
+                ['width','height','padding','border','border-radius','background-color','margin','flex','box-sizing','display','vertical-align']
+                  .forEach(k=>bx.style.setProperty(k,cs.getPropertyValue(k)));
+                if(cs.display==='inline')bx.style.display='inline-block';
+                bx.className=im.className;
+                bx.style.backgroundImage='url("'+(im.currentSrc||im.src).replace(/"/g,'%22')+'")';
+                bx.style.backgroundSize=fit==='cover'?'cover':'contain';
+                bx.style.backgroundRepeat='no-repeat';
+                bx.style.backgroundPosition=cs.objectPosition||'center';
+                bx.style.backgroundOrigin='content-box'; bx.style.backgroundClip='padding-box';
+                im.replaceWith(bx);
+              });
+            }catch(e){}
             /* v-shot10: ซ่อนแถบตัวกรองย่อยที่ยังเป็น "ทั้งหมด" — เป็นปุ่มบนจอ ไม่ต้องติดไปในรูป
                (ถ้ากำลังกรองอยู่ ยังแสดงไว้ คนดูจะได้รู้ว่าเป็นข้อมูลเฉพาะส่วน) */
             d.querySelectorAll('.fbar').forEach(f=>{
