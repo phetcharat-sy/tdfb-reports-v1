@@ -8528,9 +8528,11 @@ function slackPickSender(keys){
         <button type="button" id="slkYes" style="font:inherit;font-size:17px;font-weight:600;padding:10px 22px;border-radius:10px;border:0;background:#4A154B;color:#fff;cursor:pointer">ส่ง</button>
       </div></div>`;
     /* v-slack-sender-size: หน้าเว็บย่อ/ขยายทั้งหน้าด้วย zoom ตามขนาดจอ → หักล้างให้หน้าต่างนี้ขนาดปกติเสมอ */
-    let zEff=1; [document.documentElement,document.body].forEach(el=>{ const z=parseFloat(getComputedStyle(el).zoom); if(z>0)zEff*=z; });
-    if(Math.abs(zEff-1)>0.01)ov.style.zoom=String(1/zEff);
-    document.body.appendChild(ov);
+    /* v-slack-sender-size2: วางหน้าต่างนอก <body> (ซึ่งถูกย่อด้วย zoom) → ขนาดปกติเสมอทุกเบราว์เซอร์ */
+    const hz=parseFloat(getComputedStyle(document.documentElement).zoom);
+    if(hz>0&&Math.abs(hz-1)>0.01)ov.style.zoom=String(1/hz);
+    ov.style.fontFamily="'Baloo 2','Mitr',-apple-system,BlinkMacSystemFont,sans-serif";
+    document.documentElement.appendChild(ov);
     const q=id=>ov.querySelector('#'+id), sel=q('slkWho'), oth=q('slkOther');
     sel.addEventListener('change',()=>{ oth.hidden=sel.value!=='__other'; if(!oth.hidden)oth.focus(); });
     const close=v=>{ ov.remove(); document.removeEventListener('keydown',key,true); done(v); };
