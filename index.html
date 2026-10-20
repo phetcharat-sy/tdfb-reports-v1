@@ -8132,6 +8132,7 @@ el('kReload').addEventListener('click',()=>{
    ถูกวาดแค่ตามความละเอียดจอ → ตอนถ่ายจะปิด zoom ชั่วคราว (ล็อกความกว้างไว้เท่าเดิม
    layout จึงไม่เปลี่ยน) และสั่งให้กราฟวาดใหม่ที่ความละเอียดเท่ากับภาพที่ถ่าย */
 const SHOT_SLIDE_W=3840, SHOT_SLIDE_H=2160;
+const KPI_SHOT_W=3390;   /* v-shotw2: ความกว้างหน้า KPI ตอนถ่ายภาพ · ยิ่งน้อยภาพยิ่งสูง/ตัวใหญ่ */
 const SHOT_BG='#100D26';
 const SHOT_PANEL_SEL='.otc,.kgrid>.kcell,.ovtrend,.opanel,.big,.kpi,.cpanel,.fcacc-panel,.fcacc-cards,.sgrid,.brkcard,.panel,.kpis>.kpi,.kpis>.kcell';
 const shotWait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -8227,13 +8228,11 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
   const say=t=>{if(btn)btn.textContent=t;};
   if(btn)btn.disabled=true;
   say('กำลังเตรียมภาพ…');
-  /* v-shotw: ความกว้างหน้าเปลี่ยนตามขนาดที่แต่ละคนตั้ง (A− A+) → ภาพที่ได้สัดส่วนไม่เท่ากัน
-     ตั้ง 62% หน้ากว้างขึ้น ~1.6 เท่า ของในภาพเลยดูเล็ก/แบน · ถ่ายภาพที่ความกว้างของขนาด 100% เสมอ
-     ทุกคนได้ภาพหน้าตาเดียวกัน (หน้ารายงานประจำวันใช้ความกว้างคงที่อยู่แล้ว ไม่กระทบ) */
+  /* v-shotw2: หน้า KPI ถ่ายที่ความกว้างคงที่ 3,390px เสมอ (= ความกว้างจริงตอนตั้งขนาด 100% + เปิดเมนูซ้าย)
+     ไม่ขึ้นกับ A− A+ / การย่อ Chrome / ขนาดจอของแต่ละคน → ภาพสัดส่วนเดียวกับภาพต้นแบบทุกครั้ง
+     (หน้ารายงานประจำวันกำหนดความกว้างเองอยู่แล้ว ไม่กระทบ) */
   let w0=root.offsetWidth;
-  try{ const us=parseFloat(localStorage.getItem('ldash.size'))||1;
-    if(!document.body.classList.contains('mobile')&&!root.style.width&&Math.abs(us-1)>0.01)
-      w0=Math.max(600,Math.round(w0*us)); }catch(e){}
+  if(root.id==='kShot'&&!document.body.classList.contains('mobile'))w0=KPI_SHOT_W;
   window.__noFit=true;   /* v-fit: ห้ามปรับ zoom อัตโนมัติระหว่างถ่ายภาพ */
   const saved=zoomEls.map(e=>[e,e.style.zoom]);
   const rw=[root.style.width,root.style.maxWidth];
