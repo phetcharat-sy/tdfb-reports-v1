@@ -1852,6 +1852,12 @@ body.present .main{margin-left:0}
 body.mobile .main{margin-left:0}
 body.mobile .side{width:540px}
 </style>
+<style>
+/* v-tbbig: แถบตัวกรองด้านบน (ดูทั้งหมด / รายปี / … / บันทึกเป็นรูป / ส่งเข้า Slack) ใหญ่ขึ้น 1.4 เท่า
+   เฉพาะหน้าจอปกติ — โหมดพรีเซนต์และมือถือคงขนาดเดิม · ไม่กระทบรูปที่บันทึก/ส่ง Slack */
+body:not(.present):not(.mobile) #vKPI .toolbar,
+body:not(.present):not(.mobile) #vRPT .toolbar{zoom:1.4}
+</style>
 </head>
 <body>
 
