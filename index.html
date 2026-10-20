@@ -3315,12 +3315,26 @@ function clkPop(ch,key,i,ev){
 if(window.Chart&&!Chart.registry.plugins.get('clickF'))Chart.register(clickF);
 /* v-zoomfix: body ใช้ CSS zoom ทำให้ตำแหน่งเมาส์ที่ Chart.js อ่านเพี้ยน (จิ้มแล้วเลือกผิดแท่ง/ไม่ขึ้นป้าย)
    คำนวณตำแหน่งใหม่จาก clientX/Y เทียบขนาดจริงของ canvas บนจอ ใช้ได้ทั้งตอนมี/ไม่มี zoom */
+/* v-zoomfix2: เบราว์เซอร์แต่ละรุ่นวัดตำแหน่งตอนมี zoom ไม่เหมือนกัน
+   (Chrome ใหม่ตั้งแต่ ~v128 คิด zoom ให้ · Chrome เก่า / Safari / Edge บางรุ่นไม่คิด)
+   → วัดจริงจากกล่องทดสอบว่าเบราว์เซอร์นี้คิดแบบไหน แล้วแปลงตำแหน่งเมาส์ให้ตรงกันทุกเครื่อง */
+const zfK=(()=>{let key='',k=1;return function(){
+  let z=1; [document.documentElement,document.body].forEach(el=>{const v=parseFloat(getComputedStyle(el).zoom); if(v>0)z*=v;});
+  const kk=z.toFixed(4); if(kk===key)return k; key=kk;
+  if(Math.abs(z-1)<0.001){k=1;return k;}
+  const t=document.createElement('div');
+  t.style.cssText='position:absolute;left:0;top:0;width:1000px;height:1px;visibility:hidden;pointer-events:none';
+  document.body.appendChild(t); const m=t.getBoundingClientRect().width/1000; t.remove();
+  k=(m>0)?m/z:1; if(Math.abs(k-1)<0.01)k=1; return k;};})();
 const zoomFix={id:'zoomFix',
   beforeEvent(ch,args){
-    const e=args.event, n=e&&e.native; if(!n||n.clientX==null)return;
+    const e=args.event, n0=e&&e.native; if(!n0)return;
+    const n=(n0.touches&&n0.touches[0])||(n0.changedTouches&&n0.changedTouches[0])||n0;
+    if(n.clientX==null)return;
     const r=ch.canvas.getBoundingClientRect(); if(!r.width||!r.height)return;
-    e.x=(n.clientX-r.left)*ch.width/r.width;
-    e.y=(n.clientY-r.top)*ch.height/r.height;
+    const k=zfK();
+    e.x=(n.clientX*k-r.left)*ch.width/r.width;
+    e.y=(n.clientY*k-r.top)*ch.height/r.height;
     const A=ch.chartArea; if(A)args.inChartArea=e.x>=A.left&&e.x<=A.right&&e.y>=A.top&&e.y<=A.bottom;
   }};
 if(window.Chart&&!Chart.registry.plugins.get('zoomFix'))Chart.register(zoomFix);
@@ -8498,21 +8512,24 @@ function slackPickSender(keys){
     const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     const ov=document.createElement('div');
     ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;font-family:inherit';
-    ov.innerHTML=`<div style="background:#fff;color:#1e293b;border-radius:16px;padding:26px 28px;width:min(460px,92vw);box-shadow:0 20px 50px rgba(0,0,0,.3);font-size:18px">
-      <div style="font-size:22px;font-weight:700;margin-bottom:6px">ส่งเข้า Slack (#team-warehouse)</div>
+    ov.innerHTML=`<div style="background:#fff;color:#1e293b;border-radius:16px;padding:28px 30px;width:min(520px,92vw);box-shadow:0 20px 50px rgba(0,0,0,.3);font-size:20px">
+      <div style="font-size:24px;font-weight:700;margin-bottom:8px">ส่งเข้า Slack (#team-warehouse)</div>
       <div style="color:#475569;margin-bottom:16px;line-height:1.6">${keys.map(k=>'• '+esc(slackName(k))).join('<br>')}</div>
       <label style="display:block;font-weight:600;margin-bottom:6px">ใครเป็นคนส่ง</label>
-      <select id="slkWho" style="width:100%;font:inherit;font-size:18px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#1e293b">
+      <select id="slkWho" style="width:100%;font:inherit;font-size:20px;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#1e293b">
         <option value="">— เลือกชื่อ —</option>
         ${opts.map(o=>`<option value="${esc(o.v)}"${o.v===last?' selected':''}>${esc(o.t)}</option>`).join('')}
         <option value="__other">อื่น ๆ (พิมพ์ชื่อเอง)</option>
       </select>
-      <input id="slkOther" placeholder="พิมพ์ชื่อ" hidden style="width:100%;box-sizing:border-box;margin-top:10px;font:inherit;font-size:18px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px">
+      <input id="slkOther" placeholder="พิมพ์ชื่อ" hidden style="width:100%;box-sizing:border-box;margin-top:10px;font:inherit;font-size:20px;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px">
       <div id="slkErr" style="color:#dc2626;font-size:15px;min-height:22px;margin-top:6px"></div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
         <button type="button" id="slkNo" style="font:inherit;font-size:17px;padding:10px 20px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#334155;cursor:pointer">ยกเลิก</button>
         <button type="button" id="slkYes" style="font:inherit;font-size:17px;font-weight:600;padding:10px 22px;border-radius:10px;border:0;background:#4A154B;color:#fff;cursor:pointer">ส่ง</button>
       </div></div>`;
+    /* v-slack-sender-size: หน้าเว็บย่อ/ขยายทั้งหน้าด้วย zoom ตามขนาดจอ → หักล้างให้หน้าต่างนี้ขนาดปกติเสมอ */
+    let zEff=1; [document.documentElement,document.body].forEach(el=>{ const z=parseFloat(getComputedStyle(el).zoom); if(z>0)zEff*=z; });
+    if(Math.abs(zEff-1)>0.01)ov.style.zoom=String(1/zEff);
     document.body.appendChild(ov);
     const q=id=>ov.querySelector('#'+id), sel=q('slkWho'), oth=q('slkOther');
     sel.addEventListener('change',()=>{ oth.hidden=sel.value!=='__other'; if(!oth.hidden)oth.focus(); });
