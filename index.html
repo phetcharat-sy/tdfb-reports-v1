@@ -2230,7 +2230,7 @@ function parseCSV(t){
     else if(c==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
     else if(c!=='\r')cell+=c;}
   if(cell||row.length){row.push(cell);rows.push(row);}
-  return rows;
+  return rows.filter(r=>!r.some(x=>String(x).trim().toLowerCase()==='sample item'));
 }
 /* ชีต On-Time มีข้อมูลกว่าแสนแถว จึงให้ Google สรุปมาให้ก่อนด้วย gviz query
    แทนการดึงทั้งไฟล์มาคำนวณในเบราว์เซอร์ */
@@ -8855,7 +8855,7 @@ function parseCSV(t){
     else if(c==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
     else if(c!=='\r')cell+=c;}
   if(cell||row.length){row.push(cell);rows.push(row);}
-  return rows;
+  return rows.filter(r=>!r.some(x=>String(x).trim().toLowerCase()==='sample item'));
 }
 /* แต่ละแท็บวางหัวตารางคนละแถวและใช้ชื่อคอลัมน์ต่างกัน จึงหาหัวตารางเองแล้วจับตามชื่อ */
 function toRows(csv){
@@ -10532,7 +10532,7 @@ function parseCSV(t){const R=[];let row=[],f='',q=false;
   else if(c==='"')q=true; else if(c===','){row.push(f);f='';}
   else if(c==='\n'||c==='\r'){if(c==='\r'&amp;&amp;t[i+1]==='\n')i++;row.push(f);R.push(row);row=[];f='';}
   else f+=c;}
- if(f!==''||row.length){row.push(f);R.push(row);} return R.filter(r=&gt;r.some(x=&gt;x!==''));}
+ if(f!==''||row.length){row.push(f);R.push(row);} return R.filter(r=&gt;r.some(x=&gt;x!=='')&amp;&amp;!r.some(x=&gt;String(x).trim().toLowerCase()==='sample item'));}
 function fromCSV(text){
  const R=parseCSV(text); if(!R.length)throw new Error('ไฟล์ว่าง');
  const h=R[0].map(x=&gt;x.trim()), ix=n=&gt;h.indexOf(n);
