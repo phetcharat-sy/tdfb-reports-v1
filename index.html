@@ -8207,6 +8207,7 @@ function shotIsolate(doc,el,width){
 }
 /* ตัดขอบล่างที่ว่างเปล่า (สีพื้นหลัง) ออก */
 function shotTrim(c,bg){
+  if(!c||!c.width||!c.height)return c;   /* v-shot0: canvas ขนาด 0 อ่านพิกเซลไม่ได้ */
   const x=c.getContext('2d'), w=c.width, h=c.height;
   const t=document.createElement('canvas').getContext('2d'); t.fillStyle=bg; t.fillRect(0,0,1,1);
   const [br,bgc,bb]=t.getImageData(0,0,1,1).data;
@@ -8288,6 +8289,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     /* v-shot9: ถ้าภาพที่ได้ว่างเปล่า (เบราว์เซอร์วาด canvas ใหญ่ไม่ไหว — เจอบ่อยใน Safari/เครื่อง RAM น้อย)
        ลองใหม่อัตโนมัติด้วยขนาดที่เล็กลง แทนการเซฟภาพว่างออกไป */
     const shotBlank=c=>{
+      if(!c||!c.width||!c.height)return true;   /* v-shot0 */
       try{const x=c.getContext('2d'),w=c.width,h=c.height;
         const t=document.createElement('canvas').getContext('2d');t.fillStyle=bg;t.fillRect(0,0,1,1);
         const [r0,g0,b0]=t.getImageData(0,0,1,1).data;
@@ -8300,6 +8302,10 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
     const shoot=async(w,h,sc,prep)=>{
       const caps=[6e7,1.6e7,6e6];   /* พื้นที่ภาพสูงสุด (พิกเซล) ที่ลองตามลำดับ · 1.6e7 = เพดานของ Safari */
       let c=null;
+      /* v-shot0: กราฟที่ยังไม่ได้วาด/ถูกซ่อน มี canvas กว้างหรือสูง 0 → html2canvas อ่านพิกเซลไม่ได้ (getImageData: source width is 0)
+         ตั้งให้เป็น 1×1 ก่อนถ่าย (มองไม่เห็นอยู่แล้ว ไม่กระทบภาพ) */
+      root.querySelectorAll('canvas').forEach(cv=>{ if(!cv.width||!cv.height){ cv.width=Math.max(1,cv.width); cv.height=Math.max(1,cv.height); } });
+      if(!w||!h)throw new Error('หน้ายังแสดงผลไม่เสร็จ ลองกดส่งใหม่อีกครั้ง');
       for(const cap of caps){
         const s=Math.min(sc,Math.sqrt(cap/(w*h)),16000/h,16000/w);
         c=await html2canvas(root,{scale:s,backgroundColor:bg,useCORS:true,logging:false,
@@ -8379,7 +8385,7 @@ async function shotExport({root,btn,name,title,zoomEls,bg=SHOT_BG,fg='#B7AEDE',m
       });
       c=shotTrim(c,bg);
       /* v-shot12: ตัดพื้นว่างด้านบนออกด้วย ให้กึ่งกลางจริง (เดิมตัดแค่ด้านล่าง ภาพเลยดูเอียงลง/บน) */
-      { const x0=c.getContext('2d'), w=c.width, h=c.height, d0=x0.getImageData(0,0,w,h).data;
+      if(c.width&&c.height){ const x0=c.getContext('2d'), w=c.width, h=c.height, d0=x0.getImageData(0,0,w,h).data;
         const t=document.createElement('canvas').getContext('2d'); t.fillStyle=bg; t.fillRect(0,0,1,1);
         const [r0,g0,b0]=t.getImageData(0,0,1,1).data;
         let top=0;
@@ -8511,7 +8517,7 @@ const slackName=key=>{const b=slackNavBtn(key); const v=key.split(':')[0];
   return v==='report'?'รายงานทีม '+key.split(':')[1].replace(/^./,c=>c.toUpperCase()):((b&&b.textContent.trim())||key);};
 /* ถ่ายภาพหน้า KPI ที่เปิดอยู่ (ทั้งหน้า · ขนาดเดิม) → คืนเป็นไฟล์ */
 async function kpiCapture(btn){
-  await slackWait(()=>!/กำลังโหลด/.test(el('kShot').textContent)
+  await slackWait(()=>el('kShot').offsetWidth>0&&!/กำลังโหลด/.test(el('kShot').textContent)
     &&!(SEC==='pick'&&!PICK)&&!(SEC==='pack'&&!PACK)&&!(SEC==='ship'&&!SHIP));
   const title=el('kTitle').textContent.trim();
   const [m,v]=rfkCur(); const period=m?rfkLabel(m,v):'';
