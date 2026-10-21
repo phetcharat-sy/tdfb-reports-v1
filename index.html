@@ -5059,7 +5059,7 @@ function drawSOP(){
    ปุ่ม A− / A+ (ขนาด) ไม่ย่อ/ขยายหน้านี้ — ชดเชยด้วย zoom ของกรอบ ไม่แตะ CSS ข้างในเอกสาร */
 function sopLockSize(f){
   const apply=()=>{ const g=document.getElementById('sopFrame'); if(!g)return;
-    let us=1; try{ us=parseFloat(localStorage.getItem('ldash.size2'))||1; }catch(e){}
+    let us=1; try{ us=parseFloat(localStorage.getItem('ldash.size'))||1; }catch(e){}
     if(Math.abs(us-1)<0.001){ g.style.zoom=''; g.style.width=''; g.style.height=''; return; }
     g.style.zoom=(1/us).toFixed(4); g.style.width=''; g.style.height=''; };
   apply();
@@ -5228,8 +5228,10 @@ function drawOTPEmbed(){
   const fit=()=>{ try{
     const d=f.contentDocument, w=f.parentElement; if(!d||!d.body||!w)return;
     if(d.fullscreenElement){ f.style.zoom='1'; f.style.width='100%'; return; }
-    const k=Math.max(0.2,(w.clientWidth||OTP_W)/OTP_W);
-    f.style.width=OTP_W+'px';
+    let us=1; try{ us=parseFloat(localStorage.getItem('ldash.size'))||1; }catch(e){}
+    const ow=Math.round(OTP_W/us);   /* v-size3: ปุ่ม A− / A+ ย่อ/ขยายหน้านี้เท่ากับหน้าอื่น */
+    const k=Math.max(0.2,(w.clientWidth||ow)/ow);
+    f.style.width=ow+'px';
     if(f.style.zoom!==k.toFixed(4))f.style.zoom=k.toFixed(4);
     if(document.body.classList.contains('present')){
       const z=parseFloat(document.body.style.zoom)||1;
@@ -5246,7 +5248,7 @@ function drawOTPEmbed(){
   f.__fit=fit;
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
-  doc=doc.replace('</head>','<style>html,body{overflow-x:hidden}.page{max-width:none!important;padding-left:12px!important;padding-right:12px!important}.toolbar{gap:6px}.toolbar .tb-btn{padding:9px 10px;font-size:13px}.toolbar .tb-arrow{padding:10px 10px}.toolbar .tb-sel{min-width:120px;font-size:13px;padding:9px 10px}</style></head>');
+  doc=doc.replace('</head>','<style>html,body{overflow-x:hidden}.page{max-width:none!important;padding-left:12px!important;padding-right:12px!important}#weekChart{display:block;max-width:1400px;margin:0 auto}.toolbar{gap:6px}.toolbar .tb-btn{padding:9px 10px;font-size:13px}.toolbar .tb-arrow{padding:10px 10px}.toolbar .tb-sel{min-width:120px;font-size:13px;padding:9px 10px}</style></head>');
   /* v-otp3: ปุ่มส่ง Slack ในแถบตัวกรองด้านบน (ตำแหน่งเดียวกับหน้าอื่น: ถัดจาก บันทึกเป็นรูป) — กดแล้วใช้ปุ่ม Slack ของแดชบอร์ดหลัก */
   doc=doc.replace('<button class="tb-btn outline" id="btnPresent"','<button class="tb-btn outline" id="btnSlackOtp" title="ถ่ายภาพหน้านี้แล้วส่งเข้า Slack">Slack</button><button class="tb-btn outline" id="btnPresent"');
   doc=doc.replace(/<\/body>(?![\s\S]*<\/body>)/,'<script>(function(){var k=parent.document.getElementById("kSlack"),b=document.getElementById("btnSlackOtp");if(!k||!b)return;'
@@ -12427,7 +12429,7 @@ el('save').onclick=async function(){
   const DESIGN_W=2380, BASE=0.55, BASE_PRESENT=1.15, MOBILE_W=1250;   /* ขนาดตั้งต้น */
   /* v-usize: แต่ละคนปรับขนาดเองได้ (⌘+ / ⌘− / ⌘0 หรือปุ่ม A− A+ ในเมนูซ้าย)
      จำค่าไว้ในเบราว์เซอร์ของคนนั้น เปิดครั้งหน้าก็ยังเป็นขนาดเดิม · ไม่กระทบคนอื่น */
-  const UKEY='ldash.size2';   /* v-size2: เปลี่ยนชื่อคีย์ = รีเซ็ตขนาดที่เคยตั้งไว้ (เช่น 62%) กลับเป็น 100% ครั้งเดียว */
+  const UKEY='ldash.size';
   let US=1; try{US=parseFloat(localStorage.getItem(UKEY))||1;}catch(e){}
   const clampUS=v=>Math.max(0.5,Math.min(2.5,Math.round(v*100)/100));
   function setUS(v,show){
