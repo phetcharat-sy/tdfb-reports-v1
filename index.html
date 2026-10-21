@@ -1398,6 +1398,13 @@ html body #vKPI table.ovt th{font-size:30px}
 #vKPI .hleg.hleg-row button{font-size:23px}
 #vKPI .hleg.hleg-mini button{font-size:25px}
 #vKPI #sopcrFrame{width:100%}
+/* v-otp: หน้า KPI On Time Performance (ฝังไฟล์) — ปุ่ม Slack ลอย เพราะแถบเครื่องมือหลักถูกซ่อน */
+#vKPI #otpFrame{width:100%;display:block}
+#otpSlack{display:none}
+body.otpmode #otpSlack{display:inline-flex;align-items:center;gap:8px;position:fixed;bottom:18px;right:18px;z-index:9998;
+  box-shadow:0 3px 14px rgba(0,0,0,.35)}
+body.otpmode.present #otpSlack{display:none}
+#otpSlack img{width:22px;height:22px}
 #vRPT .toolbar .kf,#vRPT #clear{display:none!important}
 </style>
 <style id="rptDesign">
@@ -1884,7 +1891,7 @@ body:not(.present):not(.mobile) #vRPT .toolbar{zoom:1.4}
 
       <div class="grp">Admin</div>
       <!-- ซ่อนไว้ก่อน: <button data-view="kpi" data-sec="ontime">KPI On-Time Performance</button> -->
-      <button data-view="kpi" data-sec="ship">การจัดส่ง (Shipping)</button>
+      <button data-view="kpi" data-sec="ship">KPI On Time Performance</button>
       <button data-view="kpi" data-sec="cr">ยกเลิกและคืนสินค้า</button>
       <button data-view="report" data-team="admin">รายงานประจำวัน</button>
 
@@ -1950,6 +1957,7 @@ body:not(.present):not(.mobile) #vRPT .toolbar{zoom:1.4}
 </div>
 
 <!-- v126: หน้า SOP ซ่อน toolbar ทั้งแถบ จึงต้องมีปุ่มพรีเซนต์ลอยไว้ให้แยก -->
+<button class="btn ghost" id="otpSlack" title="ถ่ายภาพหน้านี้แล้วส่งเข้า Slack" onclick="document.getElementById('kSlack').click()">Slack</button>
 <button class="btn ghost sop-present" id="sopPresent">🖥 โหมดพรีเซนต์</button>
 
 <div id="kShot">
@@ -3246,7 +3254,7 @@ function clkHandle(ch,key,i){
 const clickF={id:'clickF',
   afterEvent(ch,args){
     const e=args.event; if(!e||(e.type!=='click'&&e.type!=='mousemove'))return;
-    if(SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='fc'||SEC==='sop'||SEC==='sopcr'||!document.getElementById('vKPI')||ch.options.onClick)return;
+    if(SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='fc'||SEC==='sop'||SEC==='sopcr'||SEC==='ship'||!document.getElementById('vKPI')||ch.options.onClick)return;
     if(ch.canvas&&!ch.canvas.closest('#vKPI'))return;
     /* v-clk2: แท่ง/เส้น = คลิกตรงคอลัมน์ไหนก็ได้ (แท่งเตี้ยๆ อย่าง 0.05% ก็กดได้) · วงกลม = ต้องโดนชิ้น */
     const round=/pie|doughnut/.test(ch.config.type);
@@ -5166,6 +5174,60 @@ function drawCREmbed(){
     +'</style></head>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800);
+    try{ const d=f.contentDocument;
+      if(d&&window.ResizeObserver){ new ResizeObserver(fit).observe(d.body); new ResizeObserver(fit).observe(f); }
+    }catch(e){}
+  });
+  f.srcdoc=doc;
+  f.dataset.ready='1';
+}
+
+/* ================= Admin · KPI On Time Performance (ไฟล์แยก ฝังผ่าน iframe · แทนหน้า การจัดส่ง เดิม) =================
+   ไฟล์ดึงชีต "Packing ใหม่" เอง มีตัวกรองช่วงเวลา บันทึกเป็นรูป และโหมดพรีเซนต์ในตัว
+   คำนวณทุกอย่างตามไฟล์เดิม ไม่แก้สูตร · ขยายตัวหนังสือชดเชย body zoom ของแดชบอร์ด ให้อ่านง่ายเท่ากับเปิดไฟล์เดี่ยว ×OTP_TEXT */
+const OTP_TEXT=1.2;   /* ปรับตัวเลขนี้ตัวเดียวถ้าอยากให้ตัวหนังสือใหญ่/เล็กลง */
+function otpBody(){ try{ const f=document.getElementById('otpFrame'); return f&&f.contentDocument&&f.contentDocument.body||null; }catch(e){ return null; } }
+function otpReady(){ try{ const f=document.getElementById('otpFrame'); const d=f&&f.contentDocument;
+  const u=d&&d.getElementById('updatedAt'); const er=d&&d.getElementById('errBox');
+  return !!(u&&u.textContent.trim()!=='—')||!!(er&&er.style.display==='block'); }catch(e){ return false; } }
+function secOTPEmbed(){
+  return '<div class="sopwrap"><iframe id="otpFrame" class="sopframe" title="KPI On Time Performance" allow="fullscreen" allowfullscreen scrolling="no"></iframe></div>';
+}
+function drawOTPEmbed(){
+  const f=document.getElementById('otpFrame'), t=document.getElementById('otpDoc');
+  if(!f||!t)return;
+  { const s=document.getElementById('otpSlack'), k=document.getElementById('kSlack');
+    if(s&&k&&!s.dataset.ico){ const im=k.querySelector('img'); if(im){ s.innerHTML=im.outerHTML+' ส่งเข้า Slack'; s.dataset.ico='1'; } } }
+  const fit=()=>{ try{
+    const d=f.contentDocument; if(!d||!d.body)return;
+    const z=parseFloat(document.body.style.zoom)||1;
+    if(!window.__noFit&&!(d.defaultView&&d.defaultView.__otpShot)){
+      const v=(OTP_TEXT/z).toFixed(3);
+      if(d.body.style.zoom!==v)d.body.style.zoom=v;
+    }
+    if(d.fullscreenElement)return;
+    if(document.body.classList.contains('present')){
+      f.style.height=Math.floor(window.innerHeight/z)+'px';
+      f.setAttribute('scrolling','yes');
+    }else{
+      f.setAttribute('scrolling','no');
+      f.style.height=Math.ceil(d.documentElement.scrollHeight)+'px';
+    }
+  }catch(e){} };
+  if(!window.__otpResize){ window.__otpResize=1;
+    window.addEventListener('resize',()=>{ const g=document.getElementById('otpFrame'); if(g&&g.__fit)g.__fit(); });
+    document.addEventListener('fullscreenchange',()=>setTimeout(()=>{ const g=document.getElementById('otpFrame'); if(g&&g.__fit)g.__fit(); },150)); }
+  f.__fit=fit;
+  if(f.dataset.ready){ fit(); return; }
+  let doc=t.content.textContent;
+  doc=doc.replace('</head>','<style>.page{max-width:none!important;padding-left:3%!important;padding-right:3%!important}html,body{overflow-x:hidden}</style></head>');
+  /* ปุ่ม "บันทึกเป็นรูป" ในไฟล์ — ถ่ายที่ขนาดจริง (ปิด zoom + ใช้ความกว้างเดิม 1,180px ชั่วคราว ภาพเหมือนเปิดไฟล์เดี่ยว) */
+  doc=doc.replace(/<\/body>(?![\s\S]*<\/body>)/,'<script>(function(){var o=window.shot;if(typeof o!=="function")return;'
+    +'window.shot=async function(el){var b=document.body,z=b.style.zoom,p=document.querySelector(".page"),pc=p?p.style.cssText:"";'
+    +'window.__otpShot=1;b.style.zoom="";if(p){p.style.setProperty("max-width","1180px","important");p.style.setProperty("padding-left","12px","important");p.style.setProperty("padding-right","12px","important");}'
+    +'try{return await o(el);}finally{if(p)p.style.cssText=pc;b.style.zoom=z;window.__otpShot=0;}};})();<\/script></body>');
+  f.addEventListener('load',()=>{
+    fit(); setTimeout(fit,200); setTimeout(fit,800); setTimeout(fit,2500);
     try{ const d=f.contentDocument;
       if(d&&window.ResizeObserver){ new ResizeObserver(fit).observe(d.body); new ResizeObserver(fit).observe(f); }
     }catch(e){}
@@ -7329,7 +7391,7 @@ function kpiFiltered(){
   return false;
 }
 function fitScrolls(){
-  if(SEC==='fc'||SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='sopcr')return;
+  if(SEC==='fc'||SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='sopcr'||SEC==='ship')return;
   const full=kpiFiltered();
   document.querySelectorAll('#detail .tscroll').forEach(d=>{
     const rows=d.querySelectorAll(':scope > table > tbody > tr');
@@ -7365,7 +7427,7 @@ function renderKPI(){
                pack:['Packing','Delivery · ผลงานพนักงานแพ็ค สถานี และเวลาหนาแน่น'],
                sopcr:['Mini SOP: การ Cancel และใบ Return','วิธีการปฏิบัติงาน · Cancel (int) และ Return (RT)'],
                sop:['เงื่อนไขการส่งสินค้าแต่ละ Platform','วิธีการปฏิบัติงาน · รอบตัดคำสั่งซื้อ Shopee · Lazada · TikTok'],
-               ship:['การจัดส่ง (Shipping)','Admin · ปริมาณจัดส่ง ค้างส่ง ช่องทาง และขนส่ง'],
+               ship:['KPI On Time Performance','Admin · แพ็คสินค้าตรงตามวันกำหนดแพ็ค'],   /* v-otp: หน้านี้ฝังไฟล์ KPI On Time Performance แทนหน้า การจัดส่ง เดิม */
                ret:['Return','Delivery · งานตีคืน ยกเลิก และเคสค้าง'],
                can:['Cancel','Delivery · ออเดอร์ยกเลิก'],
                cr:['ยกเลิกและคืนสินค้า','Admin · ออเดอร์ยกเลิกและคืนสินค้า']};
@@ -7375,25 +7437,28 @@ function renderKPI(){
   { const sb=el('kSlack'); if(sb)sb.hidden=!(window.SLACK_KPI||['pick','pack','ship']).includes(SEC); }   /* v-slack: ปุ่มส่ง Slack เฉพาะหน้าที่กำหนด */
   { const ht=el('kHdTabs'); if(ht){ ht.innerHTML=SEC==='repl'?replTabs(sf('repl_cat','matcha')):'';
       ht.onclick=e=>{const b=e.target.closest('[data-sf]'); if(!b)return; SUBF[b.dataset.sf]=b.dataset.v; renderKPI();}; } }
-  document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='sopcr'||SEC==='ret'||SEC==='can'||SEC==='cr');
-  document.body.classList.toggle('crmode', SEC==='cr');
+  document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='sopcr'||SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='ship');
+  document.body.classList.toggle('crmode', SEC==='cr'||SEC==='ship');
+  document.body.classList.toggle('otpmode', SEC==='ship');
   /* v-kdark: ธีมเข้มของหน้าย่อย KPI (ไม่ใช้กับหน้าภาพรวม และหน้าเอกสาร/หน้าที่ฝังไฟล์แยก) */
-  document.body.classList.toggle('kdark', !['overview','sop','sopcr','cr','ret','can'].includes(SEC));
+  document.body.classList.toggle('kdark', !['overview','sop','sopcr','cr','ret','can','ship'].includes(SEC));
   /* v-kbig: หน้าที่ขยายภาพรวม + ตัวอักษรรายละเอียด · ฟอนต์ในกราฟใหญ่ขึ้น 15% (โหมดพรีเซนต์คงเดิม) */
-  const kbig=['oos','diff','dock','pick','perr','pack','ship','fc','repl'].includes(SEC);
+  const kbig=['oos','diff','dock','pick','perr','pack','fc','repl'].includes(SEC);
   document.body.classList.toggle('kbig', kbig);
   CFZ=document.body.classList.contains('present')?2.0:(kbig?1.84:1.6);
   try{ const nb=document.querySelector('.sidenav button.on .nic');
     el('kIco').innerHTML=nb?nb.innerHTML.replace(/currentColor/g,'#fff'):''; }catch(e){}
   if(!isOv){
-    el('detail').innerHTML = ((SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='sopcr'||SEC==='fc')?'':catBar())
+    /* v-otp: หน้า KPI On Time Performance — ถ้ากรอบเปิดอยู่แล้วไม่ต้องสร้างใหม่ (กันโหลดซ้ำทุกครั้งที่ชีตอื่นโหลดเสร็จ) */
+    if(!(SEC==='ship'&&document.getElementById('otpFrame')))
+    el('detail').innerHTML = ((SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='sop'||SEC==='sopcr'||SEC==='fc'||SEC==='ship')?'':catBar())
                            + (SEC==='ontime'?secOnTime() : SEC==='oos'?secOOS()
                            : SEC==='diff'?secDiff() : SEC==='dock'?secDock()
                            : SEC==='fc'?secForecast()
                            : SEC==='pick'?secPick()
                            : SEC==='perr'?secPickErr()
                            : SEC==='pack'?secPack()
-                           : SEC==='ship'?secShip()
+                           : SEC==='ship'?secOTPEmbed()
                            : SEC==='sop'?secSOP()
                            : SEC==='sopcr'?secSopCR()
                            : SEC==='ret'?secRetEmbed()
@@ -7423,7 +7488,7 @@ function renderKPI(){
            else if(SEC==='pick')drawPick();
            else if(SEC==='perr')drawPickErr();
            else if(SEC==='pack')drawPack();
-           else if(SEC==='ship')drawShip();
+           else if(SEC==='ship')drawOTPEmbed();
            else if(SEC==='sop')drawSOP();
            else if(SEC==='sopcr')drawSopCR();
            else if(SEC==='ret')drawRetEmbed();
@@ -8518,10 +8583,15 @@ const slackName=key=>{const b=slackNavBtn(key); const v=key.split(':')[0];
 /* ถ่ายภาพหน้า KPI ที่เปิดอยู่ (ทั้งหน้า · ขนาดเดิม) → คืนเป็นไฟล์ */
 async function kpiCapture(btn){
   await slackWait(()=>el('kShot').offsetWidth>0&&!/กำลังโหลด/.test(el('kShot').textContent)
-    &&!(SEC==='pick'&&!PICK)&&!(SEC==='pack'&&!PACK)&&!(SEC==='ship'&&!SHIP));
+    &&!(SEC==='pick'&&!PICK)&&!(SEC==='pack'&&!PACK)&&!(SEC==='ship'&&!otpReady()));
   const title=el('kTitle').textContent.trim();
   const [m,v]=rfkCur(); const period=m?rfkLabel(m,v):'';
   let blob=null;
+  /* v-otp: หน้า KPI On Time Performance ใช้ตัวถ่ายภาพของไฟล์เอง (ภาพเดียวกับ บันทึกเป็นรูป → ทั้งหน้า) */
+  if(SEC==='ship'){ const w=el('otpFrame').contentWindow;
+    const c=await w.shot(w.document.getElementById('dashboardContent'));
+    blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.92)); }
+  else
   await shotExport({root:el('kShot'),btn,zoomEls:[document.body],mode:'page',name:'kpi-'+SEC,title,
     sink:async b=>{blob=b;}});
   if(!blob)throw new Error('ถ่ายภาพหน้า '+title+' ไม่สำเร็จ');
@@ -10347,6 +10417,764 @@ th,td{padding:3px 5px}
 &lt;/table&gt;&lt;/div&gt;
 
 &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</template>
+<template id="otpDoc">&lt;!DOCTYPE html&gt;
+&lt;html lang="th"&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+&lt;title&gt;KPI On Time Performance — Matchazuki&lt;/title&gt;
+&lt;link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E📦%3C/text%3E%3C/svg%3E"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"&gt;&lt;/script&gt;
+&lt;style&gt;
+:root{
+  color-scheme:dark;
+  --bg:#0F0E24; --panel:#171633; --ink:#F1EEFF; --muted:#A9A5D1; --line:#2A2950;
+  --teal:#14A58A; --teal-light:#2DD4BF; --alert:#FF8A65; --gold:#E6B94D;
+  --cream:#FFFCF2; --cream-ink:#12453F;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Prompt','Noto Sans Thai',sans-serif;-webkit-font-smoothing:antialiased;}
+button,select,input{font-family:inherit;}
+.page{max-width:1180px;margin:0 auto;padding:12px 12px 60px;}
+
+/* ===== แถบเครื่องมือด้านบน ===== */
+.toolbar{background:var(--cream);border-radius:10px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--cream-ink);}
+.tb-btn{background:#fff;border:1px solid #E3DFCF;color:#1B2B2A;border-radius:9px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;}
+.tb-btn:hover{border-color:var(--teal);}
+.tb-btn.active{background:linear-gradient(135deg,#0F8F7A,#14A58A);color:#fff;border-color:transparent;}
+.tb-btn.outline{border-color:#0F7A6A;color:#0F7A6A;}
+.tb-btn.solid{background:linear-gradient(135deg,#0F8F7A,#14A58A);color:#fff;border-color:transparent;}
+.tb-btn:focus-visible,.chip:focus-within,.tb-sel:focus-visible{outline:2px solid var(--teal-light);outline-offset:2px;}
+.tb-arrow{padding:10px 12px;line-height:1;}
+.tb-sel{background:#fff;border:1px solid #E3DFCF;border-radius:9px;padding:10px 14px;font-size:14px;color:#1B2B2A;min-width:190px;text-align:center;}
+.tb-spacer{flex:1;}
+.tb-updated{width:100%;text-align:right;font-size:13px;color:#5B6B69;margin-top:2px;}
+.tb-updated b{color:#0F7A6A;}
+
+/* ===== หัวเรื่อง ===== */
+.title-row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:12px 0 10px;padding-bottom:10px;border-bottom:1px solid var(--line);}
+.title-left{display:flex;align-items:center;gap:16px;}
+.title-icon{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#0F6F68,#145A5A);display:flex;align-items:center;justify-content:center;border:1px solid #1E8F86;}
+.title-icon svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+h1{margin:0;font-size:34px;font-weight:700;letter-spacing:-.01em;}
+.subtitle{color:var(--muted);font-size:14px;margin-top:2px;}
+.subtitle b{color:var(--ink);font-weight:500;}
+.date-card{background:#1A1830;border:1px solid var(--line);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:14px;min-width:260px;}
+.date-card svg{width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.dc-cap{font-size:12px;color:var(--muted);}
+.dc-big{font-size:22px;font-weight:700;line-height:1.2;}
+.dc-badge{display:inline-block;margin-top:4px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff;font-size:12px;font-weight:600;border-radius:6px;padding:2px 10px;}
+
+/* ===== ชิปสถานะ ===== */
+.chips{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0;}
+.chips-label{font-size:13px;font-weight:600;margin-right:4px;}
+.chip{display:inline-flex;align-items:center;gap:8px;background:#1A1830;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;user-select:none;}
+.chip input{accent-color:var(--teal);width:14px;height:14px;margin:0;}
+.chip.on{background:linear-gradient(135deg,#0F8F7A,#14A58A);border-color:transparent;font-weight:600;}
+
+.extra{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:16px;}
+.extra label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+.extra select,.extra input{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;min-width:130px;}
+.extra input::placeholder{color:var(--muted);}
+.extra .clear{background:none;border:none;border-bottom:1px solid var(--ink);color:var(--ink);padding:8px 0;cursor:pointer;font-size:13px;}
+
+.err{background:#7A2E1A;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none;line-height:1.6;}
+
+/* ===== Hero ===== */
+.hero{border-radius:16px;border:1px solid #1E7F78;background:linear-gradient(120deg,#0F5F5C 0%,#10405A 50%,#1F2262 100%);padding:24px;display:flex;justify-content:center;align-items:center;gap:44px;flex-wrap:wrap;}
+.ring{position:relative;width:150px;height:150px;flex-shrink:0;}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+.ring .bgc{stroke:rgba(255,255,255,.12);}
+.ring .fg{transition:stroke-dashoffset .6s ease;}
+.ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;}
+.ring-num sup{font-size:16px;font-weight:600;margin-left:2px;align-self:flex-start;margin-top:50px;}
+.hero-info{max-width:380px;}
+.badge{display:inline-flex;align-items:center;gap:8px;border-radius:8px;padding:8px 16px;font-size:15px;font-weight:600;border:1px solid #2DD4BF;background:rgba(20,165,138,.25);color:#fff;}
+.badge.fail{border-color:var(--alert);background:rgba(255,138,101,.2);}
+.hero-desc{font-size:16px;margin:12px 0 6px;}
+.hero-target{font-size:16px;font-weight:700;}
+
+/* ===== การ์ดตัวเลข ===== */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;}
+@media (max-width:900px){.stats{grid-template-columns:repeat(2,1fr);}}
+.stat{border-radius:12px;padding:12px 16px;display:flex;gap:14px;align-items:center;border:1px solid transparent;}
+.stat .ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stat .ic svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+.stat .sl{font-size:14px;font-weight:600;}
+.stat .sv{font-size:26px;font-weight:700;line-height:1.15;}
+.stat .sp{font-size:14px;font-weight:600;margin-left:8px;}
+.stat.blue{background:#F2F5FF;color:#14163A;border-color:#DCE3FF;} .stat.blue .ic{background:#3B6FD8;}
+.stat.green{background:#EAF8F2;color:#0E7A55;border-color:#C5EBD9;} .stat.green .ic{background:#139E75;} .stat.green .sl{color:#1B3B33;}
+.stat.red{background:#FFF0F0;color:#D1283C;border-color:#FAD0D4;} .stat.red .ic{background:#E5484D;} .stat.red .sl{color:#3B1B1B;}
+.stat.amber{background:#FFF8EA;color:#B7700A;border-color:#F3DDB0;} .stat.amber .ic{background:#E39A1B;} .stat.amber .sl{color:#2A3040;}
+.sdate{font-weight:400;color:#6B7280;font-size:13px;}
+.stat.dark{background:var(--panel);border-color:var(--line);color:var(--ink);} .stat.dark .ic{background:#3F3D7A;}
+.stat.dark .sv{font-size:20px;}
+.stat .ic.sky{background:#3B9BE6;} .stat .ic.rose{background:#E0568A;} .stat .ic.orange{background:#F2994A;}
+.stat.purple{background:#F1EEFF;color:#6D4AE0;border-color:#DDD6FF;} .stat.purple .ic{background:#7C5CF0;} .stat.purple .sl{color:#2A2550;}
+.stat.t-sky{background:#EAF4FF;color:#1F6FB8;border-color:#CFE4FA;} .stat.t-sky .sl{color:#17304D;}
+.stat.t-rose{background:#FFF0F5;color:#C2336B;border-color:#F8CFDD;} .stat.t-rose .sl{color:#3B1A27;}
+.stat.t-orange{background:#FFF4E6;color:#C26A0E;border-color:#F8DDB8;} .stat.t-orange .sl{color:#3A2A12;}
+.stat .sv.txt{font-size:22px;line-height:1.25;overflow-wrap:anywhere;}
+.stats.small{margin-top:8px;}
+
+/* ===== ส่วนกราฟ ===== */
+.section{margin-top:16px;}
+.sec-title{display:flex;align-items:baseline;gap:10px;margin:0 0 8px;font-size:19px;font-weight:700;border-left:4px solid var(--teal-light);padding-left:10px;line-height:1.2;}
+.sec-title small{font-size:14px;font-weight:400;color:var(--muted);}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media (max-width:820px){.grid3{grid-template-columns:1fr;}}
+.panel h3{margin:0 0 10px;font-size:15px;font-weight:600;}
+
+svg text{font-family:'IBM Plex Mono',monospace;font-size:12px;fill:var(--muted);}
+svg text.v{fill:var(--ink);font-weight:600;}
+svg text.pct.bad{fill:var(--alert);} svg text.pct.good{fill:var(--teal-light);}
+
+.bar-item{display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:7px;}
+.bar-item .bn{width:150px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bar-item .bt{flex:1;height:7px;background:var(--line);border-radius:4px;overflow:hidden;}
+.bar-item .bf{height:100%;border-radius:4px;}
+.bar-item .bv{min-width:60px;text-align:right;font-family:'IBM Plex Mono',monospace;color:var(--muted);font-size:12px;}
+.wide .bar-item .bn{width:280px;}
+@media (max-width:640px){.wide .bar-item .bn{width:130px;}}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:820px){.grid2{grid-template-columns:1fr;}}
+.grid2 .bar-item .bn{width:200px;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35;}
+@media (max-width:640px){.grid2 .bar-item .bn{width:130px;}}
+.hero{position:relative;overflow:hidden;}
+.delta{margin-top:10px;font-size:14px;font-weight:600;min-height:20px;}
+.delta.up{color:#5EE0C3;} .delta.down{color:#FF8A65;} .delta.flat{color:var(--muted);}
+.delta small{font-weight:400;color:var(--muted);margin-left:8px;}
+.delta.sm{margin:2px 0 0;font-size:12px;min-height:0;}
+.stat .delta.up{color:#0E7A55;} .stat .delta.down{color:#C2410C;} .stat .delta.flat{color:#5B6B69;}
+.badge.perfect{background:linear-gradient(135deg,#E6B94D,#F2994A);border-color:transparent;color:#2B1B00;}
+.ring.perfect svg{animation:glow 2.4s ease-in-out infinite;}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 4px rgba(45,212,191,.35));}50%{filter:drop-shadow(0 0 16px rgba(45,212,191,.95));}}
+.stat.red.warn{animation:warnPulse 2s ease-in-out infinite;}
+@keyframes warnPulse{0%,100%{box-shadow:0 0 0 0 rgba(229,72,77,0);}50%{box-shadow:0 0 0 4px rgba(229,72,77,.35);}}
+.confetti{position:absolute;top:-14px;width:8px;height:12px;border-radius:2px;opacity:0;animation:fall 2s ease-out forwards;pointer-events:none;}
+@keyframes fall{0%{opacity:1;transform:translateY(0) rotate(0);}100%{opacity:0;transform:translateY(280px) rotate(540deg);}}
+.tip{position:fixed;z-index:100;background:#fff;color:#1B2B2A;padding:8px 12px;border-radius:8px;font-size:12.5px;line-height:1.6;white-space:pre-line;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none;display:none;}
+svg text{pointer-events:none;}
+.hit{fill:transparent;} .hit:hover{fill:rgba(255,255,255,.07);}
+@media (prefers-reduced-motion:reduce){.ring.perfect svg,.stat.red.warn{animation:none;}.confetti{display:none;}}
+.pie-row{display:flex;gap:32px;flex-wrap:wrap;align-items:center;}
+.donut{width:150px;height:150px;border-radius:50%;background:var(--line);position:relative;}
+.donut::after{content:"";position:absolute;inset:34px;border-radius:50%;background:var(--panel);}
+.legend-item{display:flex;align-items:center;gap:9px;font-size:14px;margin-bottom:10px;}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.legend-item .lv{margin-left:auto;padding-left:16px;font-family:'IBM Plex Mono',monospace;color:var(--muted);font-size:12px;}
+
+.table-wrap{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:8px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{position:sticky;top:0;background:var(--panel);z-index:2;text-align:left;color:var(--muted);font-weight:600;padding:10px;border-bottom:2px solid var(--teal);white-space:nowrap;}
+td{padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+td.late{color:var(--alert);font-weight:600;}
+td.prod{white-space:normal;min-width:260px;max-width:400px;overflow-wrap:anywhere;line-height:1.5;}
+td.cause{white-space:normal;min-width:260px;max-width:420px;overflow-wrap:anywhere;line-height:1.5;color:var(--gold);}
+.note{margin-top:22px;font-size:12px;color:var(--muted);line-height:1.7;}
+
+.tb-menu-wrap{position:relative;}
+.tb-btn:disabled{opacity:.75;cursor:wait;}
+.save-menu{position:absolute;top:calc(100% + 8px);right:0;width:350px;max-width:calc(100vw - 32px);background:#fff;color:#1B2B2A;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.35);padding:6px;z-index:50;}
+.save-item{display:block;width:100%;text-align:left;background:none;border:none;border-radius:8px;padding:11px 14px;cursor:pointer;color:inherit;}
+.save-item:hover,.save-item:focus-visible{background:#E9F6F2;outline:none;}
+.save-item b{display:block;font-size:15px;font-weight:700;margin-bottom:2px;}
+.save-item span{display:block;font-size:12.5px;color:#5B6B69;line-height:1.5;}
+body.present .toolbar .hide-present,body.present .extra{display:none;}
+
+@media print{
+  :root{--bg:#fff;--panel:#fff;--ink:#222;--muted:#666;--line:#ddd;}
+  .toolbar,.extra{display:none !important;}
+  .hero{color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class="page"&gt;
+
+  &lt;div class="toolbar" id="toolbar"&gt;
+    &lt;button class="tb-btn" data-mode="all"&gt;ดูทั้งหมด&lt;/button&gt;
+    &lt;button class="tb-btn" data-mode="year"&gt;รายปี&lt;/button&gt;
+    &lt;button class="tb-btn" data-mode="quarter"&gt;ไตรมาส&lt;/button&gt;
+    &lt;button class="tb-btn" data-mode="month"&gt;รายเดือน&lt;/button&gt;
+    &lt;button class="tb-btn active" data-mode="week"&gt;รายสัปดาห์&lt;/button&gt;
+    &lt;button class="tb-btn" data-mode="day"&gt;รายวัน&lt;/button&gt;
+    &lt;button class="tb-btn tb-arrow" id="btnPrev" aria-label="ช่วงก่อนหน้า"&gt;‹&lt;/button&gt;
+    &lt;select class="tb-sel" id="periodSel" aria-label="เลือกช่วงเวลา"&gt;&lt;/select&gt;
+    &lt;button class="tb-btn tb-arrow" id="btnNext" aria-label="ช่วงถัดไป"&gt;›&lt;/button&gt;
+    &lt;span class="tb-spacer"&gt;&lt;/span&gt;
+    &lt;button class="tb-btn outline" onclick="loadSheet()"&gt;ดึงข้อมูลใหม่&lt;/button&gt;
+    &lt;div class="tb-menu-wrap"&gt;
+      &lt;button class="tb-btn solid" id="btnSave" aria-haspopup="true" aria-expanded="false"&gt;บันทึกเป็นรูป ▾&lt;/button&gt;
+      &lt;div class="save-menu" id="saveMenu" hidden&gt;
+        &lt;button class="save-item" data-save="slides"&gt;&lt;b&gt;🖼️ แบบรวม · สไลด์ 16:9&lt;/b&gt;&lt;span&gt;ทั้งหน้าแบ่งเป็นสไลด์ ขนาด Google Slides&lt;/span&gt;&lt;/button&gt;
+        &lt;button class="save-item" data-save="sections"&gt;&lt;b&gt;🧩 แบบแยก · ทีละหัวข้อ&lt;/b&gt;&lt;span&gt;หัวข้อ + กราฟ/การ์ดใต้หัวข้อนั้น เป็น 1 ภาพ&lt;/span&gt;&lt;/button&gt;
+        &lt;button class="save-item" data-save="full"&gt;&lt;b&gt;📄 ทั้งหน้า · ภาพเดียว&lt;/b&gt;&lt;span&gt;ทั้งหน้าตั้งแต่บนสุดถึงล่างสุด เป็นภาพยาว .png ภาพเดียว&lt;/span&gt;&lt;/button&gt;
+        &lt;button class="save-item" data-save="both"&gt;&lt;b&gt;📦 ทั้ง 2 แบบ&lt;/b&gt;&lt;span&gt;ได้ทั้งสไลด์และภาพแยก ในไฟล์ .zip เดียว&lt;/span&gt;&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;button class="tb-btn outline" id="btnPresent" onclick="togglePresent()"&gt;โหมดพรีเซนต์&lt;/button&gt;
+    &lt;div class="tb-updated"&gt;ข้อมูลอัปเดตล่าสุด &lt;b id="updatedAt"&gt;—&lt;/b&gt; · รีเฟรชอัตโนมัติใน &lt;b id="countdown"&gt;5:00&lt;/b&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="err" id="errBox"&gt;&lt;/div&gt;
+
+  &lt;div id="dashboardContent"&gt;
+    &lt;div id="blockKpi"&gt;
+    &lt;div class="title-row"&gt;
+      &lt;div class="title-left"&gt;
+        &lt;div class="title-icon"&gt;&lt;svg viewBox="0 0 28 28"&gt;&lt;path d="M3 8.5l8-4 8 4-8 4-8-4z"/&gt;&lt;path d="M3 8.5v9l8 4"/&gt;&lt;path d="M19 8.5v2.5"/&gt;&lt;path d="M11 12.5v9"/&gt;&lt;path d="M7 6.5l8 4"/&gt;&lt;circle cx="20.5" cy="20.5" r="5.5" fill="#0F6F68"/&gt;&lt;path d="M20.5 17.4v3.3l2.1 1.4"/&gt;&lt;/svg&gt;&lt;/div&gt;
+        &lt;div&gt;
+          &lt;h1&gt;KPI On Time Performance&lt;/h1&gt;
+          &lt;div class="subtitle"&gt;TDFB Delivery Operations · แพ็คสินค้า &lt;b&gt;ตามวันกำหนดแพ็ค&lt;/b&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="date-card"&gt;
+        &lt;svg viewBox="0 0 24 24"&gt;&lt;rect x="3" y="5" width="18" height="16" rx="2"/&gt;&lt;path d="M3 10h18M8 3v4M16 3v4"/&gt;&lt;/svg&gt;
+        &lt;div&gt;
+          &lt;div class="dc-cap"&gt;ข้อมูลของช่วง&lt;/div&gt;
+          &lt;div class="dc-big" id="dcBig"&gt;—&lt;/div&gt;
+          &lt;span class="dc-badge" id="dcBadge"&gt;รายสัปดาห์&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="extra"&gt;
+      &lt;div&gt;&lt;label for="fShop"&gt;ร้าน&lt;/label&gt;&lt;select id="fShop"&gt;&lt;/select&gt;&lt;/div&gt;
+      &lt;div&gt;&lt;label for="fPlat"&gt;แพลตฟอร์ม&lt;/label&gt;&lt;select id="fPlat"&gt;&lt;/select&gt;&lt;/div&gt;
+      &lt;div&gt;&lt;label for="fCourier"&gt;ขนส่ง&lt;/label&gt;&lt;select id="fCourier"&gt;&lt;/select&gt;&lt;/div&gt;
+      &lt;div&gt;&lt;label for="fSearch"&gt;ค้นหาเลข PACK / SO&lt;/label&gt;&lt;input id="fSearch" placeholder="พิมพ์เลขออเดอร์…"&gt;&lt;/div&gt;
+      &lt;button class="clear" onclick="clearFilters()"&gt;ล้างตัวกรอง&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;div class="hero" id="hero"&gt;
+      &lt;div class="ring"&gt;
+        &lt;svg viewBox="0 0 200 200"&gt;&lt;circle class="bgc" cx="100" cy="100" r="86" fill="none" stroke-width="16"/&gt;&lt;circle class="fg" id="ringFg" cx="100" cy="100" r="86" fill="none" stroke="#2DD4BF" stroke-width="16" stroke-linecap="round" stroke-dasharray="540.35" stroke-dashoffset="540.35"/&gt;&lt;/svg&gt;
+        &lt;div class="ring-num"&gt;&lt;span id="pctVal"&gt;—&lt;/span&gt;&lt;sup id="pctSign"&gt;%&lt;/sup&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="hero-info"&gt;
+        &lt;div class="badge" id="passBadge"&gt;—&lt;/div&gt;
+        &lt;div class="hero-desc"&gt;แพ็คสินค้า &lt;b&gt;ตรงตามกำหนด&lt;/b&gt;&lt;/div&gt;
+        &lt;div class="hero-target"&gt;เป้าหมาย ≥ 98%&lt;/div&gt;
+        &lt;div class="delta" id="heroDelta"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="stats"&gt;
+      &lt;div class="stat blue"&gt;&lt;div class="ic"&gt;&lt;svg viewBox="0 0 24 24"&gt;&lt;path d="M21 8l-9-5-9 5 9 5 9-5z"/&gt;&lt;path d="M3 8v8l9 5 9-5V8"/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="sl"&gt;จำนวนออเดอร์ทั้งหมด&lt;/div&gt;&lt;div class="sv"&gt;&lt;span id="cUnits"&gt;—&lt;/span&gt;&lt;/div&gt;&lt;div class="delta sm" id="unitsDelta"&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class="stat green"&gt;&lt;div class="ic"&gt;&lt;svg viewBox="0 0 24 24"&gt;&lt;circle cx="12" cy="12" r="9"/&gt;&lt;path d="M8 12.5l3 3 5-6"/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="sl"&gt;แพ็คตรงเวลา&lt;/div&gt;&lt;div class="sv"&gt;&lt;span id="cOnTime"&gt;—&lt;/span&gt;&lt;span class="sp" id="cOnPct"&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class="stat red"&gt;&lt;div class="ic"&gt;&lt;svg viewBox="0 0 24 24"&gt;&lt;circle cx="12" cy="12" r="9"/&gt;&lt;path d="M12 7v5l3 2"/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="sl"&gt;แพ็คล่าช้า&lt;/div&gt;&lt;div class="sv"&gt;&lt;span id="cLate"&gt;—&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class="stat amber"&gt;&lt;div class="ic"&gt;&lt;svg viewBox="0 0 24 24"&gt;&lt;path d="M12 3.5l9.5 16.5h-19z"/&gt;&lt;path d="M12 10v4.5M12 17.5v.01"/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="sl"&gt;วันพีคสุด &lt;span class="sdate" id="peakDate"&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class="sv" id="cTotal"&gt;—&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="stats small"&gt;
+      &lt;div class="stat t-sky"&gt;&lt;div class="ic sky"&gt;&lt;svg viewBox="0 0 24 24"&gt;&lt;rect x="3" y="5" width="18" height="16" rx="2"/&gt;&lt;path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="sl"&gt;แพ็คก่อนกำหนด&lt;/div&gt;&lt;div class="sv" id="cEarly"&gt;—&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class="stat t-rose"&gt;&lt;div class="ic rose"&gt;&lt;svg viewBox="0 0 24 24"&gt;&lt;circle cx="12" cy="12" r="9"/&gt;&lt;path d="M9 9l6 6M15 9l-6 6"/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="sl"&gt;ยกเลิก&lt;/div&gt;&lt;div class="sv" id="cCancel"&gt;—&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class="stat purple"&gt;&lt;div class="ic"&gt;&lt;svg viewBox="0 0 24 24"&gt;&lt;path d="M7 18v-4M12 18V7M17 18v-7"/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="sl"&gt;ขนส่งที่ใช้มากที่สุด&lt;/div&gt;&lt;div class="sv txt" id="cCourier"&gt;—&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;div class="stat t-orange"&gt;&lt;div class="ic orange"&gt;&lt;svg viewBox="0 0 24 24"&gt;&lt;path d="M19 5L5 19"/&gt;&lt;circle cx="7" cy="7" r="2"/&gt;&lt;circle cx="17" cy="17" r="2"/&gt;&lt;/svg&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="sl"&gt;อัตราล่าช้า (%)&lt;/div&gt;&lt;div class="sv" id="cAvgLate"&gt;—&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;/div&gt;
+
+    &lt;div class="section"&gt;
+      &lt;h2 class="sec-title"&gt;&lt;span id="trendTitle"&gt;Weekly Orders&lt;/span&gt; &lt;small id="trendCap"&gt;ออเดอร์รายสัปดาห์&lt;/small&gt;&lt;/h2&gt;
+      &lt;div class="panel"&gt;&lt;svg id="weekChart" viewBox="0 0 1000 170" width="100%"&gt;&lt;/svg&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="section"&gt;
+      &lt;h2 class="sec-title"&gt;Breakdown &lt;small&gt;แยกตามสถานะ แพลตฟอร์ม และร้าน&lt;/small&gt;&lt;/h2&gt;
+      &lt;div class="grid3"&gt;
+        &lt;div class="panel"&gt;&lt;h3&gt;สถานะการแพ็ค&lt;/h3&gt;&lt;div id="statusBars"&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;div class="panel"&gt;&lt;h3&gt;แพลตฟอร์ม&lt;/h3&gt;&lt;div id="platBars"&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;div class="panel"&gt;&lt;h3&gt;ร้าน&lt;/h3&gt;&lt;div id="shopBars"&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="section"&gt;
+      &lt;div class="grid2"&gt;
+        &lt;div&gt;
+          &lt;h2 class="sec-title"&gt;Top 5 Couriers &lt;small&gt;ขนส่งที่ใช้มากที่สุด&lt;/small&gt;&lt;/h2&gt;
+          &lt;div class="panel"&gt;&lt;div id="courierBars"&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div&gt;
+          &lt;h2 class="sec-title"&gt;Top Products &lt;small&gt;สินค้าขายดี 5 อันดับ (นับชิ้น)&lt;/small&gt;&lt;/h2&gt;
+          &lt;div class="panel"&gt;&lt;div id="topProducts"&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="section"&gt;
+      &lt;h2 class="sec-title"&gt;Late Orders &lt;small id="detailCap"&gt;รายละเอียดออเดอร์ที่แพ็คล่าช้า&lt;/small&gt;&lt;/h2&gt;
+      &lt;div class="panel"&gt;
+        &lt;div class="table-wrap"&gt;&lt;table id="detailTable"&gt;
+          &lt;thead&gt;&lt;tr&gt;&lt;th&gt;เลข SO&lt;/th&gt;&lt;th&gt;ร้าน&lt;/th&gt;&lt;th&gt;แพลตฟอร์ม&lt;/th&gt;&lt;th&gt;สินค้า&lt;/th&gt;&lt;th&gt;วันกำหนดแพ็ค&lt;/th&gt;&lt;th&gt;วันที่แพ็ค&lt;/th&gt;&lt;th&gt;ล่าช้า (วัน)&lt;/th&gt;&lt;th&gt;สาเหตุ&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+          &lt;tbody&gt;&lt;/tbody&gt;
+        &lt;/table&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="note" id="footerStats"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="tip" id="tip"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+/* ===== ตั้งค่า ===== */
+const SHEET_ID   = "1nnmp5kcom8oLW71h-mnNJ9ml6f7zMfWPHL0KpC1cUz8";
+const SHEET_NAME = "Packing ใหม่";     // ชื่อแท็บในชีท ต้องตรงทุกตัวอักษร
+const TARGET_PCT = 98;
+const REFRESH_MS = 5 * 60 * 1000;   // รีเฟรชข้อมูลอัตโนมัติทุก 5 นาที
+let nextRefresh = Date.now() + REFRESH_MS, lastPerfect = '';
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const MODE_NAMES = {all:'ทั้งหมด',year:'รายปี',quarter:'ไตรมาส',month:'รายเดือน',week:'รายสัปดาห์',day:'รายวัน'};
+const PALETTE = ['#14A58A','#E6B94D','#7C6CF0','#FF8A65','#4FC3F7','#9CCC65','#F06292','#C39BD3','#F2994A','#5EE0C3'];
+
+/* หัวคอลัมน์ที่ใช้ค้นหา + ตำแหน่งสำรอง (A=0) */
+const COLS = {
+  pack:['PACK',0], so:['SO',1], shop:['ร้าน',2], plat:['แพลตฟอร์ม',3], product:['สินค้า',4],
+  due:['กำหนดแพ็ค',6], week:['สัปดาห์',7], packed:['วันที่แพ็ค',8], status:['สถานะ',9],
+  lateDays:['จำนวนวัน',10], updated:['อัปเดต',11], courier:['ขนส่ง',12],
+  cause:[['สาเหตุ','หมายเหตุ','เหตุผล','REMARK','CAUSE'],13]   // คอลัมน์ N
+};
+
+let ALL = [], state = {mode:'week', key:''};
+const $ = id =&gt; document.getElementById(id);
+const esc = s =&gt; String(s ?? '').replace(/[&amp;&lt;&gt;"]/g, c =&gt; ({'&amp;':'&amp;amp;','&lt;':'&amp;lt;','&gt;':'&amp;gt;','"':'&amp;quot;'}[c]));
+const num = n =&gt; Number(n).toLocaleString('en-US');
+const pad = n =&gt; String(n).padStart(2,'0');
+
+/* ===== โหลดข้อมูล ===== */
+function loadSheet(){
+  $('errBox').style.display = 'none';
+  nextRefresh = Date.now() + REFRESH_MS;
+  clearTimeout(window._t);
+  window.google = window.google || {}; window.google.visualization = window.google.visualization || {};
+  window.google.visualization.Query = { setResponse(json){
+    clearTimeout(window._t);
+    try{
+      if(json.status === 'error') throw new Error((json.errors||[]).map(e =&gt; e.detailed_message || e.message).join(' | '));
+      parseTable(json.table);
+    }catch(e){ console.error(e); showErr('อ่านข้อมูลไม่สำเร็จ: ' + e.message); }
+  }};
+  const old = $('gvizScript'); if(old) old.remove();
+  const s = document.createElement('script');
+  s.id = 'gvizScript';
+  s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&amp;sheet=${encodeURIComponent(SHEET_NAME)}&amp;t=${Date.now()}`;
+  s.onerror = () =&gt; showErr('เชื่อมต่อ Google Sheet ไม่ได้ — ตรวจสอบว่าชีทแชร์แบบ "Anyone with the link: Viewer" และชื่อแท็บคือ "' + SHEET_NAME + '"');
+  document.body.appendChild(s);
+  window._t = setTimeout(() =&gt; showErr('โหลดข้อมูลนานเกินไป — ลองกดดึงข้อมูลใหม่อีกครั้ง'), 60000);
+}
+function showErr(m){ const b = $('errBox'); b.textContent = m; b.style.display = 'block'; }
+
+function cellVal(c){
+  if(!c || c.v == null) return '';
+  if(typeof c.v === 'string'){
+    const m = c.v.match(/^Date\((\d+),(\d+),(\d+)/);
+    if(m) return `${m[1]}-${pad(+m[2]+1)}-${pad(+m[3])}`;
+    return c.v.trim();
+  }
+  return c.f != null ? c.f : c.v;
+}
+
+function parseTable(t){
+  let labels = t.cols.map(c =&gt; (c.label || '').trim()), rows = t.rows;
+  if(!labels.some(Boolean) &amp;&amp; rows.length){ labels = (rows[0].c || []).map(c =&gt; String(cellVal(c)).trim()); rows = rows.slice(1); }
+  const idx = {};
+  for(const k in COLS){
+    const [name, fb] = COLS[k], names = [].concat(name);
+    const i = labels.findIndex(l =&gt; l &amp;&amp; names.some(n =&gt; l.toUpperCase().includes(n.toUpperCase())));
+    idx[k] = i &gt;= 0 ? i : fb;
+  }
+  ALL = rows.map(r =&gt; {
+    const c = r.c || [], g = k =&gt; cellVal(c[idx[k]]);
+    const due = String(g('due')).slice(0,10), status = String(g('status')), ld = parseFloat(g('lateDays'));
+    return {
+      pack:String(g('pack')), so:String(g('so')), shop:String(g('shop')) || 'ไม่ระบุ', plat:String(g('plat')) || 'ไม่ระบุ',
+      product:String(g('product')), due, week:String(g('week')), packed:String(g('packed')).slice(0,10),
+      status, lateDays:isNaN(ld) ? 0 : ld, courier:String(g('courier')) || 'ไม่ระบุ', cause:String(g('cause')).trim(),
+      updated:String(g('updated')).slice(0,10),
+      isCancel:/ยกเลิก|cancel/i.test(status), isLate:/ล่าช้า|late/i.test(status), isEarly:/ก่อน/.test(status), isPending:status === ''
+    };
+  }).filter(r =&gt; r.pack);
+
+  ['fShop','fPlat','fCourier'].forEach((id,i) =&gt; {
+    const key = ['shop','plat','courier'][i], all = ['ทุกร้าน','ทุกแพลตฟอร์ม','ทุกขนส่ง'][i];
+    const sel = $(id), cur = sel.value, vals = [...new Set(ALL.map(r =&gt; r[key]))].sort();
+    sel.innerHTML = `&lt;option value=""&gt;${all}&lt;/option&gt;` + vals.map(v =&gt; `&lt;option value="${esc(v)}"&gt;${esc(v)}&lt;/option&gt;`).join('');
+    sel.value = vals.includes(cur) ? cur : '';
+  });
+
+  const maxUpd = ALL.map(r =&gt; r.updated).filter(d =&gt; /^\d{4}-\d{2}-\d{2}$/.test(d)).sort().pop();
+  const d = maxUpd ? new Date(maxUpd + 'T00:00:00') : new Date();
+  $('updatedAt').textContent = `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+
+  const keys = periodKeys(state.mode);
+  if(!keys.includes(state.key)) state.key = keys[keys.length-1] || '';
+  buildPeriodSelect();
+  render();
+}
+
+/* ===== ช่วงเวลา (รายวัน/สัปดาห์/เดือน/ไตรมาส/ปี) ===== */
+function keyOf(r, mode = state.mode){
+  if(mode === 'all') return 'all';
+  if(mode === 'week') return r.week;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(r.due)) return '';
+  if(mode === 'day') return r.due;
+  if(mode === 'month') return r.due.slice(0,7);
+  if(mode === 'year') return r.due.slice(0,4);
+  if(mode === 'quarter') return r.due.slice(0,4) + '-Q' + (Math.floor((+r.due.slice(5,7)-1)/3)+1);
+}
+function periodKeys(mode){ return [...new Set(ALL.map(r =&gt; keyOf(r, mode)).filter(Boolean))].sort(); }
+function keyLabel(mode, k){
+  if(mode === 'all') return 'ทั้งหมด';
+  if(mode === 'year') return k;
+  if(mode === 'quarter'){ const [y,q] = k.split('-Q'); return `ไตรมาส ${q} · ${y}`; }
+  if(mode === 'month'){ const [y,m] = k.split('-'); return `${THAI_MONTHS[+m-1]} ${y}`; }
+  if(mode === 'week') return k.replace(/^(\d{4})-(W\d+)$/, '$2 · $1');
+  const [y,m,d] = k.split('-'); return `${d}/${m}/${y}`;
+}
+function keyLabelLong(mode, k){
+  if(mode === 'day'){ const [y,m,d] = k.split('-'); return `${+d} ${THAI_MONTHS[+m-1]} ${y}`; }
+  return keyLabel(mode, k);
+}
+function buildPeriodSelect(){
+  const sel = $('periodSel'), keys = periodKeys(state.mode);
+  sel.disabled = state.mode === 'all';
+  sel.innerHTML = state.mode === 'all' ? '&lt;option&gt;ทั้งหมด&lt;/option&gt;'
+    : keys.slice().reverse().map(k =&gt; `&lt;option value="${esc(k)}"&gt;${esc(keyLabel(state.mode,k))}&lt;/option&gt;`).join('');
+  if(state.mode !== 'all') sel.value = state.key;
+  document.querySelectorAll('[data-mode]').forEach(b =&gt; b.classList.toggle('active', b.dataset.mode === state.mode));
+}
+function setMode(m){
+  state.mode = m;
+  const keys = periodKeys(m);
+  state.key = keys[keys.length-1] || '';
+  buildPeriodSelect(); render();
+}
+function step(dir){
+  const keys = periodKeys(state.mode), i = keys.indexOf(state.key) + dir;
+  if(i &lt; 0 || i &gt;= keys.length) return;
+  state.key = keys[i]; buildPeriodSelect(); render();
+}
+document.addEventListener('DOMContentLoaded', () =&gt; {
+  document.querySelectorAll('[data-mode]').forEach(b =&gt; b.addEventListener('click', () =&gt; setMode(b.dataset.mode)));
+  $('btnPrev').addEventListener('click', () =&gt; step(-1));
+  $('btnNext').addEventListener('click', () =&gt; step(1));
+  $('periodSel').addEventListener('change', e =&gt; { state.key = e.target.value; render(); });
+  ['fShop','fPlat','fCourier'].forEach(id =&gt; $(id).addEventListener('change', render));
+  $('fSearch').addEventListener('input', render);
+  document.addEventListener('fullscreenchange', () =&gt; { if(!document.fullscreenElement) document.body.classList.remove('present'); });
+});
+function clearFilters(){
+  ['fShop','fPlat','fCourier'].forEach(id =&gt; $(id).value = ''); $('fSearch').value = '';
+  render();
+}
+
+/* ===== คำนวณและแสดงผล ===== */
+const cls = r =&gt; r.isLate ? 'late' : r.isEarly ? 'early' : 'on';
+function parseProducts(text){
+  const out = [], re = /(.+?)\s+x(\d+)(?:,\s*|\s*$)/g; let m;
+  while((m = re.exec(text)) !== null) out.push([m[1].trim(), +m[2]]);
+  if(!out.length &amp;&amp; text.trim()) out.push([text.trim(), 1]);
+  return out;
+}
+
+/* ===== ลูกเล่น: ตัวเลขนับขึ้น / เทียบช่วงก่อนหน้า / ฉลอง / tooltip / รีเฟรชอัตโนมัติ ===== */
+function setNum(id, to, dec = 0, suffix = ''){
+  const el = $(id), from = el._v ?? 0;
+  el._v = to;
+  const fmt = v =&gt; (dec ? v.toFixed(dec) : num(Math.round(v))) + suffix;
+  cancelAnimationFrame(el._raf);
+  if(REDUCED || from === to){ el.textContent = fmt(to); return; }
+  const t0 = performance.now(), dur = 700;
+  const tick = now =&gt; {
+    const k = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = fmt(from + (to - from) * e);
+    if(k &lt; 1) el._raf = requestAnimationFrame(tick);
+  };
+  el._raf = requestAnimationFrame(tick);
+}
+function setText(id, text){ const el = $(id); cancelAnimationFrame(el._raf); el._v = undefined; el.textContent = text; }
+function periodStats(rows){
+  const k = rows.filter(r =&gt; !r.isCancel &amp;&amp; !r.isPending), l = k.filter(r =&gt; r.isLate).length;
+  return {n:rows.length, pct:k.length ? (k.length - l) / k.length * 100 : null};
+}
+function burst(){
+  if(REDUCED) return;
+  const h = $('hero'), cols = ['#2DD4BF','#E6B94D','#FF8A65','#7C6CF0','#F1EEFF'];
+  for(let i = 0; i &lt; 36; i++){
+    const c = document.createElement('i');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + '%';
+    c.style.background = cols[i % cols.length];
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    c.style.animationDuration = (1.6 + Math.random() * 1.2) + 's';
+    h.appendChild(c);
+    setTimeout(() =&gt; c.remove(), 3600);
+  }
+}
+document.addEventListener('DOMContentLoaded', () =&gt; {
+  const svg = $('weekChart'), tip = $('tip');
+  svg.addEventListener('mousemove', e =&gt; {
+    const t = e.target.closest('[data-tip]');
+    if(!t){ tip.style.display = 'none'; return; }
+    tip.textContent = t.dataset.tip; tip.style.display = 'block';
+    tip.style.left = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8) + 'px';
+    tip.style.top = (e.clientY + 16) + 'px';
+  });
+  svg.addEventListener('mouseleave', () =&gt; { tip.style.display = 'none'; });
+});
+setInterval(() =&gt; {
+  const left = Math.max(0, nextRefresh - Date.now());
+  $('countdown').textContent = Math.floor(left / 60000) + ':' + String(Math.floor(left % 60000 / 1000)).padStart(2, '0');
+  if(left === 0 &amp;&amp; !document.hidden &amp;&amp; !$('btnSave').disabled) loadSheet();
+}, 1000);
+
+function render(){
+  if(!ALL.length) return;
+  const q = $('fSearch').value.trim().toLowerCase();
+  const f = {shop:$('fShop').value, plat:$('fPlat').value, courier:$('fCourier').value};
+  const base = ALL.filter(r =&gt; (!f.shop || r.shop === f.shop) &amp;&amp; (!f.plat || r.plat === f.plat) &amp;&amp; (!f.courier || r.courier === f.courier)
+    &amp;&amp; (!q || r.pack.toLowerCase().includes(q) || r.so.toLowerCase().includes(q)));
+  // ถ้ากำลังค้นหาเลข PACK / SO ให้ค้นทุกช่วงเวลา (ไม่ถูกจำกัดด้วยสัปดาห์/เดือนที่เลือก)
+  const period = base.filter(r =&gt; q || state.mode === 'all' || keyOf(r) === state.key);
+  const kpi = period.filter(r =&gt; !r.isCancel &amp;&amp; !r.isPending);
+  const cancelled = period.filter(r =&gt; r.isCancel).length, pending = period.filter(r =&gt; !r.isCancel &amp;&amp; r.isPending).length;
+  const lateAll = kpi.filter(r =&gt; r.isLate);
+  const total = kpi.length, late = lateAll.length, onTime = total - late;
+  const early = kpi.filter(r =&gt; r.isEarly &amp;&amp; !r.isLate).length;
+  const pct = total ? onTime / total * 100 : 0;
+  const pass = total &amp;&amp; pct &gt;= TARGET_PCT;
+
+  // หัวข้อ + วงแหวน
+  $('dcBig').textContent = q ? 'ผลการค้นหา' : (state.key || state.mode === 'all' ? keyLabelLong(state.mode, state.mode === 'all' ? 'all' : state.key) : '—');
+  $('dcBadge').textContent = q ? 'ทุกช่วงเวลา' : MODE_NAMES[state.mode];
+  const perfect = !q &amp;&amp; total &gt; 0 &amp;&amp; late === 0;
+  const C = 540.35, fg = $('ringFg');
+  fg.style.strokeDashoffset = C * (1 - Math.min(pct,100)/100);
+  fg.style.stroke = !total ? '#4A4880' : pass ? '#2DD4BF' : '#FF8A65';
+  if(total) setNum('pctVal', pct, 2); else setText('pctVal', '—');
+  $('pctSign').style.display = total ? '' : 'none';
+  document.querySelector('.ring').classList.toggle('perfect', perfect);
+  const b = $('passBadge');
+  b.className = 'badge' + (perfect ? ' perfect' : total &amp;&amp; !pass ? ' fail' : '');
+  b.textContent = !total ? 'ไม่มีข้อมูลในช่วงนี้' : perfect ? '🏆 Perfect · ไม่มีออเดอร์ล่าช้า' : pass ? '✓ ผ่านเกณฑ์' : '✕ ไม่ผ่านเกณฑ์';
+  const pk = perfect ? state.mode + '|' + state.key : '';
+  if(pk &amp;&amp; pk !== lastPerfect) burst();
+  lastPerfect = pk;
+
+  // เทียบกับช่วงก่อนหน้า
+  let prev = null;
+  if(!q &amp;&amp; state.mode !== 'all'){
+    const keys = periodKeys(state.mode), idx = keys.indexOf(state.key);
+    if(idx &gt; 0) prev = Object.assign({key:keys[idx-1]}, periodStats(base.filter(r =&gt; keyOf(r) === keys[idx-1])));
+  }
+  const arrow = (d, dec, unit) =&gt; Math.abs(d) &lt; Math.pow(10, -dec) / 2 ? '▬ ทรงตัว' : (d &gt; 0 ? '▲ +' : '▼ −') + Math.abs(d).toFixed(dec) + unit;
+  const cls2 = d =&gt; 'delta' + (Math.abs(d) &lt; 0.005 ? ' flat' : d &gt; 0 ? ' up' : ' down');
+  const hd = $('heroDelta');
+  if(prev &amp;&amp; prev.pct !== null &amp;&amp; total){
+    const d = pct - prev.pct;
+    hd.className = cls2(d);
+    hd.innerHTML = arrow(d, 2, '%') + '&lt;small&gt;เทียบ ' + esc(keyLabel(state.mode, prev.key)) + ' (' + prev.pct.toFixed(2) + '%)&lt;/small&gt;';
+  } else { hd.className = 'delta'; hd.textContent = ''; }
+  const ud = $('unitsDelta');
+  if(prev &amp;&amp; prev.n){
+    const d = (period.length - prev.n) / prev.n * 100;
+    ud.className = 'delta sm' + (Math.abs(d) &lt; 0.05 ? ' flat' : d &gt; 0 ? ' up' : ' down');
+    ud.textContent = arrow(d, 1, '%') + ' จาก ' + keyLabel(state.mode, prev.key);
+  } else { ud.className = 'delta sm'; ud.textContent = ''; }
+
+  // การ์ด
+  setNum('cUnits', period.length);
+  setNum('cOnTime', onTime);
+  if(total) setNum('cOnPct', pct, 2, '%'); else setText('cOnPct', '');
+  setNum('cLate', late);
+  document.querySelector('.stat.red').classList.toggle('warn', late &gt; 0);
+  // วันพีคสุด = วันที่มีออเดอร์มากที่สุดในช่วงที่เลือก (ไม่นับยกเลิก)
+  const dayCnt = {};
+  period.filter(r =&gt; !r.isCancel &amp;&amp; /^\d{4}-\d{2}-\d{2}$/.test(r.due)).forEach(r =&gt; { dayCnt[r.due] = (dayCnt[r.due] || 0) + 1; });
+  const top = Object.entries(dayCnt).sort((a,b) =&gt; b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+  if(top){
+    const [d, n] = top;
+    setNum('cTotal', n);
+    $('peakDate').textContent = `(${d})`;
+  } else { setText('cTotal', '—'); $('peakDate').textContent = ''; }
+  setNum('cEarly', early); setNum('cCancel', cancelled);
+  // ขนส่งที่ใช้มากที่สุด (ตัดชื่อบริการ เหลือชื่อขนส่ง เช่น SPX Express)
+  const shortCourier = n =&gt; { let t = n; const i = t.indexOf(' - '); if(i &gt;= 0) t = t.slice(i + 3); const j = t.lastIndexOf('-'); if(j &gt;= 0 &amp;&amp; j &lt; t.length - 1) t = t.slice(j + 1); return t.trim() || n; };
+  const cc = {};
+  kpi.forEach(r =&gt; { if(r.courier === 'ไม่ระบุ') return; const k = shortCourier(r.courier); cc[k] = (cc[k] || 0) + 1; });
+  const tc = Object.entries(cc).sort((a,b) =&gt; b[1] - a[1])[0];
+  setText('cCourier', tc ? tc[0] : '—');
+  $('cCourier').title = tc ? tc[0] + ' · ' + num(tc[1]) + ' ออเดอร์' : '';
+  if(total) setNum('cAvgLate', late / total * 100, 2, '%'); else setText('cAvgLate', '—');
+
+  // ส่วนล่าง: กรองตามชิปสถานะ
+  const chipRows = kpi;
+  drawTrend(base.filter(r =&gt; !r.isCancel &amp;&amp; !r.isPending), q);
+  $('statusBars').innerHTML = barsHTML(countBy(period, 'status').map(([s,n]) =&gt; [s || '(ยังไม่มีสถานะ)', n,
+    /ล่าช้า/.test(s) ? '#FF8A65' : /ยกเลิก/.test(s) ? '#7A78A8' : s === '' ? '#E6B94D' : '#14A58A']));
+  $('platBars').innerHTML = barsHTML(countBy(chipRows, 'plat').slice(0,8));
+  $('shopBars').innerHTML = barsHTML(countBy(chipRows, 'shop').slice(0,8));
+  $('courierBars').innerHTML = barsHTML(countBy(chipRows, 'courier').slice(0,5));
+  drawProducts(chipRows);
+  const lateRows = chipRows.filter(r =&gt; r.isLate);
+  drawDetail(lateRows);
+  $('footerStats').textContent = `${q ? 'ค้นหา "' + q + '" ทุกช่วงเวลา' : 'ช่วง ' + keyLabel(state.mode, state.mode === 'all' ? 'all' : state.key)} · KPI คิดจากออเดอร์ที่มีสถานะแพ็คและไม่ยกเลิก ${num(total)} ออเดอร์ · ล่าช้า ${num(late)} · ยกเลิก ${num(cancelled)} · ยังไม่มีสถานะ ${num(pending)}`;
+}
+
+function countBy(rows, key){ const m = {}; rows.forEach(r =&gt; m[r[key]] = (m[r[key]] || 0) + 1); return Object.entries(m).sort((a,b) =&gt; b[1] - a[1]); }
+function barsHTML(items){
+  const max = Math.max(...items.map(i =&gt; i[1]), 1);
+  return items.map(([n,c,col],i) =&gt; `&lt;div class="bar-item"&gt;&lt;div class="bn" title="${esc(n)}"&gt;${esc(n)}&lt;/div&gt;&lt;div class="bt"&gt;&lt;div class="bf" style="width:${c/max*100}%;background:${col || PALETTE[i % PALETTE.length]}"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="bv"&gt;${num(c)}&lt;/div&gt;&lt;/div&gt;`).join('')
+    || '&lt;div style="color:var(--muted);font-size:13px;"&gt;ไม่มีข้อมูล&lt;/div&gt;';
+}
+function drawProducts(rows){
+  const m = {};
+  rows.forEach(r =&gt; parseProducts(r.product).forEach(([n,q]) =&gt; { if(!/shipping fee/i.test(n)) m[n] = (m[n] || 0) + q; }));
+  $('topProducts').innerHTML = barsHTML(Object.entries(m).sort((a,b) =&gt; b[1] - a[1]).slice(0,5).map(([n,q]) =&gt; [n,q,'#14A58A']));
+}
+function drawTrend(rows, q){
+  // สัปดาห์/เดือน → รายวัน · วัน → เฉพาะวันนั้น · ปี/ไตรมาส/ทั้งหมด → รายเดือน · ค้นหา → รายสัปดาห์
+  const mode = q ? 'all' : state.mode;
+  let data = rows, daily = false, hl = '';
+  if(mode === 'week'){ data = rows.filter(r =&gt; r.week === state.key); daily = true; }
+  else if(mode === 'day'){ data = rows.filter(r =&gt; r.due === state.key); daily = true; }
+  else if(mode === 'month'){ data = rows.filter(r =&gt; keyOf(r, 'month') === state.key); daily = true; }
+  let monthly = false;
+  if(!q &amp;&amp; mode === 'year'){ data = rows.filter(r =&gt; keyOf(r, 'year') === state.key); monthly = true; }
+  else if(!q &amp;&amp; mode === 'quarter'){ data = rows.filter(r =&gt; keyOf(r, 'quarter') === state.key); monthly = true; }
+  else if(!q &amp;&amp; mode === 'all'){ monthly = true; }
+  const gOf = r =&gt; daily ? r.due : monthly ? (/^\d{4}-\d{2}/.test(r.due) ? r.due.slice(0,7) : '') : r.week;
+  const legend = '(เขียว = ตรงเวลา · ส้ม = ล่าช้า · % ใต้' + (daily ? 'วัน' : monthly ? 'เดือน' : 'สัปดาห์') + ' = ตรงเวลา)';
+  $('trendTitle').textContent = daily ? 'Daily Orders' : monthly ? 'Monthly Orders' : 'Weekly Orders';
+  $('trendCap').textContent = daily
+    ? (mode === 'day' ? 'ออเดอร์ของวันที่ ' + keyLabel('day', state.key) : 'ออเดอร์รายวันของ ' + keyLabel(mode, state.key)) + ' ' + legend
+    : monthly ? 'ออเดอร์รายเดือน' + (mode === 'year' ? 'ของปี ' + state.key : mode === 'quarter' ? 'ของ' + keyLabel('quarter', state.key) : 'ทั้งหมด') + ' ' + legend
+    : 'ออเดอร์รายสัปดาห์ ' + legend;
+
+  const by = {};
+  data.forEach(r =&gt; { const k = gOf(r); if(!k) return; const w = by[k] ||= {t:0,l:0}; w.t++; if(r.isLate) w.l++; });
+  const keys = Object.keys(by).sort(), svg = $('weekChart');
+  if(!keys.length){ svg.innerHTML = '&lt;text x="500" y="85" text-anchor="middle"&gt;ไม่มีข้อมูลในช่วงนี้&lt;/text&gt;'; return; }
+
+  const DOW = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  const MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const lab = k =&gt; daily ? DOW[new Date(k + 'T00:00:00').getDay()] + ' ' + k.slice(8) + '/' + k.slice(5,7)
+    : monthly ? MON[+k.slice(5,7) - 1] + (mode === 'all' ? ' ' + k.slice(2,4) : '')
+    : k.replace(/^\d{4}-/, '');
+  const W = 1000, H = 170, padL = 10, padR = 10, padT = 22, padB = 44, chartH = H - padT - padB, gap = (W - padL - padR) / keys.length;
+  const barW = Math.min(daily || monthly ? 64 : 46, gap * 0.6), max = Math.max(...keys.map(k =&gt; by[k].t), 1), skip = keys.length &gt; 16 ? 2 : 1;
+  let out = `&lt;line x1="${padL}" x2="${W-padR}" y1="${padT+chartH}" y2="${padT+chartH}" stroke="var(--line)"/&gt;`;
+  keys.forEach((k,i) =&gt; {
+    const {t,l} = by[k], cx = padL + gap*i + gap/2, h = t/max*chartH, hh = l/max*chartH, y = padT + chartH - h;
+    out += `&lt;rect x="${cx-barW/2}" y="${y}" width="${barW}" height="${h-hh}" fill="#14A58A" rx="2" ${k === hl ? 'stroke="#fff" stroke-width="2"' : ''}/&gt;`;
+    if(l) out += `&lt;rect x="${cx-barW/2}" y="${y+h-hh}" width="${barW}" height="${hh}" fill="#FF8A65" rx="2"/&gt;`;
+    out += `&lt;text class="v" x="${cx}" y="${y-6}" text-anchor="middle"&gt;${num(t)}&lt;/text&gt;`;
+    out += `&lt;rect class="hit" x="${padL + gap*i}" y="0" width="${gap}" height="${H}" data-tip="${esc(lab(k))}&amp;#10;ทั้งหมด ${num(t)} ออเดอร์&amp;#10;ตรงเวลา ${num(t-l)} (${((t-l)/t*100).toFixed(2)}%)&amp;#10;ล่าช้า ${num(l)}"/&gt;`;
+    if(i % skip === 0){
+      const p = (t-l)/t*100;
+      out += `&lt;text x="${cx}" y="${padT+chartH+14}" text-anchor="middle"&gt;${esc(lab(k))}&lt;/text&gt;&lt;text class="pct ${p &lt; TARGET_PCT ? 'bad' : 'good'}" x="${cx}" y="${padT+chartH+28}" text-anchor="middle"&gt;${p.toFixed(1)}%&lt;/text&gt;`;
+    }
+  });
+  svg.innerHTML = out;
+}
+function drawDetail(lateRows){
+  const rows = lateRows.slice().sort((a,b) =&gt; b.due.localeCompare(a.due) || (b.packed || '').localeCompare(a.packed || ''));
+  $('detailCap').textContent = `ออเดอร์แพ็คล่าช้า ${num(rows.length)} ออเดอร์ · เรียงจากวันกำหนดแพ็คล่าสุด`;
+  $('detailTable').querySelector('tbody').innerHTML = rows.length ? rows.map(r =&gt; `&lt;tr&gt;
+    &lt;td&gt;${esc(r.so)}&lt;/td&gt;&lt;td&gt;${esc(r.shop)}&lt;/td&gt;&lt;td&gt;${esc(r.plat)}&lt;/td&gt;
+    &lt;td class="prod" title="${esc(r.product)}"&gt;${esc(r.product)}&lt;/td&gt;&lt;td&gt;${esc(r.due)}&lt;/td&gt;&lt;td&gt;${esc(r.packed || '—')}&lt;/td&gt;
+    &lt;td class="late"&gt;${r.lateDays || '—'}&lt;/td&gt;&lt;td class="cause" title="${esc(r.cause)}"&gt;${esc(r.cause || '—')}&lt;/td&gt;&lt;/tr&gt;`).join('')
+    : '&lt;tr&gt;&lt;td colspan="8" style="color:var(--muted);text-align:center;"&gt;ไม่มีออเดอร์ล่าช้าในช่วงที่เลือก&lt;/td&gt;&lt;/tr&gt;';
+}
+
+/* ===== ปุ่มเครื่องมือ ===== */
+/* ===== บันทึกเป็นรูป (4 โหมด) ===== */
+const BG = '#0F0E24';
+function setSaving(msg){ const b = $('btnSave'); b.disabled = !!msg; b.textContent = msg || 'บันทึกเป็นรูป ▾'; }
+function closeMenu(){ $('saveMenu').hidden = true; $('btnSave').setAttribute('aria-expanded','false'); }
+function download(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(() =&gt; URL.revokeObjectURL(a.href), 4000);
+}
+const toBlob = c =&gt; new Promise(res =&gt; c.toBlob(res, 'image/png'));
+
+async function shot(el){
+  const sc = Math.min(2, 15000 / Math.max(el.offsetHeight, 1));
+  const c = await html2canvas(el, {scale:sc, useCORS:true, backgroundColor:BG, ignoreElements:n =&gt; n.classList &amp;&amp; n.classList.contains('extra')});
+  const m = Math.round(24 * sc), out = document.createElement('canvas');
+  out.width = c.width + 2*m; out.height = c.height + 2*m;
+  const g = out.getContext('2d'); g.fillStyle = BG; g.fillRect(0, 0, out.width, out.height); g.drawImage(c, m, m);
+  return out;
+}
+function toSlide(c){                       // สไลด์ 16:9 ขนาด 1920×1080
+  const W = 1920, H = 1080, out = document.createElement('canvas'); out.width = W; out.height = H;
+  const g = out.getContext('2d'); g.fillStyle = BG; g.fillRect(0, 0, W, H); g.imageSmoothingQuality = 'high';
+  const k = Math.min((W - 120) / c.width, (H - 120) / c.height, 2.2), w = c.width * k, h = c.height * k;
+  g.drawImage(c, (W - w) / 2, (H - h) / 2, w, h);
+  return out;
+}
+function blocks(){
+  const list = [{name:'KPI', el:$('blockKpi')}];
+  document.querySelectorAll('#dashboardContent .section').forEach((sec, i) =&gt; {
+    const t = sec.querySelector('.sec-title').childNodes[0].textContent.trim().replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    list.push({name:t || 'Late_Causes', el:sec});
+  });
+  return list;
+}
+async function saveImages(mode){
+  closeMenu();
+  const label = (state.mode === 'all' ? 'all' : state.key).replace(/[^A-Za-z0-9-]+/g, '');
+  const base = `KPI_Packing_${label}_${new Date().toISOString().slice(0,10)}`;
+  try{
+    if(mode === 'full'){
+      setSaving('กำลังสร้างภาพ…');
+      download(await toBlob(await shot($('dashboardContent'))), base + '_full.png');
+      return;
+    }
+    const zip = new JSZip(), bl = blocks(), both = mode === 'both';
+    const wantSlides = mode === 'slides' || both, wantSecs = mode === 'sections' || both;
+    for(let i = 0; i &lt; bl.length; i++){
+      setSaving(`กำลังสร้างภาพ ${i+1}/${bl.length}…`);
+      const c = await shot(bl[i].el), n = String(i+1).padStart(2,'0') + '_' + bl[i].name + '.png';
+      if(wantSecs)   zip.file((both ? 'sections/' : '') + n, await toBlob(c));
+      if(wantSlides) zip.file((both ? 'slides/' : '') + 'slide_' + n, await toBlob(toSlide(c)));
+    }
+    setSaving('กำลังบีบอัดไฟล์…');
+    download(await zip.generateAsync({type:'blob'}), base + '.zip');
+  }catch(e){ console.error(e); showErr('บันทึกรูปไม่สำเร็จ: ' + e.message); }
+  finally{ setSaving(''); }
+}
+document.addEventListener('DOMContentLoaded', () =&gt; {
+  $('btnSave').addEventListener('click', e =&gt; {
+    e.stopPropagation();
+    const m = $('saveMenu'); m.hidden = !m.hidden;
+    $('btnSave').setAttribute('aria-expanded', String(!m.hidden));
+  });
+  document.querySelectorAll('[data-save]').forEach(b =&gt; b.addEventListener('click', () =&gt; saveImages(b.dataset.save)));
+  document.addEventListener('click', e =&gt; { if(!e.target.closest('.tb-menu-wrap')) closeMenu(); });
+  document.addEventListener('keydown', e =&gt; { if(e.key === 'Escape') closeMenu(); });
+});
+function togglePresent(){
+  const on = document.body.classList.toggle('present');
+  if(on &amp;&amp; document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() =&gt; {});
+  if(!on &amp;&amp; document.fullscreenElement) document.exitFullscreen();
+  $('btnPresent').textContent = on ? 'ออกจากโหมดพรีเซนต์' : 'โหมดพรีเซนต์';
+}
+
+loadSheet();
+&lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;
 </template>
