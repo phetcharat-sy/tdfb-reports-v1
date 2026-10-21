@@ -1406,6 +1406,8 @@ body:not(.present):not(.mobile) #vRPT .wrap{padding-left:3.2%;padding-right:3.2%
 .navArrow.l{left:664px}
 body.present .navArrow.l{left:20px}
 @media(max-width:1100px){.navArrow.l{left:10px}}
+/* v-fcbig: หน้า Forecast — ขยายเนื้อหาทั้งหน้า (ตาราง กราฟ การ์ด) 1.3 เท่า · ไม่รวมแถบเครื่องมือด้านบนและโหมดพรีเซนต์ */
+body.fcmode:not(.present) #vKPI #detail{zoom:1.3}
 /* v-depf2: ตัวกรองสถานะของ Stock Depletion Forecast — ตัวอักษรใหญ่ขึ้น (เฉพาะแถบนี้) */
 #vKPI #detail .depf .fbar{gap:16px!important;margin:6px 0 22px!important;font-size:44px!important}
 #vKPI #detail .depf .fbar .fl{font-size:44px!important}
@@ -5277,6 +5279,11 @@ function drawOTPEmbed(){
     +'b.addEventListener("click",function(){k.click();});'
     +'new MutationObserver(function(){b.disabled=k.disabled;var t=k.textContent.trim();b.innerHTML=(!k.querySelector("img")&&t)?t:base;}).observe(k,{childList:true,subtree:true,characterData:true,attributes:true});'
     +'})();<\/script></body>');
+  /* v-otpshot: บันทึกเป็นรูป / ส่ง Slack — ถ่ายที่ความกว้าง OTP_W เสมอ (ไม่ยืดตามจอ) ตัวหนังสือในภาพจึงไม่เล็ก */
+  doc=doc.replace(/<\/body>(?![\s\S]*<\/body>)/,'<script>(function(){var o=window.shot;if(typeof o!=="function")return;'
+    +'window.shot=async function(el){var p=document.querySelector(".page"),pc=p?p.style.cssText:"";'
+    +'if(p)p.style.setProperty("max-width","'+OTP_W+'px","important");'
+    +'try{return await o(el);}finally{if(p)p.style.cssText=pc;}};})();<\/script></body>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800); setTimeout(fit,2500);
     try{ const d=f.contentDocument;
@@ -7492,6 +7499,7 @@ function renderKPI(){
   document.body.classList.toggle('sopmode', SEC==='sop'||SEC==='sopcr'||SEC==='ret'||SEC==='can'||SEC==='cr'||SEC==='ship');
   document.body.classList.toggle('crmode', SEC==='cr'||SEC==='ship');
   document.body.classList.toggle('otpmode', SEC==='ship');
+  document.body.classList.toggle('fcmode', SEC==='fc');   /* v-fcbig: หน้า Forecast ขยายตัวอักษรทั้งหน้า */
   /* v-kdark: ธีมเข้มของหน้าย่อย KPI (ไม่ใช้กับหน้าภาพรวม และหน้าเอกสาร/หน้าที่ฝังไฟล์แยก) */
   document.body.classList.toggle('kdark', !['overview','sop','sopcr','cr','ret','can','ship'].includes(SEC));
   /* v-kbig: หน้าที่ขยายภาพรวม + ตัวอักษรรายละเอียด · ฟอนต์ในกราฟใหญ่ขึ้น 15% (โหมดพรีเซนต์คงเดิม) */
@@ -8601,7 +8609,7 @@ el('kSave').addEventListener('click',()=>{
   shotMenu(el('kSave'),mode=>{
     const tag=[fYear(), QSEL&&('Q'+QSEL), fMonth()&&MONTH_EN[MONTH_ORDER.indexOf(fMonth())],
                WKSEL.length&&('W'+WKSEL.join('_')), DAYSEL].filter(Boolean).join('-')||'all';
-    shotExport({root:el('kShot'),btn:el('kSave'),zoomEls:[document.body],mode,
+    shotExport({root:el('kShot'),btn:el('kSave'),zoomEls:SEC==='fc'?[document.body,el('detail')]:[document.body],mode,
       name:`kpi-${SEC}-${tag}`,title:el('kTitle').textContent});
   });
 });
