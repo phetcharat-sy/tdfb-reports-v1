@@ -1398,13 +1398,8 @@ html body #vKPI table.ovt th{font-size:30px}
 #vKPI .hleg.hleg-row button{font-size:23px}
 #vKPI .hleg.hleg-mini button{font-size:25px}
 #vKPI #sopcrFrame{width:100%}
-/* v-otp: หน้า KPI On Time Performance (ฝังไฟล์) — ปุ่ม Slack ลอย เพราะแถบเครื่องมือหลักถูกซ่อน */
-#vKPI #otpFrame{width:100%;display:block}
-#otpSlack{display:none}
-body.otpmode #otpSlack{display:inline-flex;align-items:center;gap:8px;position:fixed;bottom:18px;right:18px;z-index:9998;
-  box-shadow:0 3px 14px rgba(0,0,0,.35)}
-body.otpmode.present #otpSlack{display:none}
-#otpSlack img{width:22px;height:22px}
+/* v-otp: หน้า KPI On Time Performance (ฝังไฟล์) — ปุ่ม Slack อยู่ในแถบตัวกรองของไฟล์เอง */
+#vKPI #otpFrame{width:1204px;display:block;border:0}
 #vRPT .toolbar .kf,#vRPT #clear{display:none!important}
 </style>
 <style id="rptDesign">
@@ -1957,7 +1952,6 @@ body:not(.present):not(.mobile) #vRPT .toolbar{zoom:1.4}
 </div>
 
 <!-- v126: หน้า SOP ซ่อน toolbar ทั้งแถบ จึงต้องมีปุ่มพรีเซนต์ลอยไว้ให้แยก -->
-<button class="btn ghost" id="otpSlack" title="ถ่ายภาพหน้านี้แล้วส่งเข้า Slack" onclick="document.getElementById('kSlack').click()">Slack</button>
 <button class="btn ghost sop-present" id="sopPresent">🖥 โหมดพรีเซนต์</button>
 
 <div id="kShot">
@@ -5038,6 +5032,19 @@ function drawSOP(){
   f.addEventListener('load',()=>{ inject(); setTimeout(inject,300); setTimeout(inject,1200); });
   f.srcdoc=doc;
   f.dataset.ready='1';
+  sopLockSize(f);
+}
+/* v-soplock: หน้า เงื่อนไขการส่งสินค้าแต่ละ Platform แสดงขนาดเท่ากับตอนตั้ง ขนาด 100% เสมอ
+   ปุ่ม A− / A+ (ขนาด) ไม่ย่อ/ขยายหน้านี้ — ชดเชยด้วย zoom ของกรอบ ไม่แตะ CSS ข้างในเอกสาร */
+function sopLockSize(f){
+  const apply=()=>{ const g=document.getElementById('sopFrame'); if(!g)return;
+    let us=1; try{ us=parseFloat(localStorage.getItem('ldash.size'))||1; }catch(e){}
+    if(Math.abs(us-1)<0.001){ g.style.zoom=''; g.style.width=''; g.style.height=''; return; }
+    g.style.zoom=(1/us).toFixed(4); g.style.width=''; g.style.height=''; };
+  apply();
+  if(!window.__sopLockMO&&window.MutationObserver){
+    window.__sopLockMO=new MutationObserver(apply);
+    window.__sopLockMO.observe(document.body,{attributes:true,attributeFilter:['style']}); }
 }
 
 /* ================= วิธีการปฏิบัติงาน · Mini SOP: การ Cancel และใบ Return (ไฟล์แยก ฝังผ่าน iframe) =================
@@ -5184,8 +5191,9 @@ function drawCREmbed(){
 
 /* ================= Admin · KPI On Time Performance (ไฟล์แยก ฝังผ่าน iframe · แทนหน้า การจัดส่ง เดิม) =================
    ไฟล์ดึงชีต "Packing ใหม่" เอง มีตัวกรองช่วงเวลา บันทึกเป็นรูป และโหมดพรีเซนต์ในตัว
-   คำนวณทุกอย่างตามไฟล์เดิม ไม่แก้สูตร · ขยายตัวหนังสือชดเชย body zoom ของแดชบอร์ด ให้อ่านง่ายเท่ากับเปิดไฟล์เดี่ยว ×OTP_TEXT */
-const OTP_TEXT=1.2;   /* ปรับตัวเลขนี้ตัวเดียวถ้าอยากให้ตัวหนังสือใหญ่/เล็กลง */
+   คำนวณทุกอย่างตามไฟล์เดิม ไม่แก้สูตร · v-otp2: วางหน้าไว้ที่ความกว้างออกแบบเดิมของไฟล์ (OTP_W) แล้วย่อ/ขยายทั้งกรอบให้พอดีความกว้าง
+   → สัดส่วนตัวหนังสือ การ์ด และกราฟ เหมือนเปิดไฟล์เดี่ยวทุกอย่าง แค่ใหญ่เต็มพื้นที่ */
+const OTP_W=1204;   /* ความกว้างออกแบบของไฟล์ (1,180 + ขอบ) · ลดตัวเลขนี้ = ตัวหนังสือใหญ่ขึ้น เพิ่ม = เล็กลง */
 function otpBody(){ try{ const f=document.getElementById('otpFrame'); return f&&f.contentDocument&&f.contentDocument.body||null; }catch(e){ return null; } }
 function otpReady(){ try{ const f=document.getElementById('otpFrame'); const d=f&&f.contentDocument;
   const u=d&&d.getElementById('updatedAt'); const er=d&&d.getElementById('errBox');
@@ -5196,18 +5204,15 @@ function secOTPEmbed(){
 function drawOTPEmbed(){
   const f=document.getElementById('otpFrame'), t=document.getElementById('otpDoc');
   if(!f||!t)return;
-  { const s=document.getElementById('otpSlack'), k=document.getElementById('kSlack');
-    if(s&&k&&!s.dataset.ico){ const im=k.querySelector('img'); if(im){ s.innerHTML=im.outerHTML+' ส่งเข้า Slack'; s.dataset.ico='1'; } } }
   const fit=()=>{ try{
-    const d=f.contentDocument; if(!d||!d.body)return;
-    const z=parseFloat(document.body.style.zoom)||1;
-    if(!window.__noFit&&!(d.defaultView&&d.defaultView.__otpShot)){
-      const v=(OTP_TEXT/z).toFixed(3);
-      if(d.body.style.zoom!==v)d.body.style.zoom=v;
-    }
-    if(d.fullscreenElement)return;
+    const d=f.contentDocument, w=f.parentElement; if(!d||!d.body||!w)return;
+    if(d.fullscreenElement){ f.style.zoom='1'; f.style.width='100%'; return; }
+    const k=Math.max(0.2,(w.clientWidth||OTP_W)/OTP_W);
+    f.style.width=OTP_W+'px';
+    if(f.style.zoom!==k.toFixed(4))f.style.zoom=k.toFixed(4);
     if(document.body.classList.contains('present')){
-      f.style.height=Math.floor(window.innerHeight/z)+'px';
+      const z=parseFloat(document.body.style.zoom)||1;
+      f.style.height=Math.floor(window.innerHeight/z/k)+'px';
       f.setAttribute('scrolling','yes');
     }else{
       f.setAttribute('scrolling','no');
@@ -5220,16 +5225,19 @@ function drawOTPEmbed(){
   f.__fit=fit;
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
-  doc=doc.replace('</head>','<style>.page{max-width:none!important;padding-left:3%!important;padding-right:3%!important}html,body{overflow-x:hidden}</style></head>');
-  /* ปุ่ม "บันทึกเป็นรูป" ในไฟล์ — ถ่ายที่ขนาดจริง (ปิด zoom + ใช้ความกว้างเดิม 1,180px ชั่วคราว ภาพเหมือนเปิดไฟล์เดี่ยว) */
-  doc=doc.replace(/<\/body>(?![\s\S]*<\/body>)/,'<script>(function(){var o=window.shot;if(typeof o!=="function")return;'
-    +'window.shot=async function(el){var b=document.body,z=b.style.zoom,p=document.querySelector(".page"),pc=p?p.style.cssText:"";'
-    +'window.__otpShot=1;b.style.zoom="";if(p){p.style.setProperty("max-width","1180px","important");p.style.setProperty("padding-left","12px","important");p.style.setProperty("padding-right","12px","important");}'
-    +'try{return await o(el);}finally{if(p)p.style.cssText=pc;b.style.zoom=z;window.__otpShot=0;}};})();<\/script></body>');
+  doc=doc.replace('</head>','<style>html,body{overflow-x:hidden}.toolbar{gap:6px}.toolbar .tb-btn{padding:9px 10px;font-size:13px}.toolbar .tb-arrow{padding:10px 10px}.toolbar .tb-sel{min-width:120px;font-size:13px;padding:9px 10px}</style></head>');
+  /* v-otp3: ปุ่มส่ง Slack ในแถบตัวกรองด้านบน (ตำแหน่งเดียวกับหน้าอื่น: ถัดจาก บันทึกเป็นรูป) — กดแล้วใช้ปุ่ม Slack ของแดชบอร์ดหลัก */
+  doc=doc.replace('<button class="tb-btn outline" id="btnPresent"','<button class="tb-btn outline" id="btnSlackOtp" title="ถ่ายภาพหน้านี้แล้วส่งเข้า Slack">Slack</button><button class="tb-btn outline" id="btnPresent"');
+  doc=doc.replace(/<\/body>(?![\s\S]*<\/body>)/,'<script>(function(){var k=parent.document.getElementById("kSlack"),b=document.getElementById("btnSlackOtp");if(!k||!b)return;'
+    +'var im=k.querySelector("img"),base=(im?"<img src=\\""+im.src+"\\" alt=\\"\\" style=\\"width:18px;height:18px;vertical-align:-3px;margin-right:6px\\">":"")+"ส่งเข้า Slack";b.innerHTML=base;'
+    +'b.addEventListener("click",function(){k.click();});'
+    +'new MutationObserver(function(){b.disabled=k.disabled;var t=k.textContent.trim();b.innerHTML=(!k.querySelector("img")&&t)?t:base;}).observe(k,{childList:true,subtree:true,characterData:true,attributes:true});'
+    +'})();<\/script></body>');
   f.addEventListener('load',()=>{
     fit(); setTimeout(fit,200); setTimeout(fit,800); setTimeout(fit,2500);
     try{ const d=f.contentDocument;
-      if(d&&window.ResizeObserver){ new ResizeObserver(fit).observe(d.body); new ResizeObserver(fit).observe(f); }
+      d.addEventListener('fullscreenchange',()=>setTimeout(fit,150));
+      if(window.ResizeObserver){ new ResizeObserver(fit).observe(d.body); new ResizeObserver(fit).observe(f.parentElement); }
     }catch(e){}
   });
   f.srcdoc=doc;
