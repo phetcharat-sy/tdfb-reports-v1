@@ -1398,8 +1398,19 @@ html body #vKPI table.ovt th{font-size:30px}
 #vKPI .hleg.hleg-row button{font-size:23px}
 #vKPI .hleg.hleg-mini button{font-size:25px}
 #vKPI #sopcrFrame{width:100%}
+/* v-size2: ลดช่องว่างซ้าย-ขวาของเนื้อหา (ไม่รวมหน้า วิธีการปฏิบัติงาน ที่เต็มจออยู่แล้ว) */
+body:not(.sopmode):not(.present) #vKPI .wrap{padding-left:3.2%;padding-right:3.2%}
+body:not(.present):not(.mobile) #vRPT .wrap{padding-left:3.2%;padding-right:3.2%}
+/* v-size2: ปุ่มเลื่อนหน้า ‹ › ไม่ทับแถบเมนูซ้าย (แถบกว้าง 640px) */
+.navArrow{width:80px}
+.navArrow.l{left:664px}
+body.present .navArrow.l{left:20px}
+@media(max-width:1100px){.navArrow.l{left:10px}}
 /* v-otp: หน้า KPI On Time Performance (ฝังไฟล์) — ปุ่ม Slack อยู่ในแถบตัวกรองของไฟล์เอง */
-#vKPI #otpFrame{width:1204px;display:block;border:0}
+#vKPI #otpFrame{width:1420px;display:block;border:0}
+/* v-size2: หน้า KPI On Time Performance เว้นขอบซ้าย-ขวาเท่าหน้า KPI อื่น */
+body.otpmode:not(.present) #vKPI .wrap{padding:18px 3.2% 30px}
+body.otpmode #vKPI .sopwrap{background:transparent;overflow:hidden}
 #vRPT .toolbar .kf,#vRPT #clear{display:none!important}
 </style>
 <style id="rptDesign">
@@ -4551,13 +4562,14 @@ function secForecast(){
         <div class="cbox" style="height:${Math.max(420,items4.length*54)}px"><canvas id="c_fc4w"></canvas></div></div>
     </div>`:''}
 
-    ${dep.length?`<h2 class="sec">Stock Depletion Forecast <em>${fmt(dep.length)} สินค้า · เรียงจากวิกฤตที่สุด</em><span></span></h2>
+    ${dep.length?`<h2 class="sec">Stock Depletion Forecast <em>${fmt(depFilter(dep).length)} สินค้า · เรียงจากวิกฤตที่สุด</em><span></span></h2>${depChipBar(dep)}
     <div class="tscroll" style="max-height:none;overflow:visible"><table class="dt"><thead><tr>
       <th>Product</th><th class="num">Demand เฉลี่ย/สัปดาห์</th>
       <th class="num">Stock WH300</th><th class="num">เหลือ (สัปดาห์)</th>
       <th class="num">สถานะ</th><th>สาเหตุที่ยังไม่เติม</th>
     </tr></thead><tbody>`
-    +dep.map(r=>{
+    +(depFilter(dep).length?'':'<tr><td colspan="6" style="text-align:center;color:var(--mute)">ไม่มีสินค้าในสถานะที่เลือก</td></tr>')
+    +depFilter(dep).map(r=>{
       const w=r.weeksLeft;
       const st=w==null?'<span style="color:var(--mute)">ไม่มี demand</span>'
         :w<2?'<span class="bad">วิกฤต</span>'
@@ -4574,6 +4586,15 @@ function secForecast(){
     :'<div class="empty2">ยังไม่มีข้อมูล Replenishment สำหรับคำนวณ Stock Depletion</div>'}`;
 }
 
+/* v-depf: ตัวกรองสถานะของ Stock Depletion Forecast (วิกฤต · เฝ้าระวัง · ปกติ · ไม่มี demand) — เลือกได้หลายอัน
+   เกณฑ์เดียวกับคอลัมน์สถานะในตาราง: < 2 สัปดาห์ = วิกฤต · < 4 = เฝ้าระวัง · ที่เหลือ = ปกติ */
+const DEP_ST=[['crit','วิกฤต'],['watch','เฝ้าระวัง'],['ok','ปกติ'],['none','ไม่มี demand']];
+const depStOf=r=>r.weeksLeft==null?'none':r.weeksLeft<2?'crit':r.weeksLeft<4?'watch':'ok';
+function depFilter(dep){ const sel=String(sf('dep_st','')).split('|').filter(Boolean);
+  return sel.length?dep.filter(r=>sel.includes(depStOf(r))):dep; }
+function depChipBar(dep){ const sel=String(sf('dep_st','')).split('|').filter(Boolean);
+  const n={}; dep.forEach(r=>{const k=depStOf(r); n[k]=(n[k]||0)+1;});
+  return chipMulti('dep_st','สถานะ',DEP_ST.filter(([k])=>n[k]).map(([k,t])=>[k,t+' ('+fmt(n[k])+')']),sel); }
 /* แถบค่าพยากรณ์ใต้กราฟ — อ่านง่ายกว่าเบียดกันบนเส้น และครบทุกค่าเสมอ */
 const FC_EV_COL={dd:'#E11D48',mid:'#7C3AED',pay:'#0891B2',pre:'#64748B',post:'#EA580C'};
 /* ประเภทวันพิเศษของจุดพยากรณ์ที่ j — รายวันดูจาก fcEv · รายสัปดาห์ดูว่ามี Double Day ในสัปดาห์ไหม */
@@ -5038,7 +5059,7 @@ function drawSOP(){
    ปุ่ม A− / A+ (ขนาด) ไม่ย่อ/ขยายหน้านี้ — ชดเชยด้วย zoom ของกรอบ ไม่แตะ CSS ข้างในเอกสาร */
 function sopLockSize(f){
   const apply=()=>{ const g=document.getElementById('sopFrame'); if(!g)return;
-    let us=1; try{ us=parseFloat(localStorage.getItem('ldash.size'))||1; }catch(e){}
+    let us=1; try{ us=parseFloat(localStorage.getItem('ldash.size2'))||1; }catch(e){}
     if(Math.abs(us-1)<0.001){ g.style.zoom=''; g.style.width=''; g.style.height=''; return; }
     g.style.zoom=(1/us).toFixed(4); g.style.width=''; g.style.height=''; };
   apply();
@@ -5193,7 +5214,7 @@ function drawCREmbed(){
    ไฟล์ดึงชีต "Packing ใหม่" เอง มีตัวกรองช่วงเวลา บันทึกเป็นรูป และโหมดพรีเซนต์ในตัว
    คำนวณทุกอย่างตามไฟล์เดิม ไม่แก้สูตร · v-otp2: วางหน้าไว้ที่ความกว้างออกแบบเดิมของไฟล์ (OTP_W) แล้วย่อ/ขยายทั้งกรอบให้พอดีความกว้าง
    → สัดส่วนตัวหนังสือ การ์ด และกราฟ เหมือนเปิดไฟล์เดี่ยวทุกอย่าง แค่ใหญ่เต็มพื้นที่ */
-const OTP_W=1204;   /* ความกว้างออกแบบของไฟล์ (1,180 + ขอบ) · ลดตัวเลขนี้ = ตัวหนังสือใหญ่ขึ้น เพิ่ม = เล็กลง */
+const OTP_W=1420;   /* ความกว้างออกแบบของไฟล์ (1,180 + ขอบ) · ลดตัวเลขนี้ = ตัวหนังสือใหญ่ขึ้น เพิ่ม = เล็กลง */
 function otpBody(){ try{ const f=document.getElementById('otpFrame'); return f&&f.contentDocument&&f.contentDocument.body||null; }catch(e){ return null; } }
 function otpReady(){ try{ const f=document.getElementById('otpFrame'); const d=f&&f.contentDocument;
   const u=d&&d.getElementById('updatedAt'); const er=d&&d.getElementById('errBox');
@@ -5225,7 +5246,7 @@ function drawOTPEmbed(){
   f.__fit=fit;
   if(f.dataset.ready){ fit(); return; }
   let doc=t.content.textContent;
-  doc=doc.replace('</head>','<style>html,body{overflow-x:hidden}.toolbar{gap:6px}.toolbar .tb-btn{padding:9px 10px;font-size:13px}.toolbar .tb-arrow{padding:10px 10px}.toolbar .tb-sel{min-width:120px;font-size:13px;padding:9px 10px}</style></head>');
+  doc=doc.replace('</head>','<style>html,body{overflow-x:hidden}.page{max-width:none!important;padding-left:12px!important;padding-right:12px!important}.toolbar{gap:6px}.toolbar .tb-btn{padding:9px 10px;font-size:13px}.toolbar .tb-arrow{padding:10px 10px}.toolbar .tb-sel{min-width:120px;font-size:13px;padding:9px 10px}</style></head>');
   /* v-otp3: ปุ่มส่ง Slack ในแถบตัวกรองด้านบน (ตำแหน่งเดียวกับหน้าอื่น: ถัดจาก บันทึกเป็นรูป) — กดแล้วใช้ปุ่ม Slack ของแดชบอร์ดหลัก */
   doc=doc.replace('<button class="tb-btn outline" id="btnPresent"','<button class="tb-btn outline" id="btnSlackOtp" title="ถ่ายภาพหน้านี้แล้วส่งเข้า Slack">Slack</button><button class="tb-btn outline" id="btnPresent"');
   doc=doc.replace(/<\/body>(?![\s\S]*<\/body>)/,'<script>(function(){var k=parent.document.getElementById("kSlack"),b=document.getElementById("btnSlackOtp");if(!k||!b)return;'
@@ -12406,7 +12427,7 @@ el('save').onclick=async function(){
   const DESIGN_W=2380, BASE=0.55, BASE_PRESENT=1.15, MOBILE_W=1250;   /* ขนาดตั้งต้น */
   /* v-usize: แต่ละคนปรับขนาดเองได้ (⌘+ / ⌘− / ⌘0 หรือปุ่ม A− A+ ในเมนูซ้าย)
      จำค่าไว้ในเบราว์เซอร์ของคนนั้น เปิดครั้งหน้าก็ยังเป็นขนาดเดิม · ไม่กระทบคนอื่น */
-  const UKEY='ldash.size';
+  const UKEY='ldash.size2';   /* v-size2: เปลี่ยนชื่อคีย์ = รีเซ็ตขนาดที่เคยตั้งไว้ (เช่น 62%) กลับเป็น 100% ครั้งเดียว */
   let US=1; try{US=parseFloat(localStorage.getItem(UKEY))||1;}catch(e){}
   const clampUS=v=>Math.max(0.5,Math.min(2.5,Math.round(v*100)/100));
   function setUS(v,show){
