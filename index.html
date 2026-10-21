@@ -7505,7 +7505,7 @@ function renderKPI(){
   /* v-kbig: หน้าที่ขยายภาพรวม + ตัวอักษรรายละเอียด · ฟอนต์ในกราฟใหญ่ขึ้น 15% (โหมดพรีเซนต์คงเดิม) */
   const kbig=['oos','diff','dock','pick','perr','pack','fc','repl'].includes(SEC);
   document.body.classList.toggle('kbig', kbig);
-  CFZ=document.body.classList.contains('present')?2.0:(kbig?1.84:1.6);
+  CFZ=document.body.classList.contains('present')?(SEC==='fc'?1.4:2.0):(kbig?1.84:1.6);   /* v-fcpres: Forecast ในโหมดพรีเซนต์ ฟอนต์กราฟเล็กลง ไม่ให้วันที่/ตัวเลขทับกัน */
   try{ const nb=document.querySelector('.sidenav button.on .nic');
     el('kIco').innerHTML=nb?nb.innerHTML.replace(/currentColor/g,'#fff'):''; }catch(e){}
   if(!isOv){
