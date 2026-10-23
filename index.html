@@ -5343,7 +5343,14 @@ async function shipRows(){
   }
   throw last;
 }
-async function loadShip(force){
+/* v-shipwait: ถ้ามีการโหลดชีต Packing ค้างอยู่ (เช่น ตอนเปิดเว็บ) ให้รอชุดเดียวกันจนเสร็จ
+   เดิมคืนค่า null ทันที → การ์ด "จำนวนออเดอร์" ในรายงานประจำวัน Delivery ค้าง "กำลังโหลด…" ไม่ขึ้นตัวเลข */
+let SHIP_P=null;
+function loadShip(force){
+  if(SHIP_LOADING&&SHIP_P)return SHIP_P;
+  return SHIP_P=loadShip0(force);
+}
+async function loadShip0(force){
   if(force){ SHIP=null; SHIP_ERR=''; }
   if(SHIP||SHIP_LOADING)return SHIP;
   SHIP_LOADING=true;
